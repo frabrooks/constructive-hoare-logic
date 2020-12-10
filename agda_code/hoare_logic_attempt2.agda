@@ -269,15 +269,21 @@ module Programs where
   -}
 
 
-
+  
   data AssiProgram : Id → ℤ → Set where
     asi : {id : Id} → {f : ℤ} →  AssiProgram id f 
 
-
-  -- Need to figure out how to get around Maybe on retreival from storage??
   evalAssi : ∀ {i : Id} → {f : ℤ} → S → AssiProgram i f → S
   evalAssi   {i} {f}  s asi  = updateState i f s
-  --evalAssi {id} {Var x} s asi = updateState id {!getVar x s = Maybe!} {!!}
+
+
+
+  {-
+  data Program ::
+
+    asignment  : AssiProgram → Program
+  -}
+    
 
   {-
   data isEq : ℤProp → Set where

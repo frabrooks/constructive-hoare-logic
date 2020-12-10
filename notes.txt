@@ -1,0 +1,22 @@
+https://vst.cs.princeton.edu/
+
+file:///C:/Users/Frase/Downloads/VC.pdf
+
+http://www0.cs.ucl.ac.uk/staff/p.ohearn/papers/Marktoberdorf11LectureNotes.pdf
+
+https://fbinfer.com/
+
+https://github.com/yiyunliu/separation-logic-primer-agda/blob/master/program.agda
+
+http://www.cse.chalmers.se/~myreen/stacks.html
+
+https://iris-project.org/
+
+https://www.cl.cam.ac.uk/archive/mjcg/HL/Notes/Notes.pdf
+
+ISABELLE, IRIS
+
+
+
+Start with IRIS before VST
+look in to: partial vs. totally correct
