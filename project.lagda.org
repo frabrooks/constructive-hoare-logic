@@ -1,0 +1,474 @@
+#+TITLE: Separation Logic Final Year Project
+#+DATE: 22/02/2021
+
+#+begin_src agda2
+
+-- imports
+open import Relation.Binary.PropositionalEquality using ( _≡_  ; refl)
+open import Data.Maybe 
+open import Data.Nat
+
+
+#+end_src
+
+
+* CODEBASE TODO:
+
+- [X] Refactor Code Base into Different Files
+  - [X] Data Representation
+  - [X] State Representation
+  - [X] Expressions
+  - [X] Logical Grammar
+- [X] Abstracting classes
+  - [X] Data Representation
+  - [X] State Representation
+  - [X] Program Constructs file
+- [X] Create +LanguageConfig+ Top-Level file
+- [X] parameterize Mini-C.Lang
+- [X] Organise code base
+- [X] Axiom of assignment fully implemented
+- [-] Rule of Consequence
+  - [X] Bad Implemented
+  - [ ] implemented with all program constructs
+- [ ] Hoare Triples
+- [ ] Push to git
+- [ ] 
+
+* DOCUMENTATION TODO:
+
+- [X] Look into Literate/Org-mode Agda
+- [ ] Logical Structure outlined
+  - [ ] Grammar documented in this file
+       ℤExp → ℤExp → ℤExp
+       (x + 2) + (y + 4)
+       
+       ℤExp → ℤExp → 𝔹Exp
+       ( x + 2 ) > (y + 4)
+
+       𝔹Exp → 𝔹Exp → 𝔹Exp
+       ( x != 4 ) V ( y > 3)
+       
+       x < 4 = valid expression 
+       y + 5 = valid expression
+
+       (x < 4) + (y + 5) = invalid expression
+
+       ---------------------------
+       CFG Grammar to accomadate the above:
+
+       Mini-C-Exp   ::=   Be | Ze 
+
+       Assertion    ::=   Be 
+
+       Be   ::=   ( Ze ZZBo Ze ) | ( Be Bo Be ) | (! Be) | Bc
+
+       Ze   ::=   Ze Zo Ze | Zc
+
+       ZZBo  ::=   ≤  | < | == | ≥  | >
+
+       Bo  ::=   &&  | || | ⇔ | 
+
+       Zo  ::=   +  |  -  |  *  |  /  |  % 
+
+       Bc  ::=   𝑻 | 𝑭
+
+       Zc   ::=   V | 1 | 2 | 3 | 4 | ...
+
+       V   ::=   𝔁 | 𝔂 | 𝔃 | ...
+
+       Simplify:
+
+       Mini-C-Exp   ::=   Be | Ze 
+
+       Assertion    ::=   Be 
+
+       Be   ::=   ( Ze ≤ Ze ) | ( Ze < Ze ) | ( Ze == Ze ) | ( Ze ≥ Ze ) | ( Ze > Ze ) |
+        ( Be && Be ) | ( Be || Be ) | ( Be ⇔ Be ) | (! Be) | 𝑻 | 𝑭
+
+       Ze  ::=  ( Ze + Ze ) | ( Ze  - Ze ) | ( Ze  * Ze ) | ( Ze  / Ze ) |
+       ( Ze  % Ze ) | V | C
+
+       C   ::=   1 | 2 | 3 | 4 | ...
+
+       V   ::=   𝔁 | 𝔂 | 𝔃 | ...
+  - [ ] Improvement of `holds` using 𝔹Exp documented
+  - [ ] Comb through scrapped-code.agda and document past approaches
+    - [ ] Old expressions
+      - [ ] Long sub function
+      - [ ] Old Op mess
+        Op &&𝓬 [ Op ≤𝓬 [ (Op +𝓬 [ (Var 4) ؛
+        (Constant (pos 1)) ] ) ؛ (Var 3 ) ] ؛ Op ==𝓬 [ (Var 6) ؛
+        (Constant (pos 1)) ] ] 
+- [ ] Start report in Latex
+- [ ] Fill out Reading section
+- [ ] Fill out Refrences section
+- [ ] Fill out summary of terms/things I've learned section
+
+
+* MISC TODO:
+
+- [ ] Un-indent top level to keep with Agda convention
+- [ ] Fix hl2do C-c C-n conflict with agda eval norm form
+- [ ] (setq ivy-use-selectable-prompt t) in init.el
+- [ ] Disable/rebind C-| keybinding to toggle input binding (at least in Agda)
+- [ ] force pragmata pro in Agda font lock faces to get monospace in org
+
+
+* Agda help
+
+- [ ] Why does `with getZero zero` split into `nothing` and `just x` when getZero is defined as `zero -> just zero ; n → nothing`  ???
+
+  #+begin_src agda2
+
+getZero : ℕ → Maybe ℕ
+getZero zero = just zero
+getZero  n   = nothing
+
+test : ℕ → ℕ
+test zero with getZero (zero)
+... | nothing = {!!} -- Why Agda consider this case?
+... | just x     = {!!}
+test (suc n ) = {!!}
+
+-- and at the same time:
+
+test2 : getZero (zero) ≡ just zero
+test2 = refl
+
+
+  #+end_src
+  
+
+* TODO Summary of Terms / Things I've learned that will go into report
+  
+** Hoare Logic
+
+** Separation Logic
+
+** Shallow vs. Deep Embeddings
+
+** Higher Order Logic
+
+  
+* Logical Structure of Code Base
+
+  There are two main parts of Hoare logic: 
+  
+** Mini-C Language
+
+   Agda embedding of a 'c-like' language that will be  reasoned about
+
+   As part of this embedding we also need to embedd some representation of
+   data//memory/state of a running program but the exact way these things
+   are embedded is an implementation detail that we don't want to worry about.
+
+   So the 'data' and 'state' representations are abstracted away via two agda
+   modules that provide an interface.
+
+   Starting with data representation:
+
+   #+begin_src agda2
+
+module RepresentationData where
+
+  open import Relation.Binary.PropositionalEquality
+  open import Relation.Binary
+  open import Relation.Nullary using ( yes ; no )
+  open import Relation.Nullary.Decidable using (False ; True ; isYes ; isNo ; ⌊_⌋ )
+  --open import Data.Product using ()
+  open import Data.Maybe
+  open import Level
+
+  import Data.Integer as Int -- using (ℤ ; pose ; negsuc )
+  import Data.Nat as Nat  -- renaming (_+_ to _⊕_ ; _*_ to _⊛_ ) using (ℕ; zero; suc; _∸_; _≤_; pred ; _≟_ ; _≤?_)
+
+  record D-Representation : Set₁ where
+    field
+      Id        : Set
+      Val       : Set
+      𝑻         : Val
+      𝑭         : Val
+      _?id=_    : Decidable {A = Id} _≡_
+      _?val=_   : Decidable {A = Val} _≡_
+      _||𝓿_      : Maybe Val → Maybe Val → Maybe Val
+      _&&𝓿_      : Maybe Val → Maybe Val → Maybe Val
+      _==𝓿_      : Maybe Val → Maybe Val → Maybe Val
+      _≤𝓿_       : Maybe Val → Maybe Val → Maybe Val
+      _<𝓿_       : Maybe Val → Maybe Val → Maybe Val
+      _≥𝓿_       : Maybe Val → Maybe Val → Maybe Val
+      _>𝓿_       : Maybe Val → Maybe Val → Maybe Val
+      _+𝓿_       : Maybe Val → Maybe Val → Maybe Val
+      _-𝓿_       : Maybe Val → Maybe Val → Maybe Val
+      _*𝓿_       : Maybe Val → Maybe Val → Maybe Val
+      _%𝓿_       : Maybe Val → Maybe Val → Maybe Val
+      _/𝓿_       : Maybe Val → Maybe Val → Maybe Val
+      !𝓿         : Maybe Val → Maybe Val
+
+
+
+
+   #+end_src
+   
+   And the state representation which necessarily depends on the data representation.
+
+   #+begin_src agda2
+module RepresentationState (dRep : RepresentationData.D-Representation ) where
+
+  open RepresentationData.D-Representation dRep
+
+  open import Data.Maybe using (Maybe ; just ; nothing)
+  open import Relation.Nullary using ( ¬_ )
+  open import Relation.Binary.PropositionalEquality using (_≡_)
+  open import Data.Empty using (⊥)
+
+
+  record S-Representation  : Set₁ where
+    field
+      S              : Set
+      --H            : Set
+      ●              : S  -- Initial State 
+      updateState    : Id → Val → S → S
+      getVarVal      : Id → S → Maybe Val
+      dropValue      : S → Id → S
+      hasVarVal      : Id → Val → S → Set
+      updateGet      : ∀ i v s  → getVarVal i (updateState i v s) ≡ just v
+      irrelUpdate    : ∀ i x v y → ¬ i ≡ x → (s : S) →
+                       getVarVal x (updateState i v s) ≡ y → getVarVal x s ≡ y
+      nothingRec     : ∀ x i v s → getVarVal x (updateState i v s) ≡ nothing
+                       → getVarVal x s ≡ nothing
+      hasValueSame   : (x : Id) → (v v' : Val) → (s : S)
+                       → (hasVarVal x v (updateState x v' s)) → v ≡ v'
+      hasValueDiff   : (x y : Id) → (xval yval : Val)
+                       → (s : S) → ¬ (x ≡ y)
+                       → (hasVarVal x xval (updateState y yval s))
+                       → (hasVarVal x xval s)
+      updateState¬●  : (i : Id) → (f : Val) → (s : S )
+                       → ( updateState i f s ≡ ● ) → ⊥
+
+
+   #+end_src
+   
+   Originally C didn't have a boolean type
+   (Int 0 = false and anythine else = true)
+   So to keep things simple we start with only Integers in our mini-language
+
+   Then, we have expressions:
+
+   #+begin_src agda2
+
+
+module Mini-CExpressions (dRep : RepresentationData.D-Representation )
+  (sRep : RepresentationState.S-Representation dRep ) where
+
+  open RepresentationData.D-Representation dRep
+  open RepresentationState.S-Representation sRep
+
+  module List-Patterns where
+
+    open import Data.List as List using (_∷_ ; [] )
+
+    pattern [_] z = z ∷ []
+    pattern [_؛_] y z = y ∷ z ∷ []
+    pattern [_؛_؛_] x y z = x ∷ y ∷ z ∷ []
+    pattern [_؛_؛_؛_] w x y z = w ∷ x ∷ y ∷ z ∷ []
+    pattern [_؛_؛_؛_؛_] v w x y z = v ∷ w ∷ x ∷ y ∷ z ∷ []
+    pattern [_؛_؛_؛_؛_؛_] u v w x y z = u ∷ v ∷ w ∷ x ∷ y ∷ z ∷ []
+
+
+  open List-Patterns public
+  open import Data.Maybe using (Maybe ; nothing ; just )
+  open import Data.List as List using (List; _∷_; []  )
+
+
+  data ℤ→ℤ→ℤ : Set where
+    +ᶻ  : ℤ→ℤ→ℤ
+    -ᶻ  : ℤ→ℤ→ℤ
+    *ᶻ  : ℤ→ℤ→ℤ
+    /ᶻ  : ℤ→ℤ→ℤ
+    %ᶻ  : ℤ→ℤ→ℤ
+
+  data ℤ→ℤ : Set where
+  -- i.e. (++) & (--)
+  -- none atm, may add later
+
+  data ℤExp : Set where
+    binary-ℤ-op:ℤ : ℤExp → ℤ→ℤ→ℤ → ℤExp → ℤExp
+    Const         : Val → ℤExp
+    Var           : Id  → ℤExp
+
+  pattern ⇉ᶻ l o r = binary-ℤ-op:ℤ l o r
+  -- pattern ⇾ᶻ o e    = binary-ℤ-op:ℤ o e
+
+  data ℤ→ℤ→𝔹 : Set where
+    ≤    : ℤ→ℤ→𝔹
+    <    : ℤ→ℤ→𝔹
+    ==   : ℤ→ℤ→𝔹
+    ≥    : ℤ→ℤ→𝔹
+    >    : ℤ→ℤ→𝔹
+
+  data 𝔹→𝔹→𝔹 : Set where
+    &&   : 𝔹→𝔹→𝔹
+    ||   : 𝔹→𝔹→𝔹
+    ⇔  : 𝔹→𝔹→𝔹
+
+
+  data 𝔹→𝔹 : Set where
+    !    : 𝔹→𝔹
+
+  data 𝔹Exp : Set where  
+    binary-ℤ-op:𝔹 : ℤExp → ℤ→ℤ→𝔹 → ℤExp → 𝔹Exp
+    binary-𝔹-op:𝔹 : 𝔹Exp → 𝔹→𝔹→𝔹 → 𝔹Exp → 𝔹Exp
+    unary-𝔹-op:𝔹  : 𝔹→𝔹 → 𝔹Exp → 𝔹Exp
+    𝒕     : 𝔹Exp
+    𝒇     : 𝔹Exp
+
+  pattern ⇉ᵇ l o r = binary-𝔹-op:𝔹 l o r
+  pattern ᶻ⇉ᵇ l o r  = binary-ℤ-op:𝔹 l o r 
+  pattern ⇾ᵇ o e = unary-𝔹-op:𝔹 o e
+
+  -- Top level of the grammar
+  -- An expression can either be an ℤ expression
+  -- ,such as one that may be used in an assignment,
+  --
+  -- i.e. x := (y + 4)
+  --
+  -- or a 𝔹 expression that may be used in either:
+  -- a conditional statement as part of control flow
+  --
+  -- i.e. if (y < 4) then {...} else {...}
+  --
+  -- or within the propositional reasoning about
+  -- program state within the Hoare/Separation logic
+  --
+  -- i.e. [ x < 4 ]
+  --      y := 4
+  --   ∴  [ x < y ]
+  -------------------------------------------------
+  data Exp : Set where
+    𝔹: : 𝔹Exp → Exp
+    ℤ: : ℤExp → Exp
+
+
+  getOpᶻ : ℤ→ℤ→ℤ → Maybe Val → Maybe Val → Maybe Val
+  getOpᶻ +ᶻ = _+𝓿_
+  getOpᶻ -ᶻ = _-𝓿_
+  getOpᶻ *ᶻ = _*𝓿_
+  getOpᶻ /ᶻ = _/𝓿_
+  getOpᶻ %ᶻ = _%𝓿_
+
+  getOpᶻᵇ : ℤ→ℤ→𝔹 → Maybe Val → Maybe Val → Maybe Val
+  getOpᶻᵇ ≤ = _≤𝓿_
+  getOpᶻᵇ < = _<𝓿_
+  getOpᶻᵇ == = _==𝓿_
+  getOpᶻᵇ ≥ = _≥𝓿_
+  getOpᶻᵇ > = _>𝓿_
+
+  getOpᵇ : 𝔹→𝔹→𝔹 → Maybe Val → Maybe Val → Maybe Val
+  getOpᵇ && = _&&𝓿_
+  getOpᵇ || = _||𝓿_
+  getOpᵇ ⇔ = _==𝓿_
+
+  -- Evaluation of expressions:
+  evalℤExp : ℤExp → S → Maybe Val
+  evalℤExp (binary-ℤ-op:ℤ l α r) s = let _∙_ = getOpᶻ α in evalℤExp l s ∙ evalℤExp r s
+  evalℤExp (Const x) s = just x
+  evalℤExp (Var x) s = getVarVal x s
+
+  eval𝔹Exp : 𝔹Exp → S → Maybe Val
+  eval𝔹Exp (binary-ℤ-op:𝔹 l α r) s = let _∙_ = getOpᶻᵇ α in evalℤExp l s ∙ evalℤExp r s
+  eval𝔹Exp (binary-𝔹-op:𝔹 l α r) s = let _∙_ = getOpᵇ α in eval𝔹Exp l s ∙ eval𝔹Exp r s
+  eval𝔹Exp (unary-𝔹-op:𝔹 ! e) s = !𝓿 (eval𝔹Exp e s)
+  eval𝔹Exp 𝒕 s = just 𝑻
+  eval𝔹Exp 𝒇 s = just 𝑭
+
+  evalExp : Exp → S → Maybe Val
+  evalExp (𝔹: e) s = eval𝔹Exp e s
+  evalExp (ℤ: e) s = evalℤExp e s
+
+
+   #+end_src
+
+   and finally the language constructs themselves:
+
+   #+begin_src agda2
+
+module Mini-CLang (dRep : RepresentationData.D-Representation )
+  (sRep : RepresentationState.S-Representation dRep ) where
+
+  open RepresentationData.D-Representation dRep
+  open RepresentationState.S-Representation sRep
+
+   -- Expressions ---------------------------
+  open Mini-CExpressions dRep sRep
+
+
+  -- Assignment (i.e. AssiProgram ) 
+  
+  data _:=_ : Id → Exp → Set where
+    _:=''_ : ∀ (id : Id) → (exp : Exp) →  id := exp
+
+
+  data _:=_|evalExp=_USING_GIVES_ : Id → Exp → Val → S → S →  Set where
+    _:='_w/_andPExp : ∀ {v : Val} (id : Id) → (exp : Exp) → (s : S )
+                        → (evalExp exp s) ≡ just v
+                        → id := exp |evalExp= v USING s GIVES (updateState id v s)
+
+
+
+  evalAssiVal : ∀ (id : Id ) ( v : Maybe Val ) → S → Maybe S
+  -- Computation fail (e.g. S = nothing after ÷ by 0 error)
+  evalAssiVal id nothing _ = nothing
+  -- Computation success
+  evalAssiVal id (just v) s = just (updateState id v s )
+
+  
+  evalAssi : ∀ {i e} (p : i := e) → S → Maybe S
+  evalAssi (id :='' exp) s  = evalAssiVal id (evalExp exp s) s
+
+
+   #+end_src
+   
+** Embedding of first order logic
+
+   This is a deep embedding of first order logic contained within assertions.agda
+   that  allows you to say something along the lines of 'x = 2 in the current store'.
+
+   Eventually could be extended to include Separation Logic as well which would
+   require the assertions to range over the Heap space as well as the Store space*.
+
+   *There are different ways we could encode the Store/Heap. See 'Data'
+
+   
+   
+** Data
+
+*** Store (local variables)
+
+    Currently represented as a list of pairs of Identifiers and Values
+
+*** TODO Heap (memory)
+    
+
+** Proofs
+
+*** TODO Axioms
+
+1) [X] Axiom of assignment
+
+2) [ ] Rule of Consequence1
+
+3) [ ] Rule of Consequence2
+
+4) [ ] Rule of Iteration      
+
+   
+*** Lemmas
+    
+
+* Agda Code
+
+* Reading
+
+* Refrences
+
+  

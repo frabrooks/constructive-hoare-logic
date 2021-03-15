@@ -1,0 +1,19 @@
+
+
+Hoare 69:
+[42] C.A.R. Hoare. An axiomatic basis for computer programming. Comm. ACM, 12(10):576–580 and 583, 1969
+
+Hoare-ProceduresParameters_1971:
+[43] C.A.R. Hoare. Procedures and parameters: An axiomatic approach. In E. Engler, editor, Symposium on the Semantics of Algebraic Languages, pages 102–116. Springer, 1971. Lecture Notes in Math. 188.
+
+p39-hoare:
+[44] C.A.R. Hoare. Proof of a Program: FIND. Comm. ACM, 14(1):39–45, 1971
+
+hoare1973:
+[45] C.A.R. Hoare and N. Wirth. An axiomatic definition of the programming language Pascal. Acta Informatica, 2:335–355, 1973
+
+
+[27] E.W. Dijkstra. A Discipline of Programming. Prentice Hall, 1976
+
+[37] M. Foley and C.A.R. Hoare. Proof of a recursive program: Quicksort. Computer Journal, 14:391–395, 1971.
+

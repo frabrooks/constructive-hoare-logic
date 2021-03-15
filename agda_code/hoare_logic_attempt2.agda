@@ -27,36 +27,93 @@ open ℤ
 open import Agda.Builtin.Unit
 open import Data.Empty using (⊥)
 
+open import integer_operations
 
+open import Data.Product
+
+
+{-
 pattern [_] z = z ∷ []
 pattern [_,_] y z = y ∷ z ∷ []
 pattern [_,_,_] x y z = x ∷ y ∷ z ∷ []
 pattern [_,_,_,_] w x y z = w ∷ x ∷ y ∷ z ∷ []
 pattern [_,_,_,_,_] v w x y z = v ∷ w ∷ x ∷ y ∷ z ∷ []
 pattern [_,_,_,_,_,_] u v w x y z = u ∷ v ∷ w ∷ x ∷ y ∷ z ∷ []
+-}
 
 
+localVar = Id × Val
 
-open import integer_operations
 
 
 module Programs where
 
-  open import Data.Product
+
+  {- Not ideal this being a List, contains more information than we need (the order)
+     which (as I suspected) is making proofs further down the line more difficult.
+     The State should be a 𝑆𝑒𝑡 of Entrys. -}
+  S = List localVar
+
+  {-
+  Maybe do something like this:
+
+  The set of unordered pairs of A can be defined using a higher-inductive 
+  type with set-truncation, just as you suggested, somewhat like this 
+  (I am writing this off the top of my head without verifying it in Agda, 
+  but you'll get the point:)
+  
+  data UPair (A : Type ℓ) : Type ℓ where
+    mkpair : (x y : A) → UPair A
+    uswap : ∀ a b → mkpair a b ≡ mkpair b a
+    trunc : ∀ (u v : UPair A) (p q : u ≡ v) → p ≡ q
 
 
-  Id = ℕ
-  Val = ℤ
-
-  data Expr  : Set where
-    Constant : Val → Expr
-    Var : Id → Expr
-    Op : OpName → List Expr → Expr
+  -- Andrej Bauer
 
 
-  Entry = Id × Val
+  data Store : Set where
 
-  S = List Entry
+    one :  Id → Val → Store
+    step : Store → Id no in State → Id val + State → State
+    idUnique : State Id Val₁ → State Id Val₂ → Val₁ ≡ Val₂
+
+  -} 
+
+  {-
+  data Store : List localVar → Set where
+    list      :  ( ls : List localVar ) → Store ls 
+    unorderedₗ : ∀ {id : Id} {v : Val } → { ls : List localVar } → Store ( (id , v) ∷ ls ) → Store ( ls ++ (( id , v ) ∷ []) )
+    unorderedᵣ : ∀ {id : Id} {v : Val } → { ls : List localVar } → Store ( ls ++ (( id , v ) ∷ []) ) → Store ( (id , v) ∷ ls )
+
+
+  
+  updateStore : ∀ {ls} {ls'} → Id → Val → Store ls → Store ls'
+  updateStore {ls} {_} i z (list .ls) = ?
+  updateStore {.( _ ++ ([ _ , _ ]))} {_} i z (unorderedₗ s) = ?
+  updateStore {.((_ , _) ∷ _)} {_} i z (unorderedᵣ s) = ?
+  -}
+
+  -- LOOK BACK AT WHAT WAS CAUSING YOU TO WORRY ABOUT LIST REPRESENTATION
+  
+  {-
+  data Store  where
+    _:=:_  : Id → Val → Store
+    combine  : ∀ {i} → (s s' : Store)
+                     → (hasLocalVar s i → notLocalVar s' i)
+                     → (hasLocalVar s' i → notLocalVar s i)
+                     → Store
+
+  
+  data notLocalVar where
+    single    : ∀ {z} i j  → i ≡ j → ⊥ → notLocalVar (i :=: z) j 
+    notEither : ∀ i s s' → notLocalVar s i → notLocalVar s' i → notLocalVar (combine s s' _ _) i
+
+
+  data hasLocalVar  where
+    justOne   : ∀ i z s → hasLocalVar (i :=: z) i 
+    toTheLeft : ∀ i s s' →  hasLocalVar s i → notLocalVar s' i → hasLocalVar (combine s s' _ _) i
+    toTheRight : ∀ i s s' → notLocalVar s i → hasLocalVar s' i → hasLocalVar (combine s s' _ _) i
+  -}
 
   updateState : Id → Val → S → S
   updateState i z  []  = [( i ∧ z )]
@@ -165,10 +222,7 @@ module Programs where
 
 
 
-  data hasValue : Id → ℤ → S → Set where
-    atthehead : ∀ i z s → hasValue i z ((i , z) ∷ s)
-    elsewhere : ∀ i j z w s s' → i ≡ j → ⊥ → hasValue i z s → s' ≡ ((j , w) ∷ s ) → hasValue i z s'
-
+  
 
 
   {- This doesn't seem to be working too well with the function 'getVar' within the constructor. Going to try and change to have the same property encoded in a data type
@@ -270,84 +324,142 @@ module Programs where
 
 
   
-  data AssiProgram : Id → ℤ → Set where
-    asi : {id : Id} → {f : ℤ} →  AssiProgram id f 
+  data AssiProgram : Id → Expr → Set where
+    _:=_ : ∀ (id : Id) → (exp : Expr) →  AssiProgram id exp
 
-  evalAssi : ∀ {i : Id} → {f : ℤ} → S → AssiProgram i f → S
-  evalAssi   {i} {f}  s asi  = updateState i f s
+  evalAssi : ∀ {id : Id} {exp : Expr} → S → AssiProgram id exp → Maybe S
+  evalAssi s (id := exp) with (eval exp s)
+  ... | nothing = nothing
+  ... | just f = just (updateState id f s)
 
+
+
+  data Program : Set where
+
+    assi  : ∀ {id : Id} {exp : Expr} → AssiProgram id exp → Program
+    
+    
+  evalProgram : S → Program  → Maybe S
+  evalProgram s (assi x) = evalAssi s x
 
 
   {-
-  data Program ::
-
-    asignment  : AssiProgram → Program
+  data Program : Set where
+    Block : List Program → Program
+    Assignment : Id → Expr → Program
+    While : Expr → Program -> Program
+    If : Expr → Program -> Program
+    IfElse : Expr → Program → Program -> Program
   -}
-    
 
   {-
   data isEq : ℤProp → Set where
     •• : isEq eqPℤ 
   -}
 
-
-
-  
-
-{-
-  test : ∀ {s : S} → {f : ℤ} → { p : PROPO } → ( x y : Id ) → ( ( x ≡ y ) → ⊥ ) → holds p ( ( x ∧ f ) ∷ s ) → holds p s
-  test {s} {f} {.(𝔹ℤ (eqPℤ (Con _) (Con _)))} x y no (CCEq x₁) = CCEq x₁
-  test {.[]} {f} {.(𝔹ℤ (eqPℤ (Con f) (Var x)))} x y no (CVEq refl singleton) = CVEq {!!} {!!}
-  test {s} {f} {.(𝔹ℤ (eqPℤ (Con f) (Var x)))} x y no (CVEq refl elsewhere) = CVEq {!!} {!!}
-  test {s} {f} {.(𝔹ℤ (eqPℤ (Var _) (Con _)))} x y no (VCEq x₁ x₂) = {!!}
-  test {s} {f} {.(𝔹ℤ (eqPℤ (Var _) (Var _)))} x y no (VVEq x₁ x₂ x₃) = {!!}
-  test {s} {f} {.(𝔹∧ _ _)} x y no (ANDHolds h h₁) = {!!}
-  test {s} {f} {.(𝔹V _ _)} x y no (ORHoldL h) = {!!}
-  test {s} {f} {.(𝔹V _ _)} x y no (ORHoldR h) = {!!}
--}
-  
-
-  drop-just : ∀ {A : Set} → {x y : A} →
-            just x ≡ just y → x ≡ y
+  drop-just : ∀ {A : Set} → {x y : A} → just x ≡ just y → x ≡ y
   drop-just refl = refl
 
-{-
-  simpleGet : ∀ (s : S) → (x : Id) → (f y : ℤ) → getVar x (updateState x f s)  ≡ just y → f ≡ y
-  simpleGet [] x f y get with ⌊ x ≟ x  ⌋
-  ...                         | true = drop-just get
-  simpleGet (x₁ ∷ s) x f y get with ⌊ proj₁ x₁ ≟ x ⌋
-  ...                               | false = {!!}
-  ...                               | true with ⌊ x ≟ x ⌋
-  ...                                           | false = {!!}
-  ...                                           | true = drop-just get
--}
-
 
   --
-  hasValueSame' : ∀ x y f s s' → s' ≡ (updateState x f s) → hasValue x y s' → y ≡ f
-  hasValueSame' x y .y [] .([ (x , y) ]) refl (atthehead .x .y .[]) = refl
-  hasValueSame' x y f (x₁ ∷ s) .((x , y) ∷ s₁) w (atthehead .x .y s₁) with proj₁ x₁ ≟ x
-  hasValueSame' x y .y (x₁ ∷ s) ((.x , .y) ∷ .s) refl (atthehead .x .y .s) | yes _ = refl
-  hasValueSame' x y f (.(x , y) ∷ s) ((.x , .y) ∷ .(updateState x f s)) refl (atthehead .x .y .(updateState x f s)) | no p = ⊥-elim (p refl)
-
-  hasValueSame : ∀ x y f s → hasValue x y (updateState x f s) → y ≡ f
-  hasValueSame x y f s hv =  hasValueSame' x y f s (updateState x f s) refl hv
 
 
+
+  
+
+  
+  
+  assi=Upsert : ∀ {f} s i  → hasValue i f s → updateState i f s ≡ updateState i f (dropValue s i)
+  assi=Upsert .((i , _) ∷ s) i (atthehead .i _ s) with (i ≟ i)
+  ... | .true because ofʸ p = {!!}
+  ... | .false because ofⁿ ¬p = {!!}
+
+
+
+  ✰assi¬∅ : ∀ s i exp → (f : ℤ) → (a : AssiProgram i exp) → eval exp s ≡ just f
+                                  → evalAssi s a ≡ just [] →  ⊥
+  ✰assi¬∅ s i (Constant x) f (.i := .(Constant x)) p₁ p₂ = ✰updateNonEmpty i x s (drop-just p₂)
+  ✰assi¬∅ s i (Var x) f (.i := .(Var x)) p₁ p₂ rewrite p₁ = ✰updateNonEmpty i f s (drop-just p₂)
+  ✰assi¬∅ s i (Op x x₁) f (.i := .(Op x x₁)) p₁ p₂ rewrite p₁ = ✰updateNonEmpty i f s (drop-just p₂)
+  
+
+
+  eval✰  : ∀ s s' i exp f → (a : AssiProgram i exp) → eval exp s ≡ just f → evalAssi s a ≡ just s'
+                           → updateState i f s ≡ s'
+  eval✰ [] s' i (Constant x) f (.i := .(Constant x)) p₁ p₂ rewrite (drop-just p₁) = drop-just p₂
+  eval✰ [] s' i (Op x x₁) f (.i := .(Op x x₁)) p₁ p₂ rewrite p₁ = drop-just p₂
+  eval✰ ((fst , snd) ∷ s) s' i (Constant x) f (.i := .(Constant x)) p₁ p₂ with (i ≟ fst)
+  ... | yes proof rewrite (sym proof) = let IH = eval✰ s s' i (Constant x) f (i := (Constant x)) p₁ {!!}  in  {!!}
+  ... | no  proof = {!!}
+  eval✰ ((fst , snd) ∷ s) s' i (Var x) f a p₁ p₂ = {!!}
+  eval✰ ((fst , snd) ∷ s) s' i (Op x x₁) f a p₁ p₂ = {!!}
+
+  {-
+  
+  with (i ≟ fst)
+  ... | yes proof = let IH = eval✰ s s' i exp f a {!!} {!!}  in  {!!}
+  ... | no  proof = {!!}
+
+  eval✰ s [] i exp f a p₁ p₂ = ⊥-elim (✰Assi¬∅ s i exp f a p₁ p₂)
+  eval✰ s ((fst , snd) ∷ s') i exp f (.i := .exp) p₁ p₂  with (i ≟ fst)
+  ... | yes proof = let IH = eval✰ s s' i exp f (i := exp) p₁ {!!} in {!!}
+  ... | no  proof = {!!}
+  -}
+  
+  {-
+
+  with (i ≟ fst)
+  ... | yes proof = let IH = eval✰ s s' i exp f a p₁ {!!} in {!!}
+  ... | no  proof = {!}!
+  
+  -}
+
+  Predicate = PROPO
+  State = S
+
+  
+  data HoareTriple : Predicate → Program → Predicate → Set where
+
+    triple : ∀ (s s' : S) → (p q : Predicate) → (prog : Program)
+                → evalProgram s prog ≡ just s'
+                → holds p s → holds q s'
+                → HoareTriple p prog q
+
+  
+  axiomOfAssignment : ∀ (s s' : State) (i : Id) (exp : Expr) (f : ℤ)
+                        (p : Predicate) (a : AssiProgram i exp)
+                      → evalAssi s a ≡ just s'
+                      → eval exp s ≡ just f
+                      → holds  p  s'
+                      → holds (sub f i p)  s
+  axiomOfAssignment s s' i e f (𝔹ℤ (eqPℤ (Con x) (Con x₁))) a p₁ p₂ (CCEq x₂) = CCEq x₂
+  axiomOfAssignment s s' i e f (𝔹ℤ (eqPℤ (Con x) (Var x₁))) a p₁ p₂ (CVEq .x y .s' .x₁ x₂ x₃) = {!!}
+
+  {-
+
+  eval e s ≡ just f
+  evalAssi s a ≡ just s'
+
+  updateState i f s ≡ s'
+
+  with i ≟ x₁
+  ... | yes as = let e1 = Eq.subst (λ x → hasValue x₁ y (updateState x f s)) as {!!} in
+                 let e2 = hasValueSame x₁ y f s e1  in
+                 CCEq (Eq.trans x₂ e2)
+  ... | no  as = {!!}
+
+
+  -}
+
+
+  axiomOfAssignment s s' i e f (𝔹ℤ (eqPℤ (Var x) (Con x₁))) a p₁ p₂ h₁ = {!!}
+  axiomOfAssignment s s' i e f (𝔹ℤ (eqPℤ (Var x) (Var x₁))) a p₁ p₂ h₁ = {!!}
+  axiomOfAssignment s s' i e f (𝔹∧ p p₃) a p₁ p₂ h₁ = {!!}
+  axiomOfAssignment s s' i e f (𝔹V p p₃) a p₁ p₂ h₁ = {!!}
+
+  {-
   --
-  hasValueDiff' : ∀ x x' y f s s' → ¬ x ≡ x' → s' ≡ (updateState x' f s) → hasValue x y s' → hasValue x y s
-  hasValueDiff' x .x y .y [] .([( x , y )]) d refl (atthehead .x .y .[]) = ⊥-elim (d refl)
-  hasValueDiff' x x' y f ((fst , snd) ∷ s) .((x , y) ∷ s₁) d e (atthehead .x .y s₁) with fst ≟ x'
-  hasValueDiff' .x' x' y .y ((fst , snd) ∷ s) ((.x' , .y) ∷ .s) d refl (atthehead .x' .y .s) | yes p = ⊥-elim (d refl)
-  hasValueDiff' .fst x' y f ((fst , .y) ∷ s) ((.fst , .y) ∷ .(updateState x' f s)) d refl (atthehead .fst .y .(updateState x' f s)) | no p = atthehead fst y s
-
-
-  hasValueDiff : ∀ x x' y f s → ¬ x ≡ x' → hasValue x y (updateState x' f s) → hasValue x y s
-  hasValueDiff x x' y f s d hv =  hasValueDiff' x x' y f s (updateState x' f s) d refl hv
-
-
-  --
-  axiomOfAssignment : ∀ (s : S) (x : Id) (f : ℤ) (p : PROPO) (assi : AssiProgram x f)
+  axiomOfAssignment : ∀ (s : State) (x : Id) (f : ℤ) (p : Predicate) (assi : AssiProgram)
                       → holds  p  (evalAssi {x} {f} s assi)
                       → holds (sub f x p)  s
   axiomOfAssignment s x f (𝔹ℤ (eqPℤ (Con x₁) (Con x₂))) asi (CCEq x₃) = CCEq x₃
@@ -398,6 +510,29 @@ module Programs where
   axiomOfAssignment s x f (𝔹V p p₁) asi (ORHoldR .p .p₁ .(updateState x f s) h)  =
                          let IH = axiomOfAssignment s x f p₁ asi h in
                          ORHoldR _ (sub f x p₁) s IH
+
+  -}
+
+  {-
+  RuleOfConsequence1 : ∀ (s : State) → (prog : Program) → (p q r : Predicate) → ((holds q s) → (holds r s))
+                                     → HoareTriple p prog q → HoareTriple p prog r
+
+
+  RuleOfConsequence1 s prog p q r consequence trp = {!!}
+
+
+  RuleOfConsequence2 : ∀ (s : State) → (prog : Program) → (p q r : Predicate) → ((holds p s) → (holds r s))
+                                     → HoareTriple p prog q → HoareTriple r prog q
+
+
+
+
+  RuleOfConsequence2 s prog p q r consequence trp = {!!}
+
+  -}
+
+ 
+
   {-
   with x ≟ x₁
   ... | yes z = let e1 = hasValueSame x₁ y f s in
@@ -422,15 +557,7 @@ module Programs where
   -}
 
   
-
-  data Program : Set where
-    Block : List Program → Program
-    Assignment : Id → Expr → Program
-    While : Expr → Program -> Program
-    If : Expr → Program -> Program
-    IfElse : Expr → Program → Program -> Program
-       
-
+  
 
 
 

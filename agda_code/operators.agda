@@ -7,6 +7,7 @@ open import Agda.Builtin.Unit
 
 module operators where
 
+  {-
   infixl 18 _<$>⟨_⟩_
   _<$>⟨_⟩_ : {ℓ : Level} → { F : Set ℓ → Set ℓ } → {A B : Set ℓ}
                          → (A → B)
@@ -28,15 +29,16 @@ module operators where
                          → (RawMonad {ℓ} F)
                          → (A → F B) → F B
   ma >>=⟨ monRec ⟩ a→mb = (monRec RawMonad.>>= ma) a→mb 
+  -}
 
-  infixl 18 _<$>ₘ_
-  _<$>ₘ_ : {A B : Set} → (A → B) → Maybe A → Maybe B
-  f <$>ₘ m = map f m
+  infixl 18 _<$>_
+  _<$>_ : {A B : Set} → (A → B) → Maybe A → Maybe B
+  f <$> m = map f m
 
-  infixl 18 _⊛ₘ_
-  _⊛ₘ_ : {A B : Set} → Maybe (A → B) → Maybe A → Maybe B
-  f ⊛ₘ m = ap f m
+  infixl 18 _<*>_
+  _<*>_ : {A B : Set} → Maybe (A → B) → Maybe A → Maybe B
+  f <*> m = ap f m
 
-  infixl 18 _>>=ₘ_
-  _>>=ₘ_ : {A B : Set} → Maybe A → ( A → Maybe B ) → Maybe B
-  ma >>=ₘ a→mb = ma >>= a→mb 
+  --infixl 18 _>>=_
+  --_>>=_ : {A B : Set} → Maybe A → ( A → Maybe B ) → Maybe B
+  --ma >>= a→mb = ma >>= a→mb 
