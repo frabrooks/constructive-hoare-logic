@@ -3,18 +3,18 @@
 ------------------------------------------------------------------
 
 
-open import Representation.Data using (D-Representation)
+open import Representation.Data using (Data-Implementation)
 
-module Representation.State (dRep : D-Representation ) where
+module Representation.State ( 𝔡 : Data-Implementation ) where
 
-  open D-Representation dRep
+  open Data-Implementation 𝔡
 
   open import Data.Maybe using (Maybe ; just ; nothing)
   open import Relation.Nullary using ( ¬_ )
   open import Relation.Binary.PropositionalEquality using (_≡_)
   open import Data.Empty using (⊥)
 
-
+                         
   record S-Representation  : Set₁ where
     field
       S              : Set
@@ -46,10 +46,10 @@ module Representation.State (dRep : D-Representation ) where
     getVarValM i (just s) = getVarVal i s
 
 
-  import State-List-Rep dRep as List-Rep'
+  import State-List-Rep 𝔡 as List-Rep
   -- S = List localVar
   ListRep : S-Representation
-  ListRep = record { List-Rep' }
+  ListRep = record { List-Rep }
 
 
 

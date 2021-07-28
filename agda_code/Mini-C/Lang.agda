@@ -6,16 +6,16 @@ open import Data.Bool using ( true )
 import Data.Integer using ( ℤ )
 import Data.Nat using (ℕ)
 
-open import Representation.Data using (D-Representation)
+open import Representation.Data using (Data-Implementation)
 open import Representation.State using (S-Representation)
 
-module Mini-C.Lang (dRep : D-Representation )
-  (sRep : S-Representation dRep ) where
+module Mini-C.Lang (𝔡 : Data-Implementation )
+  (sRep : S-Representation 𝔡 ) where
 
-  open D-Representation dRep
+  open Data-Implementation 𝔡
   
   -- Expressions ---------------------------
-  open import Mini-C.Expressions dRep sRep
+  open import Mini-C.Expressions 𝔡 sRep
 
   -- Commands/Programs
   data 𝐶 : Set
@@ -29,11 +29,11 @@ module Mini-C.Lang (dRep : D-Representation )
     _﹔_ : ∀ c₁ c₂ → c₁ ; c₂
 
   -- If Then Else Command
-  data IF_THEN_ELSE_ :  𝔹Exp → 𝐶 → 𝐶 → Set  where
+  data IF_THEN_ELSE_ :  Exp → 𝐶 → 𝐶 → Set  where
     𝑖𝑓_𝑡ℎ𝑒𝑛_𝑒𝑙𝑠𝑒_ : ∀ b c₁ c₂ → IF b THEN c₁ ELSE c₂
 
   -- WHILE LOOP Command
-  data WHILE_DO_ : 𝔹Exp → 𝐶 → Set where
+  data WHILE_DO_ : Exp → 𝐶 → Set where
     𝑤ℎ𝑖𝑙𝑒_𝑑𝑜_ : ∀ b c →  WHILE b DO c
 
   data 𝐶 where

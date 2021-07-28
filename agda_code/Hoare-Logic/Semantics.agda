@@ -1,60 +1,55 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 
 -- Lib Imports
+open import Relation.Binary.PropositionalEquality using ( _≡_ ; refl ; subst ; sym ; cong ; inspect ; [_] )
+open import Data.Maybe.Relation.Unary.Any renaming ( just to any-just )
 open import Data.Product using (Σ ; Σ-syntax ; _×_  ; _,_  ; proj₁ ; proj₂ )
 open import Data.Maybe using ( Maybe ; just ; nothing ; _>>=_ ; Is-just ; to-witness )
+import Data.Maybe.Relation.Unary.Any 
+open Data.Maybe.Relation.Unary.Any.Any renaming ( just to any-just )
+open import Data.Unit using (⊤ ; tt)
+open import Data.Empty using ( ⊥ ; ⊥-elim )
+open import Data.Bool
+open import Function using (_$_ ; _∘_)
+open import Function.Equivalence hiding (sym)
+
 
 -- Project Imports
-open import Representation.Data using (D-Representation)
+open import Representation.Data using (Data-Implementation)
 open import Representation.State using (S-Representation)
 
+open import Misc
 
-module Hoare-Logic.Semantics (dRep : D-Representation )
-  (sRep : S-Representation dRep ) where
+module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
+  (sRep : S-Representation 𝔡 ) where
 
-  open D-Representation dRep
+  open Data-Implementation 𝔡
   open S-Representation sRep
 
-  open import Mini-C.Expressions dRep sRep
-  open import Assertions.Props dRep sRep
+  open import Mini-C.Expressions 𝔡 sRep
+  open import Assertions.Props 𝔡 sRep
 
-  open import Mini-C.Lang dRep sRep
+  open import Mini-C.Lang 𝔡 sRep
 
-  open import Hoare-Logic.Termination dRep sRep
-
-
---  data Π (A : Set) (B : A → Set) : Set where
---    Λ : ((a : A) → B a) → Π A B
-
-
-  WP : S → 𝐶 → 𝑃 → Set
-  WP s C P = ( s' : S ) →  Eval s C s' → ( P ← s' )
---  WP C P = Σ[ s ∈ S ] Π S (λ s' → Eval s C s' → ( P ← s' ))
-
+  open import Hoare-Logic.Termination 𝔡 sRep
 
   -- Hoare's Notation: {P}C{Q}   P → wp C P   ( Partial Correctness )
-  ⟪_⟫_⟪_⟫ :  𝑃 → 𝐶 → 𝑃 → Set
-  ⟪ P ⟫ C ⟪ Q ⟫ = ( s : S ) → ( P ← s ) → WP s C Q
+  ⟪_⟫_⟪_⟫ :  𝐴 → 𝐶 → 𝐴 → Set
+  ⟪ P ⟫ C ⟪ Q ⟫ = ( s : S ) → ( (Σ⊢ s P ) →
+                  ((ϕ : Terminates C s) → Σ⊢ (Result ϕ) Q))
+
+  -- ⟪ 𝐹 ⟫ C ⟪ Q ⟫ = 𝑇  for all C Q, so the definition above needs
+  -- to give us:  ∀ C Q → ⟪ 𝐹 ⟫ C ⟪ Q ⟫ → 
+
+  -- Need to exclude trivially true assertions that don't actually
+  -- 𝑔𝑢𝑎𝑟𝑎𝑛𝑡𝑒𝑒 correctness (i.e.  ⟪ 𝑇 ⟫ 𝔁 := 2 / 𝔂 ⟪ 𝔁 == 1 ⟫ → ⊥ )
+
 
   -- Total Correctness 
-  ⟦_⟧_⟦_⟧ :  𝑃 → 𝐶 → 𝑃 → Set
-  ⟦ P ⟧ C ⟦ Q ⟧ = Σ[ s ∈ S ] Terminates C s ×  ⟪ P ⟫ C ⟪ Q ⟫ 
+  ⟦_⟧_⟦_⟧ :  𝐴 → 𝐶 → 𝐴 → Set
+  ⟦ P ⟧ C ⟦ Q ⟧ = (s : S) → Terminates C s × ⟪ P ⟫ C ⟪ Q ⟫  
 
-
-  
-
-
-
-
-  -- Π S (λ(s : S) → ( P ← s ) × Terminates C s s' → ( Q ← s' ) )
-
-
-  --              P ⇒ wp( C , Q ) 
-  --              i.e. P = X = 6
-  --                   wp = X != 0
-  --                 ∴  P → wp 
-  --
-  --              Terminates → eval C P s = s' → Q s'
-
+  -- ⟦𝑃𝑟𝑒𝐶𝑜𝑛𝑑⟧ P 𝑓𝑜𝑟 s C Q -- Σ[ s ∈ S ] Terminates C s ×  ⟪ P ⟫ C ⟪ Q ⟫ 
 
 
 

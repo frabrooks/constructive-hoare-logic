@@ -18,13 +18,13 @@ open import Data.Empty
 
 
 -- Local imports
-open import Representation.Data using (D-Representation)
+open import Representation.Data using (Data-Implementation)
 open import List-Patterns
 
 
-module State-List-Rep (dRep : D-Representation) where
+module State-List-Rep ( 𝔡 : Data-Implementation) where
 
-  open D-Representation dRep
+  open Data-Implementation 𝔡
 
   S = List (Id × Val)
   -- H = ?

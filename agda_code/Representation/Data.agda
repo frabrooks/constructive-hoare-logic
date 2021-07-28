@@ -1,200 +1,229 @@
 
-
 -- Abstract out the representation of data (i.e. the Values and Variables)
-
-
 
 module Representation.Data where
 
-  open import Relation.Binary.PropositionalEquality
-  open import Relation.Binary
-  open import Relation.Nullary using ( yes ; no )
+  open import Relation.Binary.PropositionalEquality using ( _≡_ ; refl ; sym ; cong ; inspect ; [_] ; subst )
+  open import Relation.Binary using (Decidable)
+  open import Relation.Nullary using ( yes ; no ; ¬_ )
   open import Relation.Nullary.Decidable using (False ; True ; isYes ; isNo ; ⌊_⌋ )
-  --open import Data.Product using ()
+  open import Data.Product as Pr using ( Σ ; Σ-syntax ; _×_ ; _,_ ; proj₁ ; proj₂) 
+  open import Data.Sum using ( _⊎_ ; inj₁ ; inj₂ ; fromInj₁ ; fromInj₂ ) renaming ( [_,_] to [_⸴_] )
   open import Data.Maybe
+  import Data.Maybe.Relation.Unary.Any 
+  open Data.Maybe.Relation.Unary.Any.Any renaming ( just to any-just )
   open import Level
-  open import Data.Empty using ( ⊥ )
+  open import Data.Empty using ( ⊥ ; ⊥-elim )
+  open import Function using ( _∘_ ; _$_ ; id  ) renaming ( flip to ′ )
+  import Data.Integer as Int
+  import Data.Nat as Nat
+  open import Data.Bool
+  open Nat using ( ℕ ) renaming ( suc to sucn ; _≟_ to _≟ⁿ_ ) 
+  open import Data.Bool.Base as Bool using (true; false)
+  
+  record Value-Implementation : Set₁ where
 
-  import Data.Integer as Int -- using (ℤ ; pose ; negsuc )
-  import Data.Nat as Nat  -- renaming (_+_ to _⊕_ ; _*_ to _⊛_ ) using (ℕ; zero; suc; _∸_; _≤_; pred ; _≟_ ; _≤?_)
+    WFF = Is-just
 
-  open import operators
-
-  record D-Representation : Set₁ where
     field
       Id        : Set
       Val       : Set
       𝔁         : Id
       𝔂         : Id
       𝔃         : Id
-      𝔁≢𝔂       : 𝔁 ≡ 𝔂 → ⊥
-      𝔁≢𝔃       : 𝔁 ≡ 𝔃 → ⊥
-      𝔂≢𝔃       : 𝔂 ≡ 𝔃 → ⊥
+      -- Truth constants
+      𝑻         : Maybe Val
+      𝑭         : Maybe Val
+
+      -- Truth constants should trivially be WFF
+      𝑻isWFF    : WFF 𝑻
+      𝑭isWFF    : WFF 𝑭
+
+      -- All WFF (well formed expressions) have
+      -- an associated truth value
+      toTruthValue  : {v : Maybe Val} → WFF v → Bool
+
+      𝑻is𝑻 : ( isWFF : WFF 𝑻 ) → toTruthValue {𝑻} isWFF ≡ true
+      𝑭is𝑭 : ( isWFF : WFF 𝑭 ) → toTruthValue {𝑭} isWFF ≡ false
+
+
+      -- More constants
+      -- (perhaps unnecessary)
       ⓪        : Val
       ➊        : Val
       ➋        : Val
       ➌        : Val
-      𝑻         : Val
-      𝑭         : Val
+
+      -- Truisms
+      𝔁≢𝔂       : 𝔁 ≡ 𝔂 → ⊥
+      𝔁≢𝔃       : 𝔁 ≡ 𝔃 → ⊥
+      𝔂≢𝔃       : 𝔂 ≡ 𝔃 → ⊥
+
+      {-
+      is𝑻 : Maybe Val → Set -- (As a proposition)
+      is𝑭 : Maybe Val → Set -- (As a proposition)
+
+      -- is𝑻 f implies that f is a WFF and
+      -- the truth value of that WFF is 'true'
+      𝑻istrue : ∀ v → is𝑻 v → Σ (WFF v)
+             (λ w → ((toTruthValue w) ≡ true)) 
+
+      -- is𝑭 f implies that f is a WFF and
+      -- the truth value of that WFF is 'false'
+      𝑭isfalse : ∀ v → is𝑭 v → Σ (WFF v)
+             (λ w → ((toTruthValue w) ≡ false)) 
+      
+      
+      isProposition : Maybe Val → Set
+      
+
+
+      -- An implementation must prove that
+      -- isProposition really does mean so i.e.
+      -- f is a proposition if it's range/image  ≃ Bool
+      propIsProp : (Σ[ f ∈ Maybe Val ] isProposition f) ≃ Bool
+      is𝔹→isProposition : ∀ f → is𝑻 f ⊎ is𝑭 f → isProposition f
+      -}
+
+  
       _?id=_    : Decidable {A = Id} _≡_
-      _?val=_   : Decidable {A = Val} _≡_
-      _||𝓿_      : Maybe Val → Maybe Val → Maybe Val
-      _&&𝓿_      : Maybe Val → Maybe Val → Maybe Val
-      _==𝓿_      : Maybe Val → Maybe Val → Maybe Val
-      _≤𝓿_       : Maybe Val → Maybe Val → Maybe Val
-      _<𝓿_       : Maybe Val → Maybe Val → Maybe Val
-      _≥𝓿_       : Maybe Val → Maybe Val → Maybe Val
-      _>𝓿_       : Maybe Val → Maybe Val → Maybe Val
-      _+𝓿_       : Maybe Val → Maybe Val → Maybe Val
-      _-𝓿_       : Maybe Val → Maybe Val → Maybe Val
-      _*𝓿_       : Maybe Val → Maybe Val → Maybe Val
-      _%𝓿_       : Maybe Val → Maybe Val → Maybe Val
-      _/𝓿_       : Maybe Val → Maybe Val → Maybe Val
-      !𝓿         : Maybe Val → Maybe Val
+      --_?val=_   : Val → Val → Bool
+      
+    ⊨ : Maybe Val → Set
+    ⊨ x = Σ (WFF x) (T ∘ toTruthValue)
 
 
+  record Operation-Implementation (𝔡 : Value-Implementation) : Set₁ where
+      
+    open Value-Implementation 𝔡
 
-  module SimpleRepresentation where
+    𝕍 = Maybe Val
 
-    open import Agda.Builtin.Unit
-    open import Data.Integer.DivMod using (_div_ ; _mod_ )
-    
-    open Int 
-    open ℤ
+    field 
+      --------------------------------------------------------
+      -- Operations
+      
+      -- binary 𝔹 ops
+      _||𝓿_     : 𝕍 → 𝕍 → 𝕍
+      _&&𝓿_     : 𝕍 → 𝕍 → 𝕍
+      _==𝓿_     : 𝕍 → 𝕍 → 𝕍
+      _≤𝓿_      : 𝕍 → 𝕍 → 𝕍
+      _<𝓿_      : 𝕍 → 𝕍 → 𝕍
+      _≥𝓿_      : 𝕍 → 𝕍 → 𝕍
+      _>𝓿_      : 𝕍 → 𝕍 → 𝕍
 
+      -- binary 𝕍 ops
+      _+𝓿_      : 𝕍 → 𝕍 → 𝕍
+      _-𝓿_      : 𝕍 → 𝕍 → 𝕍
+      _*𝓿_      : 𝕍 → 𝕍 → 𝕍
+      _%𝓿_      : 𝕍 → 𝕍 → 𝕍
+      _/𝓿_      : 𝕍 → 𝕍 → 𝕍
 
-    Id  = Nat.ℕ
-    Val = Int.ℤ
+      -- unary operations
+      ¬𝓿        : 𝕍 →  𝕍
+      ++𝓿       : 𝕍 →  𝕍
+      ─-𝓿       : 𝕍 →  𝕍
+      --------------------------------------------------------
+      -- Operation predicates
+      
+      -- All binary operations
+      OP₂ : (𝕍 → 𝕍 → 𝕍) → Set
+      ||𝓿₂  : OP₂ (_||𝓿_) 
+      &&𝓿₂  : OP₂ (_&&𝓿_)    
+      ==𝓿₂  : OP₂ (_==𝓿_) 
+      ≤𝓿₂   : OP₂ (_≤𝓿_ )     
+      <𝓿₂   : OP₂ (_<𝓿_ )     
+      ≥𝓿₂   : OP₂ (_≥𝓿_ )     
+      >𝓿₂   : OP₂ (_>𝓿_ )     
+      +𝓿₂   : OP₂ (_+𝓿_ )     
+      -𝓿₂   : OP₂ (_-𝓿_ )     
+      *𝓿₂   : OP₂ (_*𝓿_ )     
+      %𝓿₂   : OP₂ (_%𝓿_ )     
+      /𝓿₂   : OP₂ (_/𝓿_ )     
 
-    𝔁 = 0
-    𝔂 = 1
-    𝔃 = 2
-
-    𝔁≢𝔂 : 𝔁 ≡ 𝔂 → ⊥
-    𝔁≢𝔂 ()
-    𝔁≢𝔃 : 𝔁 ≡ 𝔃 → ⊥
-    𝔁≢𝔃 ()
-    𝔂≢𝔃 : 𝔂 ≡ 𝔃 → ⊥
-    𝔂≢𝔃 ()
-
-    𝑻 = pos 1
-    𝑭 = pos 0
-
-    ⓪ = pos 0
-    ➊ = pos 1
-    ➋ = pos 2
-    ➌ = pos 3
-    
-
-    _?id=_ : Decidable {A = Id} _≡_ 
-    _?id=_ = Nat._≟_
-
-    _?val=_ : Decidable {A = Val} _≡_ 
-    _?val=_ = Int._≟_
-
-    private is-neg : ℤ → ℤ
-    is-neg (negsuc _) = pos 1
-    is-neg (pos    _) = pos 0
-
-    private is-pos : ℤ → ℤ
-    is-pos (pos    _) = pos 1
-    is-pos (negsuc _) = pos 0
-    
-
-    private 0→nothing : (z : ℤ) →  Maybe ( False ( ∣ z ∣ Nat.≟ 0) )
-    0→nothing (pos Nat.zero)         = nothing
-    0→nothing (Int.+[1+ n ])         = just tt
-    0→nothing (negsuc n)             = just tt
-    
-
-    _||𝓿_ : Maybe ℤ → Maybe ℤ → Maybe ℤ 
-    a ||𝓿 b = or <$> a <*> b
-      where
-      or : Val → Val → Val
-      or (pos 0)  (pos 0)  = pos 0
-      or (pos n)    _      = pos 1
-      or _        (pos n)  = pos 1
-      or _ _               = pos 0
-
-    _&&𝓿_ : Maybe ℤ → Maybe ℤ → Maybe ℤ 
-    a &&𝓿 b = and <$> a <*> b
-      where
-      and : Val → Val → Val
-      and (pos 0)    _      = pos 0
-      and   _      (pos 0)  = pos 0
-      and (pos _)  (pos _)  = pos 1
-      and   _        _      = pos 0
-
-    _==𝓿_ : Maybe ℤ → Maybe ℤ → Maybe ℤ
-    a ==𝓿 b = eq <$> a <*> b
-      where
-      is-zero : ℤ → ℤ
-      is-zero (pos 0) = pos 1
-      is-zero  _      = pos 0
-      eq : Val → Val → Val
-      eq a b = is-zero (a - b)
-
-    _≤𝓿_ : Maybe ℤ → Maybe ℤ → Maybe ℤ 
-    a ≤𝓿 b = leq <$> a <*> b
-      where
-      leq : Val → Val → Val
-      leq a b = is-neg ((a - b) - (pos 1))
-
-    _<𝓿_ : Maybe ℤ → Maybe ℤ → Maybe ℤ 
-    a <𝓿 b = less <$> a <*> b 
-      where
-      less : Val → Val → Val
-      less a b = is-neg (a - b)
-
-    _≥𝓿_ : Maybe ℤ → Maybe ℤ → Maybe ℤ 
-    a ≥𝓿 b = geq <$> a <*> b 
-      where
-      geq : Val → Val → Val
-      geq a b = is-pos (a - b)
-
-    _>𝓿_ : Maybe ℤ → Maybe ℤ → Maybe ℤ 
-    a >𝓿 b = greater <$> a <*> b 
-      where
-      greater : Val → Val → Val
-      greater a b = is-pos ((a - b) - (pos 1))
-
-    _+𝓿_ : Maybe ℤ → Maybe ℤ → Maybe ℤ
-    a +𝓿 b = (_+_) <$> a <*> b
-
-    _-𝓿_ : Maybe ℤ → Maybe ℤ → Maybe ℤ
-    a -𝓿 b = (_-_) <$> a <*> b
-
-    _*𝓿_ : Maybe ℤ → Maybe ℤ → Maybe ℤ
-    a *𝓿 b = (_*_) <$> a <*> b
-
-    _/𝓿_ : Maybe ℤ → Maybe ℤ → Maybe ℤ
-    a /𝓿 b = maybeDiv b <*> a
-      where
-      maybeDiv : Maybe ℤ → Maybe (ℤ → ℤ)
-      maybeDiv nothing = nothing
-      maybeDiv (just divisor) = (λ not0 → (λ numerator → (numerator div divisor) {not0} )) <$> ( 0→nothing divisor)
-
-    _%𝓿_ : Maybe ℤ → Maybe ℤ → Maybe ℤ
-    a %𝓿 b = maybeMod b <*> a
-      where
-      maybeMod : Maybe ℤ → Maybe (ℤ → ℤ)
-      maybeMod nothing = nothing
-      maybeMod (just divisor) = (λ not0 → (λ numerator → pos ((numerator mod divisor) {not0} ))) <$> ( 0→nothing divisor)
-
-    !𝓿 : Maybe ℤ → Maybe ℤ
-    !𝓿 x = x >>= aux
-      where 
-      aux : ℤ → Maybe ℤ
-      aux (pos Nat.zero) = just (pos 1)
-      aux Int.+[1+ Nat.zero ] = just (pos 0)
-      aux Int.+[1+ Nat.suc n ] = nothing
-      aux (negsuc n) = nothing
+      -- All unary operations
+      OP₁ : (𝕍 → 𝕍) → Set
+      ¬𝓿₁  :  OP₁ (¬𝓿)
+      ++𝓿₁ :  OP₁ (++𝓿)
+      ─-𝓿₁ :  OP₁ (─-𝓿)
 
 
-  -- Identifier = ℕ
-  -- Values = ℤ
-  SimpleRep : D-Representation
-  SimpleRep = record { SimpleRepresentation  }
+      wffₒᵤₜ⇒wffᵢₙ : ∀ {∙} x (α : OP₂ ∙ ) y → WFF (∙ x y)
+               → WFF x × WFF y 
+
+      -- WFF preserving
+      -- (if inputs are WFF then
+      --   outputs are WFF)
+      -- Don't need OP₁ version
+      -- as all unary ops are
+      -- WFF preserving
+      OP₂:𝑤𝑓𝑓    : ∀ {∙} → OP₂ ∙ → Set
+      ||𝓿:𝑤𝑓𝑓    : OP₂:𝑤𝑓𝑓 ||𝓿₂
+      &&𝓿:𝑤𝑓𝑓    : OP₂:𝑤𝑓𝑓 &&𝓿₂
+      ==𝓿:𝑤𝑓𝑓    : OP₂:𝑤𝑓𝑓 ==𝓿₂
+      ≤𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 ≤𝓿₂
+      <𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 <𝓿₂
+      ≥𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 ≥𝓿₂
+      >𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 >𝓿₂
+      +𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 +𝓿₂
+      -𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 -𝓿₂
+      *𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 *𝓿₂
+      
+      :𝑤𝑓𝑓₂ : ∀ {∙} {α : OP₂ ∙} {x} {y} → (𝑤𝑓𝑓 : OP₂:𝑤𝑓𝑓 α)
+              → WFF x → WFF y → WFF (∙ x y)
+
+      :𝑤𝑓𝑓₁ : ∀ {x} {∙} (α : OP₁ ∙) → WFF x → WFF (∙ x)
+
+      {-
+      :𝔹₁⇒Prop : ∀ {∙} {∙is₁ : OP₁ ∙} ( ∙is:𝔹 : OP₁:𝔹 ∙is₁ )
+                 x → WFF (∙ x) → isProposition (∙ x) 
+
+      :𝔹₂⇒Prop : ∀ {∙} {∙is₂ : OP₂ ∙} (∙is:𝔹 : OP₂:𝔹 ∙is₂ )
+                 x y → WFF (∙ x y ) → isProposition (∙ x y)
+      -}
+
+      {-
+      -- :𝕍 = Integer/Value operation/output
+      -- i.e. inputs ≢ nothing ⇒ output ≃ Val(:𝕍)
+      OP₂:𝕍    : ∀ {∙} → OP₂ ∙ → Set
+      +𝓿:𝕍  : OP₂:𝕍 +𝓿₂
+      -𝓿:𝕍  : OP₂:𝕍 -𝓿₂
+      *𝓿:𝕍  : OP₂:𝕍 *𝓿₂
+      %𝓿:𝕍  : OP₂:𝕍 %𝓿₂
+      /𝓿:𝕍  : OP₂:𝕍 /𝓿₂
+
+      OP₁:𝕍    : ∀ {∙} → OP₁ ∙ → Set
+      ++𝓿:𝕍  : OP₁:𝕍 ++𝓿₁
+      ─-𝓿:𝕍  : OP₁:𝕍 ─-𝓿₁
+      -}
+
+      {-
+      :𝕍₁⇒¬Prop : ∀ {∙} {∙is₁ : OP₁ ∙} ( ∙is:𝔹 : OP₁:𝕍 ∙is₁ )
+                    x → isProposition (∙ x) → ⊥      
+
+      :𝕍₂⇒¬Prop : ∀ {∙} {∙is₂ : OP₂ ∙} (∙is:𝔹 : OP₂:𝕍 ∙is₂ )
+                    x y → isProposition (∙ x y) → ⊥
+      -}
+
+      DeMorgan₁ : ∀ x y → ¬𝓿 (x ||𝓿 y) ≡ (¬𝓿 x) &&𝓿 (¬𝓿 y)
+
+      DeMorgan₂ : ∀ x y → ¬𝓿 (x &&𝓿 y) ≡ (¬𝓿 x) ||𝓿 (¬𝓿 y)
+
+      
+      ConjunctionElim₁ : ∀ x y → ⊨ (x &&𝓿 y) → ⊨ x
+      ConjunctionElim₂ : ∀ x y → ⊨ (x &&𝓿 y) → ⊨ y
+
+      ConjunctionIntro : ∀ x y → ⊨ x → ⊨ y → ⊨ (x &&𝓿 y)
+
+
+  record Data-Implementation : Set₁ where
+    field
+      𝔙 : Value-Implementation
+      𝒪 : Operation-Implementation 𝔙
+
+    open Value-Implementation 𝔙 public
+    open Operation-Implementation 𝒪 public
+
 
 
 

@@ -1,9 +1,12 @@
+
+open import Relation.Binary.PropositionalEquality
 open import Category.Functor
 open import Category.Applicative
 open import Category.Monad
 open import Level
 open import Data.Maybe using (Maybe ; map ; ap ; _>>=_ )
 open import Agda.Builtin.Unit
+open import Data.Empty
 
 module operators where
 
@@ -31,13 +34,6 @@ module operators where
   ma >>=⟨ monRec ⟩ a→mb = (monRec RawMonad.>>= ma) a→mb 
   -}
 
-  infixl 18 _<$>_
-  _<$>_ : {A B : Set} → (A → B) → Maybe A → Maybe B
-  f <$> m = map f m
-
-  infixl 18 _<*>_
-  _<*>_ : {A B : Set} → Maybe (A → B) → Maybe A → Maybe B
-  f <*> m = ap f m
 
   --infixl 18 _>>=_
   --_>>=_ : {A B : Set} → Maybe A → ( A → Maybe B ) → Maybe B

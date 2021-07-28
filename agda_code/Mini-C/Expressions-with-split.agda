@@ -10,13 +10,13 @@ open import Relation.Binary
 open import Relation.Nullary using ( yes ; no )
 open import Relation.Nullary.Decidable using ( map′)
 
-open import Representation.Data using (Data-Implementation)
+open import Representation.Data using (D-Representation)
 open import Representation.State using (S-Representation)
 
-module Mini-C.Expressions ( 𝔡 : Data-Implementation )
-  (sRep : S-Representation 𝔡 ) where
+module Mini-C.Expressions (dRep : D-Representation )
+  (sRep : S-Representation dRep ) where
 
-  open Data-Implementation 𝔡
+  open D-Representation dRep
   open S-Representation sRep
 
   open import List-Patterns
@@ -48,27 +48,43 @@ module Mini-C.Expressions ( 𝔡 : Data-Implementation )
   -- Binary Operators ------------------------
 
   -- :𝔹 -> binary output (i.e. |x ∙ y| ⊆ Bool )
+  data BinOp:𝔹 : Set where
+    &&   : BinOp:𝔹
+    ||   : BinOp:𝔹
+    ==   : BinOp:𝔹
+    ≤    : BinOp:𝔹
+    <    : BinOp:𝔹
+    ≥    : BinOp:𝔹
+    >    : BinOp:𝔹
+
+  -- :𝕍 -> output is a Value.
+  -- That is, a (possibly bounded) integer
+  -- i.e. |x ∙ y| ⊆ { z |minInt < z ∧ z < maxInt}
+  data BinOp:𝕍 : Set where
+    +    : BinOp:𝕍
+    -    : BinOp:𝕍
+    *    : BinOp:𝕍
+    /    : BinOp:𝕍
+    %    : BinOp:𝕍
+    
   data BinOp : Set where
-    &&   : BinOp
-    ||   : BinOp
-    ==   : BinOp
-    ≤    : BinOp
-    <    : BinOp
-    ≥    : BinOp
-    >    : BinOp
-    +    : BinOp
-    -    : BinOp
-    *    : BinOp
-    /    : BinOp
-    %    : BinOp
+    _:𝕍  : BinOp:𝕍 → BinOp
+    _:𝔹  : BinOp:𝔹 → BinOp
 
   -- Unary Operators ------------------------
   
-  data UnOp : Set where
-    ++   : UnOp
-    ─-   : UnOp
-    ¬ᵇ   : UnOp
-    
+  data UnOp:𝕍 : Set where
+    ++   : UnOp:𝕍
+    ─-   : UnOp:𝕍
+
+  data UnOp:𝔹 : Set where
+    ¬ᵇ   : UnOp:𝔹
+
+  data UnaryOp : Set where
+    _:𝔹  : UnOp:𝔹 → UnaryOp
+    _:𝕍  : UnOp:𝕍 → UnaryOp
+
+
   -------------------------------------------------
   -- Definition of Expressions
 
@@ -80,7 +96,7 @@ module Mini-C.Expressions ( 𝔡 : Data-Implementation )
 
   data Exp : Set where
     op₂    : Exp → BinOp → Exp → Exp
-    op₁    : UnOp → Exp → Exp 
+    op₁    : UnaryOp → Exp → Exp 
     term   : Terminal → Exp
 
 
@@ -102,43 +118,66 @@ module Mini-C.Expressions ( 𝔡 : Data-Implementation )
   ∅ₛ : Exp
   ∅ₛ = term 𝒇
 
-  getOp₁ : UnOp → Maybe Val → Maybe Val
-  getOp₁ ¬ᵇ  = ¬𝓿
-  getOp₁ ++  = ++𝓿
-  getOp₁ ─-  = ─-𝓿
+  getOp₁ : UnaryOp → Maybe Val → Maybe Val
+  getOp₁ (¬ᵇ :𝔹) = ¬𝓿
+  getOp₁ (++ :𝕍) = ++𝓿
+  getOp₁ (─- :𝕍) = ─-𝓿
 
   getOp₂ : BinOp → Maybe Val → Maybe Val → Maybe Val
-  getOp₂ +   = _+𝓿_
-  getOp₂ -   = _-𝓿_
-  getOp₂ *   = _*𝓿_
-  getOp₂ /   = _/𝓿_
-  getOp₂ %   = _%𝓿_
-  getOp₂ ≤   = _≤𝓿_
-  getOp₂ <   = _<𝓿_
-  getOp₂ ≥   = _≥𝓿_
-  getOp₂ >   = _>𝓿_
-  getOp₂ ==  = _==𝓿_
-  getOp₂ &&  = _&&𝓿_
-  getOp₂ ||  = _||𝓿_
+  getOp₂ (+  :𝕍)  = _+𝓿_
+  getOp₂ (-  :𝕍)  = _-𝓿_
+  getOp₂ (*  :𝕍)  = _*𝓿_
+  getOp₂ (/  :𝕍)  = _/𝓿_
+  getOp₂ (%  :𝕍)  = _%𝓿_
+  getOp₂ (≤  :𝔹)  = _≤𝓿_
+  getOp₂ (<  :𝔹)  = _<𝓿_
+  getOp₂ (≥  :𝔹)  = _≥𝓿_
+  getOp₂ (>  :𝔹)  = _>𝓿_
+  getOp₂ (== :𝔹)  = _==𝓿_
+  getOp₂ (&& :𝔹)  = _&&𝓿_
+  getOp₂ (|| :𝔹)  = _||𝓿_
 
   _isAry₁ : ∀ ∙ → (OP₁ (getOp₁ ∙))
-  ¬ᵇ isAry₁ = ¬𝓿₁
-  ++ isAry₁ = ++𝓿₁
-  ─- isAry₁ = ─-𝓿₁
+  (¬ᵇ :𝔹) isAry₁ = ¬𝓿₁
+  (++ :𝕍) isAry₁ = ++𝓿₁
+  (─- :𝕍) isAry₁ = ─-𝓿₁
 
   _isAry₂ : ∀ ∙ → (OP₂ (getOp₂ ∙))
-  +  isAry₂ = +𝓿₂
-  -  isAry₂ = -𝓿₂
-  *  isAry₂ = *𝓿₂
-  /  isAry₂ = /𝓿₂
-  %  isAry₂ = %𝓿₂
-  && isAry₂ = &&𝓿₂
-  || isAry₂ = ||𝓿₂
-  == isAry₂ = ==𝓿₂
-  ≤  isAry₂ = ≤𝓿₂
-  <  isAry₂ = <𝓿₂
-  ≥  isAry₂ = ≥𝓿₂
-  >  isAry₂ = >𝓿₂
+  (+  :𝕍) isAry₂ = +𝓿₂
+  (-  :𝕍) isAry₂ = -𝓿₂
+  (*  :𝕍) isAry₂ = *𝓿₂
+  (/  :𝕍) isAry₂ = /𝓿₂
+  (%  :𝕍) isAry₂ = %𝓿₂
+  (&& :𝔹) isAry₂ = &&𝓿₂
+  (|| :𝔹) isAry₂ = ||𝓿₂
+  (== :𝔹) isAry₂ = ==𝓿₂
+  (≤  :𝔹) isAry₂ = ≤𝓿₂
+  (<  :𝔹) isAry₂ = <𝓿₂
+  (≥  :𝔹) isAry₂ = ≥𝓿₂
+  (>  :𝔹) isAry₂ = >𝓿₂
+
+  _:𝕍₁ : ∀ ∙ → OP₁:𝕍 ((∙ :𝕍) isAry₁)
+  ++ :𝕍₁ = ++𝓿:𝕍
+  ─- :𝕍₁ = ─-𝓿:𝕍
+
+  _:𝕍₂ : ∀ ∙ → OP₂:𝕍 ((∙ :𝕍) isAry₂)
+  + :𝕍₂   = +𝓿:𝕍
+  - :𝕍₂   = -𝓿:𝕍
+  * :𝕍₂   = *𝓿:𝕍
+  / :𝕍₂   = /𝓿:𝕍
+  % :𝕍₂   = %𝓿:𝕍
+
+  _:𝔹₁ : ∀ ∙ → OP₁:𝔹 ((∙ :𝔹) isAry₁)
+  ¬ᵇ :𝔹₁ = ¬𝓿:𝔹
+
+  _:𝔹₂ : ∀ ∙ → OP₂:𝔹 ((∙ :𝔹) isAry₂)
+  && :𝔹₂  = &&𝓿:𝔹
+  || :𝔹₂  = ||𝓿:𝔹
+  == :𝔹₂  = ==𝓿:𝔹
+  ≤  :𝔹₂  = ≤𝓿:𝔹
+  <  :𝔹₂  = <𝓿:𝔹
+  ≥  :𝔹₂  = ≥𝓿:𝔹
+  >  :𝔹₂  = >𝓿:𝔹
 
   -------------------------------------------------
   -- Evaluation of Expressions (Decidable)
