@@ -34,9 +34,15 @@ module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
   open import Hoare-Logic.Termination 𝔡 sRep
 
   -- Hoare's Notation: {P}C{Q}   P → wp C P   ( Partial Correctness )
-  ⟪_⟫_⟪_⟫ :  𝐴 → 𝐶 → 𝐴 → Set
-  ⟪ P ⟫ C ⟪ Q ⟫ = ( s : S ) → ( (Σ⊢ s P ) →
-                  ((ϕ : Terminates C s) → Σ⊢ (Result ϕ) Q))
+  ⟪_⟫_⟪_⟫ :  𝐴 → C → 𝐴 → Set
+  ⟪ P ⟫ C ⟪ Q ⟫ = ( s : S ) → Σ⊢ s P → (ϕ : ⌊ᵗ C ⸴ s ᵗ⌋) → Σ⊢ (‵ ϕ) Q 
+
+  -- Total Correctness 
+  ⟦_⟧_⟦_⟧ :  𝐴 → C → 𝐴 → Set
+  ⟦ P ⟧ C ⟦ Q ⟧ = (s : S) → ⌊ᵗ C ⸴ s ᵗ⌋ × ⟪ P ⟫ C ⟪ Q ⟫
+
+
+--                  ((ϕ : Terminates C s) → Σ⊢ (Result ϕ) Q))
 
   -- ⟪ 𝐹 ⟫ C ⟪ Q ⟫ = 𝑇  for all C Q, so the definition above needs
   -- to give us:  ∀ C Q → ⟪ 𝐹 ⟫ C ⟪ Q ⟫ → 
@@ -44,10 +50,6 @@ module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
   -- Need to exclude trivially true assertions that don't actually
   -- 𝑔𝑢𝑎𝑟𝑎𝑛𝑡𝑒𝑒 correctness (i.e.  ⟪ 𝑇 ⟫ 𝔁 := 2 / 𝔂 ⟪ 𝔁 == 1 ⟫ → ⊥ )
 
-
-  -- Total Correctness 
-  ⟦_⟧_⟦_⟧ :  𝐴 → 𝐶 → 𝐴 → Set
-  ⟦ P ⟧ C ⟦ Q ⟧ = (s : S) → Terminates C s × ⟪ P ⟫ C ⟪ Q ⟫  
 
   -- ⟦𝑃𝑟𝑒𝐶𝑜𝑛𝑑⟧ P 𝑓𝑜𝑟 s C Q -- Σ[ s ∈ S ] Terminates C s ×  ⟪ P ⟫ C ⟪ Q ⟫ 
 

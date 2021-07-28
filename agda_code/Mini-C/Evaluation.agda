@@ -67,17 +67,134 @@ module Mini-C.Evaluation (𝔡 : Data-Implementation )
   ... | just v = just (updateState id v s) -- Comp success
   -}
 
-  evalAssi : ∀ {i e} → S → (p : i := e) → Maybe S
-  evalAssi s (id ꞉= exp) = map (λ v → updateState id v s) (evalExp exp s) 
+  evalAssi : Id → Exp → S → Maybe S
+  evalAssi id exp s =  map (λ v → updateState id v s) (evalExp exp s) 
   
 -- 
   
-  is-JustExp→is-JustAssi : ∀ {i e s} → WFF (evalExp e s) → WFF (evalAssi s (i ꞉= e))
+  is-JustExp→is-JustAssi : ∀ {i e s} → WFF (evalExp e s) → WFF (evalAssi i e s)
   is-JustExp→is-JustAssi {i} {e} {s} p with (evalExp e s)
   ... | just _ = Any.just tt
-  
 
+
+  ssEvalwithFuel :  ℕ → C → S → Maybe S
+  -- Skip ⇒ eval finished successfully
+  -- Computation Successful 
+  ssEvalwithFuel zero (𝑠𝑘𝑖𝑝 ;) s = just s
+  ssEvalwithFuel (suc n) ( 𝑠𝑘𝑖𝑝 ;) s = just s
+
+  -- Out of fuel
+  -- Need to explicitly give all four cases here so
+  -- Agda can see `eval zero C = c , nothing` is always
+  -- definitionally true.
+  ssEvalwithFuel zero ( 𝔴𝔥𝔦𝔩𝔢 _ 𝒹ℴ _ ;) _ = nothing
+  ssEvalwithFuel zero ( 𝔦𝔣 _ 𝔱𝔥𝔢𝔫 _ 𝔢𝔩𝔰𝔢 _ ;) _ = nothing
+  ssEvalwithFuel zero ( _ := _ ; ) _ = nothing
+  ssEvalwithFuel zero ((𝔴𝔥𝔦𝔩𝔢 _ 𝒹ℴ _) ; _) _ = nothing
+  ssEvalwithFuel zero ((𝔦𝔣 _ 𝔱𝔥𝔢𝔫 _ 𝔢𝔩𝔰𝔢 _) ; _) _ = nothing
+  ssEvalwithFuel zero ((_ := _) ; _) _ = nothing
+  ssEvalwithFuel zero ( 𝑠𝑘𝑖𝑝 ; b ) s = ssEvalwithFuel zero b s
   
+  ssEvalwithFuel (suc n) ( 𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c ;) s with evalExp exp s
+  ... | nothing = nothing -- Computation failed i.e. div by 0
+  ... | f@(just _) with toTruthValue {f} (Any.just tt)
+  ... | true  = ssEvalwithFuel n ( c 𝔱𝔥𝔢𝔫 𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c ;) s
+  ... | false = just s
+  ssEvalwithFuel (suc n) ( 𝔦𝔣 exp 𝔱𝔥𝔢𝔫 c₁ 𝔢𝔩𝔰𝔢 c₂  ;) s with evalExp exp s
+  ... | nothing = nothing -- Computation failed i.e. div by 0
+  ... | f@(just _) with toTruthValue {f} (Any.just tt)
+  ... | true = ssEvalwithFuel n c₁ s
+  ... | false = ssEvalwithFuel n c₂ s
+  ssEvalwithFuel (suc n) ( id := exp ;) s = 
+    map (λ v → updateState id v s) (evalExp exp s)
+  ssEvalwithFuel (suc n) (𝑠𝑘𝑖𝑝 ; c) s = ssEvalwithFuel (suc n) c s
+  
+  ssEvalwithFuel (suc n) ((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c₁) ; c₂) s with evalExp exp s
+  ... | nothing = nothing -- Computation failed i.e. div by 0
+  ... | f@(just _) with toTruthValue {f} (Any.just tt)
+  ... | true = ssEvalwithFuel n (c₁ 𝔱𝔥𝔢𝔫 ((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c₁) ; c₂)) s
+  ... | false = ssEvalwithFuel n c₂ s
+  
+  ssEvalwithFuel (suc n) ((𝔦𝔣 exp 𝔱𝔥𝔢𝔫 c₁ 𝔢𝔩𝔰𝔢 c₂) ; c₃) s with evalExp exp s
+  ... | nothing = nothing -- Computation failed i.e. div by 0
+  ... | f@(just _) with toTruthValue {f} (Any.just tt)
+  ... | true = ssEvalwithFuel n (c₁ 𝔱𝔥𝔢𝔫 c₃) s 
+  ... | false = ssEvalwithFuel n (c₂ 𝔱𝔥𝔢𝔫 c₃) s
+  ssEvalwithFuel (suc n) ((id := exp) ; c) s with evalExp exp s
+  ... | nothing = nothing -- Computation failed i.e. div by 0
+  ... | (just v) = ssEvalwithFuel n c (updateState id v s)
+
+  {- This no longer holds with program blocks as a block of skips will terminate 
+  0⇒𝑠𝑘𝑖𝑝 : ∀ {s} {c} → Is-just (ssEvalwithFuel zero c s) → c ≡ 𝑠𝑘𝑖𝑝 ;
+  0⇒𝑠𝑘𝑖𝑝 {_} {𝑠𝑘𝑖𝑝 ;} _ = refl
+  0⇒𝑠𝑘𝑖𝑝 {s} {𝑠𝑘𝑖𝑝 ; b} ij rewrite 0⇒𝑠𝑘𝑖𝑝 {s} {b} ij = {!!}
+  -}
+
+  {-
+  det-eval : ∀ {s} {b₁ b₂ b₃} {n} → ssEvalwithFuel n b₂ s ≡ ssEvalwithFuel n b₃ s
+             → ssEvalwithFuel n (b₁ 𝔱𝔥𝔢𝔫 b₂) s ≡ ssEvalwithFuel n (b₁ 𝔱𝔥𝔢𝔫 b₃) s
+  det-eval {s} {𝑠𝑘𝑖𝑝 ;} {b₂} {b₃} {zero} bb = bb
+  det-eval {s} {(𝔴𝔥𝔦𝔩𝔢 x 𝒹ℴ x₁) ;} {b₂} {b₃} {zero} bb = refl
+  det-eval {s} {(𝔦𝔣 x 𝔱𝔥𝔢𝔫 x₁ 𝔢𝔩𝔰𝔢 x₂) ;} {b₂} {b₃} {zero} bb = refl
+  det-eval {s} {(x := x₁) ;} {b₂} {b₃} {zero} bb = refl
+  det-eval {s} {𝑠𝑘𝑖𝑝 ;} {b₂} {b₃} {suc n} bb = bb
+  det-eval {s} {(𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c) ;} {b₂} {b₃} {suc n} bb with evalExp exp s
+  ... | nothing = refl
+  ... | f@(just _) with toTruthValue {f} (Any.just tt)
+  ... | false = {!!}
+  ... | true = {!!}
+  det-eval {s} {(𝔦𝔣 x 𝔱𝔥𝔢𝔫 x₁ 𝔢𝔩𝔰𝔢 x₂) ;} {b₂} {b₃} {suc n} bb = {!!}
+  det-eval {s} {(x := x₁) ;} {b₂} {b₃} {suc n} bb = {!!}
+  det-eval {s} {c ; b₁} {b₂} {b₃} {n} bb = {!!}
+
+  lem : ∀ {s} {n} b₁ c b₂ → ssEvalwithFuel n ( b₁ 𝔱𝔥𝔢𝔫 c ; b₂) s ≡ ssEvalwithFuel n ( b₁ 𝔱𝔥𝔢𝔫 c ; 𝔱𝔥𝔢𝔫 b₂) s
+  lem {s} {n} b₁ c b₂ = refl
+
+  elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 : ∀ {s} {b} {n} → ssEvalwithFuel n ( b 𝔱𝔥𝔢𝔫 𝑠𝑘𝑖𝑝 ;) s ≡ ssEvalwithFuel n b s
+  elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 {s} {𝑠𝑘𝑖𝑝 ;} {zero} = refl
+  elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 {s} {(𝔴𝔥𝔦𝔩𝔢 x 𝒹ℴ x₁) ;} {zero} = refl
+  elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 {s} {(𝔦𝔣 x 𝔱𝔥𝔢𝔫 x₁ 𝔢𝔩𝔰𝔢 x₂) ;} {zero} = refl
+  elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 {s} {(x := x₁) ;} {zero} = refl
+  elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 {s} {𝑠𝑘𝑖𝑝 ;} {suc n} = refl
+  elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 {s} {(𝔴𝔥𝔦𝔩𝔢 x 𝒹ℴ x₁) ;} {suc n} with evalExp x s
+  ... | nothing = refl
+  ... | f@(just _) with toTruthValue {f} (Any.just tt) | n | x₁
+  ... | false | zero | _ = refl
+  ... | false | suc _ | _ = refl
+  ... | true | zero | c ; = elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 {s} {c ; 𝔴𝔥𝔦𝔩𝔢 x 𝒹ℴ (c ;) ;} {zero}
+  ... | true | zero | 𝑠𝑘𝑖𝑝 ; (c  ;) = elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 {s} {c ; 𝔴𝔥𝔦𝔩𝔢 x 𝒹ℴ ((𝑠𝑘𝑖𝑝 ; c ;)) ; } {zero}
+  ... | true | zero | 𝑠𝑘𝑖𝑝 ; (c ; b) = {!!}
+  ... | true | zero | (𝔴𝔥𝔦𝔩𝔢 x₂ 𝒹ℴ x₃) ; b = {!!}
+  ... | true | zero | (𝔦𝔣 x₂ 𝔱𝔥𝔢𝔫 x₃ 𝔢𝔩𝔰𝔢 x₄) ; b = {!!}
+  ... | true | zero | (x₂ := x₃) ; b = {!!}
+  ... | true | suc m | a = {!!}
+  elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 {s} {(𝔦𝔣 x 𝔱𝔥𝔢𝔫 x₁ 𝔢𝔩𝔰𝔢 x₂) ;} {suc n} = {!!}
+  elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 {s} {(x := x₁) ;} {suc n} = {!!}
+  elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 {s} {x ; b} {zero} = {!!}
+  elim-𝔱𝔥𝔢𝔫-𝑠𝑘𝑖𝑝 {s} {x ; b} {suc n} = {!!}
+
+
+  elim-𝑠𝑘𝑖𝑝 : ∀ {s} {c} {n} → ssEvalwithFuel n ( c ; 𝑠𝑘𝑖𝑝 ; ) s ≡ ssEvalwithFuel n (c ;) s
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑘𝑖𝑝} {zero} = refl
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑘𝑖𝑝} {suc n} = refl
+  elim-𝑠𝑘𝑖𝑝 {s} {𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c} {zero} with evalExp exp s
+  ... | nothing = refl
+  ... | f@(just _) with toTruthValue {f} (Any.just tt)
+  ... | false = refl
+  ... | true = refl
+  elim-𝑠𝑘𝑖𝑝 {s} {𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ b} {suc n} with evalExp exp s
+  ... | nothing = refl
+  ... | f@(just _) with toTruthValue {f} (Any.just tt) | n
+  ... | false | zero = refl
+  ... | false | suc _ = refl
+  ... | true  | x  with b
+  ... | c ; = {!!}
+  ... | c ; b₁ = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝔦𝔣 exp 𝔱𝔥𝔢𝔫 c₁ 𝔢𝔩𝔰𝔢 c₂} {n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {id := exp} {n} = {!!}
+  -}
+
+{-
   ssEvalwithFuel :  ℕ → 𝐶 × Maybe S → Maybe S
   -- Skip ⇒ eval finished successfully
   ssEvalwithFuel  zero     (𝑠𝑘𝑖𝑝 , s@(just _)) = s   
@@ -89,10 +206,10 @@ module Mini-C.Evaluation (𝔡 : Data-Implementation )
   -- Need to explicitly give all four cases here so
   -- Agda can see `eval zero C = c , nothing` is always
   -- definitionally true.
-  ssEvalwithFuel zero (c@(𝑎𝑠𝑠𝑖꞉ x) , s) = nothing         -- ran out of fuel
-  ssEvalwithFuel zero (c@(𝑠𝑒𝑞꞉ x) , s)  = nothing         -- ran out of fuel
-  ssEvalwithFuel zero (c@(𝑐𝑡𝑟𝑙꞉ x) , s) = nothing         -- ran out of fuel
-  ssEvalwithFuel zero (c@(𝑙𝑜𝑜𝑝꞉ x) , s) = nothing         -- ran out of fuel
+  ssEvalwithFuel zero (c@(𝑎𝑠𝑠𝑖꞉ _) , s) = nothing         -- ran out of fuel
+  ssEvalwithFuel zero (c@( _ ; _ ﹒ _) , s)  = nothing         -- ran out of fuel
+  ssEvalwithFuel zero (c@(𝑐𝑡𝑟𝑙꞉ _) , s) = nothing         -- ran out of fuel
+  ssEvalwithFuel zero (c@(𝑙𝑜𝑜𝑝꞉ _) , s) = nothing         -- ran out of fuel
 
   -- Assignment
   ssEvalwithFuel (suc n) (𝑎𝑠𝑠𝑖꞉ (i ꞉= e) , nothing) = nothing 
@@ -111,39 +228,107 @@ module Mini-C.Evaluation (𝔡 : Data-Implementation )
   ssEvalwithFuel (suc n) ( loop@(𝑙𝑜𝑜𝑝꞉ (𝑤ℎ𝑖𝑙𝑒 b 𝑑𝑜 c)) , s'@(just s)) with evalExp b s
   ... | nothing = nothing -- Computation fail (i.e div by zero)
   ... | exp@(just v) with toTruthValue {exp} (Any.just tt)
-  ... | true     = ssEvalwithFuel n ( 𝑠𝑒𝑞꞉ (c ﹔ loop) , s' )
+  ... | true     = ssEvalwithFuel n ( c ; loop ﹒ {!!} , s' )
   ... | false    = ssEvalwithFuel n (𝑠𝑘𝑖𝑝 , s')
 
   -- Sequence: (skip ; C)
-  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (_ ﹔ _) , nothing )  = nothing
-  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ﹔ c@(𝑎𝑠𝑠𝑖꞉ x)) , s@(just _)) = ssEvalwithFuel (suc n) (c , s)
-  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ﹔ c@(𝑠𝑒𝑞꞉ x)) ,  s@(just _)) = ssEvalwithFuel (suc n) (c , s)
-  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ﹔ c@(𝑐𝑡𝑟𝑙꞉ x)) , s@(just _)) = ssEvalwithFuel (suc n) (c , s)
-  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ﹔ c@(𝑙𝑜𝑜𝑝꞉ x)) , s@(just _)) = ssEvalwithFuel (suc n) (c , s)
-  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ﹔ c@(𝑠𝑘𝑖𝑝))  ,  s@(just _)) = ssEvalwithFuel (suc n) (c , s)
+  ssEvalwithFuel (suc n) ( ( c₁ ; c₂ ﹒ ⬞) , nothing ) = nothing
+  ssEvalwithFuel (suc n) ( ( c₁ ; c₂ ﹒ ⬞) , s@(just _) ) = {!!}
+
+-}
+
+
+{-
+  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (_ ; _) , nothing )  = nothing
+  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ; c@(𝑎𝑠𝑠𝑖꞉ x)) , s@(just _)) = ssEvalwithFuel (suc n) (c , s)
+  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ; c@(𝑠𝑒𝑞꞉ x)) ,  s@(just _)) = ssEvalwithFuel (suc n) (c , s)
+  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ; c@(𝑐𝑡𝑟𝑙꞉ x)) , s@(just _)) = ssEvalwithFuel (suc n) (c , s)
+  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ; c@(𝑙𝑜𝑜𝑝꞉ x)) , s@(just _)) = ssEvalwithFuel (suc n) (c , s)
+  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ; c@(𝑠𝑘𝑖𝑝))  ,  s@(just _)) = ssEvalwithFuel (suc n) (c , s)
 
   -- Sequence: (Assignment ; C)
-  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (𝑎𝑠𝑠𝑖꞉ c₁ ﹔ c₂) , (just s)) =  ssEvalwithFuel n ( c₂ , ( evalAssi s c₁ )) 
+  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ (𝑎𝑠𝑠𝑖꞉ c₁ ; c₂) , (just s)) =  ssEvalwithFuel n ( c₂ , ( evalAssi s c₁ )) 
 
   -- Sequence: (Sequence ; C)
-  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ c@(𝑠𝑒𝑞꞉ (c₁ ﹔ c₂) ﹔ c₃) , s@(just _)) = ssEvalwithFuel (n) (𝑠𝑒𝑞꞉ (c₁ ﹔ (𝑠𝑒𝑞꞉ (c₂ ﹔ c₃))) ,  s)
+  ssEvalwithFuel (suc n) (𝑠𝑒𝑞꞉ c@(𝑠𝑒𝑞꞉ (c₁ ; c₂) ; c₃) , s@(just _)) = ssEvalwithFuel (n) (𝑠𝑒𝑞꞉ (c₁ ; (𝑠𝑒𝑞꞉ (c₂ ; c₃))) ,  s)
 
   -- Sequence: (If then Else ; C)
-  ssEvalwithFuel (suc n) ( (𝑠𝑒𝑞꞉ (c@(𝑐𝑡𝑟𝑙꞉ (𝑖𝑓 b 𝑡ℎ𝑒𝑛 c₁ 𝑒𝑙𝑠𝑒 c₂)) ﹔ c₃ ) ) , s'@(just s) ) with evalExp b s
+  ssEvalwithFuel (suc n) ( (𝑠𝑒𝑞꞉ (c@(𝑐𝑡𝑟𝑙꞉ (𝑖𝑓 b 𝑡ℎ𝑒𝑛 c₁ 𝑒𝑙𝑠𝑒 c₂)) ; c₃ ) ) , s'@(just s) ) with evalExp b s
   ... | nothing = nothing
   ... | exp@(just v) with toTruthValue {exp} (Any.just tt)
-  ... | true     = ssEvalwithFuel n ( (𝑠𝑒𝑞꞉ (c₁ ﹔ c₃) ) , s' )
-  ... | false    = ssEvalwithFuel n ( (𝑠𝑒𝑞꞉ (c₂ ﹔ c₃) ) , s' )
+  ... | true     = ssEvalwithFuel n ( (𝑠𝑒𝑞꞉ (c₁ ; c₃) ) , s' )
+  ... | false    = ssEvalwithFuel n ( (𝑠𝑒𝑞꞉ (c₂ ; c₃) ) , s' )
 
   -- Sequence: (Loop : C)
-  ssEvalwithFuel (suc n) ( (𝑠𝑒𝑞꞉ (loop@(𝑙𝑜𝑜𝑝꞉ (𝑤ℎ𝑖𝑙𝑒 b 𝑑𝑜 c₁)) ﹔ c₂ ) ) , s'@(just s)) with evalExp b s
+  ssEvalwithFuel (suc n) ( (𝑠𝑒𝑞꞉ (loop@(𝑙𝑜𝑜𝑝꞉ (𝑤ℎ𝑖𝑙𝑒 b 𝑑𝑜 c₁)) ; c₂ ) ) , s'@(just s)) with evalExp b s
   ... | nothing = nothing
   ... | exp@(just v) with toTruthValue {exp} (Any.just tt)
-  ... | true     = ssEvalwithFuel n ( 𝑠𝑒𝑞꞉ (𝑠𝑒𝑞꞉ (c₁ ﹔ loop) ﹔ c₂) , s' )
+  ... | true     = ssEvalwithFuel n ( 𝑠𝑒𝑞꞉ (𝑠𝑒𝑞꞉ (c₁ ; loop) ; c₂) , s' )
   ... | false    = ssEvalwithFuel n ( c₂ , s')
+-}
 
+
+{-
+  0⇒𝑠𝑘𝑖𝑝 : ∀ {s} {c} → Is-just (ssEvalwithFuel zero (c , just s)) → c ≡ 𝑠𝑘𝑖𝑝
+  0⇒𝑠𝑘𝑖𝑝 {_} {𝑠𝑘𝑖𝑝} _ = refl
+
+  elim-𝑠𝑘𝑖𝑝 : ∀ {s} {c} {n} → ssEvalwithFuel n ( 𝑠𝑒𝑞꞉ ( c ; 𝑠𝑘𝑖𝑝 ) , just s) ≡ ssEvalwithFuel n ( c , just s)
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑎𝑠𝑠𝑖꞉ x} {zero} = refl
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑎𝑠𝑠𝑖꞉ (i ꞉= e)} {suc zero} with evalExp e s
+  ... | nothing = refl
+  ... | just x  = refl
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑎𝑠𝑠𝑖꞉ (i ꞉= e)} {suc (suc n)} with evalExp e s
+  ... | nothing = refl
+  ... | just x  = refl
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (c₁ ; c₂)} {zero} = refl
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑎𝑠𝑠𝑖꞉ (i ꞉= e) ; 𝑎𝑠𝑠𝑖꞉ (i' ꞉= e'))} {suc n} with n | evalExp e s | inspect (evalExp e) s
+  ... | zero | nothing | [ eq ] = refl
+  ... | zero | just x | [ eq ] = refl
+  ... | suc zero | nothing | [ eq ] rewrite eq = refl
+  ... | suc (suc a) | nothing | [ eq ] rewrite eq  = refl
+  ... | suc a | just x | [ eq ] with a | evalExp e' (updateState i x s)
+  ... | zero  | nothing = refl
+  ... | zero  | just x₁ = {!!}
+  ... | suc f | nothing = {!!}
+  ... | suc f | just x₁ = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑎𝑠𝑠𝑖꞉ x ; 𝑠𝑒𝑞꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑎𝑠𝑠𝑖꞉ x ; 𝑐𝑡𝑟𝑙꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑎𝑠𝑠𝑖꞉ x ; 𝑙𝑜𝑜𝑝꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑎𝑠𝑠𝑖꞉ x ; 𝑠𝑘𝑖𝑝)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑠𝑒𝑞꞉ x ; 𝑎𝑠𝑠𝑖꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑠𝑒𝑞꞉ x ; 𝑠𝑒𝑞꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑠𝑒𝑞꞉ x ; 𝑐𝑡𝑟𝑙꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑠𝑒𝑞꞉ x ; 𝑙𝑜𝑜𝑝꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑠𝑒𝑞꞉ x ; 𝑠𝑘𝑖𝑝)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑐𝑡𝑟𝑙꞉ x ; 𝑎𝑠𝑠𝑖꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑐𝑡𝑟𝑙꞉ x ; 𝑠𝑒𝑞꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑐𝑡𝑟𝑙꞉ x ; 𝑐𝑡𝑟𝑙꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑐𝑡𝑟𝑙꞉ x ; 𝑙𝑜𝑜𝑝꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑐𝑡𝑟𝑙꞉ x ; 𝑠𝑘𝑖𝑝)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑙𝑜𝑜𝑝꞉ x ; 𝑎𝑠𝑠𝑖꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑙𝑜𝑜𝑝꞉ x ; 𝑠𝑒𝑞꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑙𝑜𝑜𝑝꞉ x ; 𝑐𝑡𝑟𝑙꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑙𝑜𝑜𝑝꞉ x ; 𝑙𝑜𝑜𝑝꞉ x₁)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑙𝑜𝑜𝑝꞉ x ; 𝑠𝑘𝑖𝑝)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ; 𝑎𝑠𝑠𝑖꞉ x)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ; 𝑠𝑒𝑞꞉ x)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ; 𝑐𝑡𝑟𝑙꞉ x)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ; 𝑙𝑜𝑜𝑝꞉ x)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑒𝑞꞉ (𝑠𝑘𝑖𝑝 ; 𝑠𝑘𝑖𝑝)} {suc n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑐𝑡𝑟𝑙꞉ x} {n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑙𝑜𝑜𝑝꞉ x} {n} = {!!}
+  elim-𝑠𝑘𝑖𝑝 {s} {𝑠𝑘𝑖𝑝} {n} = {!!}
+-}
   
-  
+  {-
+  Γ : ∀ n c → ssEvalwithFuel n (c , nothing ) ≡ nothing
+  Γ zero (𝑎𝑠𝑠𝑖꞉ x) = refl
+  Γ (suc n) (𝑎𝑠𝑠𝑖꞉ (_ ꞉= _)) = refl
+  Γ n (𝑠𝑒𝑞꞉ x) = {!!}
+  Γ n (𝑐𝑡𝑟𝑙꞉ x) = {!!}
+  Γ n (𝑙𝑜𝑜𝑝꞉ x) = {!!}
+  Γ n 𝑠𝑘𝑖𝑝 = {!!}
+-}
 
   {-
   evalAssi : ∀ {i e} → S → (p : i := e) → Maybe S

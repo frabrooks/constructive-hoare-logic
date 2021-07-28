@@ -90,11 +90,9 @@ module Mini-C.Expressions ( 𝔡 : Data-Implementation )
 
   -- Const and var below are to simplify hard coding expressions within agda
   -- e.g.    (op₂ (𝑣𝑎𝑟 𝔁) ( == :𝔹 ) (𝑐𝑜𝑛𝑠𝑡 ➋)) : Exp
-  𝑐𝑜𝑛𝑠𝑡 : Val → Exp
-  𝑐𝑜𝑛𝑠𝑡 n = term (Const n)
+  pattern 𝑐𝑜𝑛𝑠𝑡 n = term (Const n)
+  pattern 𝑣𝑎𝑟 i = term (Var i)
 
-  𝑣𝑎𝑟 : Id → Exp
-  𝑣𝑎𝑟 i = term (Var i)
 
   ∀ₛ : Exp
   ∀ₛ = term 𝒕
