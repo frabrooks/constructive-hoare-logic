@@ -16,25 +16,26 @@ open import Function using ( _∘_ )
 open import Data.Sum using (_⊎_ ; inj₁ ; inj₂)
 open import Data.Unit using ( ⊤ ; tt )
 
-open import Representation.Data using (Data-Implementation)
-open import Representation.State using (S-Representation)
+open import Data using (Data-Implementation)
+open import State using (State-Implementation)
 open import Misc
 
 
-module Hoare-Logic.Axioms (𝔡 : Data-Implementation )
-  (sRep : S-Representation 𝔡 ) where
+module Hoare-Logic.Axioms
+  (𝔡 : Data-Implementation )
+  (𝔖 : State-Implementation 𝔡 ) where
 
   open Data-Implementation 𝔡
-  open S-Representation sRep
+  open State-Implementation 𝔖
 
-  open import Mini-C.Expressions 𝔡 sRep
-  open import Assertions.Props 𝔡 sRep
+  open import Language.Expressions 𝔡 𝔖
+  open import Language.Assertions  𝔡 𝔖
 
-  open import Mini-C.Lang 𝔡 sRep
-  open import Mini-C.Evaluation 𝔡 sRep
+  open import Language.Mini-Imp 𝔡 𝔖
+  open import Evaluation.Evaluation 𝔡 𝔖
+  open import Evaluation.Termination 𝔡 𝔖
 
-  open import Hoare-Logic.Semantics 𝔡 sRep
-  open import Hoare-Logic.Termination 𝔡 sRep
+  open import Hoare-Logic.Semantics 𝔡 𝔖
 
 -- ═══════════════════════════════════════════════════════════════════════════════ --
 -- Axioms / Rules
@@ -66,16 +67,16 @@ module Hoare-Logic.Axioms (𝔡 : Data-Implementation )
             → ⟪ P ⟫ Q₁ 𝔱𝔥𝔢𝔫 Q₂ ⟪ R ⟫
 
 
-  D3-While-Rule : ∀ {P} {B} {𝒬}
+  D3-While-Rule : ∀ {P} {B} {C}
 
-                 → ⟪ op₂ P && B ⟫ 𝒬 ⟪ P ⟫
+                 → ⟪ P ∧ B ⟫ C ⟪ P ⟫
   -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --
-        → ⟪ P ⟫ 𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ 𝒬 ; ⟪ op₂ (op₁ ¬ᵇ B) && P ⟫
+        → ⟪ P ⟫ 𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ; ⟪ (𝑛𝑜𝑡 B) ∧ P ⟫
 
 
   D4-Conditional-Rule : ∀ {A} {B} {C} {P} {Q}
 
-      → ⟪ op₂ C && P ⟫ A ⟪ Q ⟫ → ⟪ op₂ (op₁ ¬ᵇ C) && P ⟫ B ⟪ Q ⟫
+      → ⟪ C ∧ P ⟫ A ⟪ Q ⟫ → ⟪ (𝑛𝑜𝑡 C) ∧ P ⟫ B ⟪ Q ⟫
   -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --
               → ⟪ P ⟫  𝔦𝔣 C 𝔱𝔥𝔢𝔫 A 𝔢𝔩𝔰𝔢 B ; ⟪ Q ⟫
               
@@ -130,12 +131,12 @@ module Hoare-Logic.Axioms (𝔡 : Data-Implementation )
 
 -- ═══════════════════════════════════════════════════════════════════════════════ --
 
-  D3-While-Rule {P} {B} {𝒬} PB𝒬P s Σ⊢P (suc ℱ , ⌊ᵗ𝒬ᵗ⌋) = go (suc ℱ) Σ⊢P ⌊ᵗ𝒬ᵗ⌋ 
+  D3-While-Rule {P} {B} {C} PBCP s Σ⊢P (suc ℱ , ⌊ᵗCᵗ⌋) = go (suc ℱ) Σ⊢P ⌊ᵗCᵗ⌋ 
       where
       ------------------------------------------------------------
       -- Using mutually recursive functions go and go-true      
-      go : ∀ {s} ℱ → Σ⊢ s P → (⌊ᵗ𝒬ᵗ⌋ : ⌊ᵗ ℱ ⸴ (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ 𝒬 ;) ⸴ s ᵗ⌋)
-           → Σ⊢ (″ ⌊ᵗ𝒬ᵗ⌋) (op₂ (op₁ ¬ᵇ B) && P )
+      go : ∀ {s} ℱ → Σ⊢ s P → (⌊ᵗCᵗ⌋ : ⌊ᵗ ℱ ⸴ (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⸴ s ᵗ⌋)
+           → Σ⊢ (″ ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₑ B) && P )
       -- ℱ needs to be an argument by itself outside the Sigma type
       -- so we can recurse on it as Agda can't see it always decrements
       -- with each call if it is inside the product.
@@ -143,10 +144,10 @@ module Hoare-Logic.Axioms (𝔡 : Data-Implementation )
       -- case where B is true
       go-true : ∀ {s} {ℱ} {v} → Σ⊢ s P → (evalExp B s ≡ just v)
               → (toTruthValue {just v} (just tt) ≡ true)
-              → (⌊ᵗ𝒬ᵗ⌋ : ⌊ᵗ ℱ ⸴ (𝒬 𝔱𝔥𝔢𝔫 𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ 𝒬 ;) ⸴ s ᵗ⌋)
-              → Σ⊢ (to-witness ⌊ᵗ𝒬ᵗ⌋) (op₂ (op₁ ¬ᵇ B) && P)
-      go-true {s} {ℱ} Σ⊢P p₁ p₂ ⌊ᵗ𝒬ᵗ⌋
-          with ⌊ᵗ⌋-split ℱ s 𝒬 (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ 𝒬 ;) ⌊ᵗ𝒬ᵗ⌋
+              → (⌊ᵗCᵗ⌋ : ⌊ᵗ ℱ ⸴ (C 𝔱𝔥𝔢𝔫 𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⸴ s ᵗ⌋)
+              → Σ⊢ (to-witness ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₑ B) && P)
+      go-true {s} {ℱ} Σ⊢P p₁ p₂ ⌊ᵗCᵗ⌋
+          with ⌊ᵗ⌋-split ℱ s C (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⌊ᵗCᵗ⌋
       ... | record { Lᵗ = Lᵗ ; ℱ' = ℱ' ; Rᵗ = Rᵗ ; lt = lt ; Δ = Δ } = Λ
          where
          Σ⊢B : Σ⊢ s B
@@ -154,47 +155,47 @@ module Hoare-Logic.Axioms (𝔡 : Data-Implementation )
          Σ⊢P&B : Σ⊢ s (op₂ P && B)
          Σ⊢P&B = ConjunctionIntro _ _ Σ⊢P Σ⊢B  
          Σ⊢P' : Σ⊢ (″ Lᵗ) P
-         Σ⊢P' = PB𝒬P s Σ⊢P&B (ℱ , Lᵗ)
+         Σ⊢P' = PBCP s Σ⊢P&B (ℱ , Lᵗ)
          
          -- Proof of termination of rhs of split with ℱ'
-         Rᵗ+ : ⌊ᵗ ℱ' +ᴺ (k lt) ⸴ (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ 𝒬 ;) ⸴ (″ Lᵗ) ᵗ⌋
-         Rᵗ+ = addFuel' {𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ 𝒬 ;} ℱ' (k lt) Rᵗ
+         Rᵗ+ : ⌊ᵗ ℱ' +ᴺ (k lt) ⸴ (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⸴ (″ Lᵗ) ᵗ⌋
+         Rᵗ+ = addFuel' {𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;} ℱ' (k lt) Rᵗ
          -- ℱ' with (ℱ' ≤ ℱ) implies termination with ℱ fuel
-         Rᵗℱ : ⌊ᵗ ℱ ⸴ (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ 𝒬 ;) ⸴ (″ Lᵗ) ᵗ⌋
-         Rᵗℱ = let 𝐶 = (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ 𝒬 ;) in subst
+         Rᵗℱ : ⌊ᵗ ℱ ⸴ (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⸴ (″ Lᵗ) ᵗ⌋
+         Rᵗℱ = let 𝐶 = (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) in subst
                (λ ℱ → ⌊ᵗ ℱ ⸴ 𝐶 ⸴ (″ Lᵗ) ᵗ⌋) (proof lt) Rᵗ+      
          -- This new proof of termination Rᵗℱ has same output
          isDet : ″ Rᵗℱ ≡ ″ Rᵗ
-         isDet = EvaluationIsDeterministic (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ 𝒬 ;)
+         isDet = EvaluationIsDeterministic (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;)
                  (ℱ , Rᵗℱ) (ℱ' , Rᵗ) refl refl                 
          -- and said output is identical to the original output
-         Δ' : ″ Rᵗℱ ≡ ″ ⌊ᵗ𝒬ᵗ⌋
+         Δ' : ″ Rᵗℱ ≡ ″ ⌊ᵗCᵗ⌋
          Δ' rewrite isDet = Δ         
          -- which we can now use in a recursive call: (suc ℱ) ⇒ ℱ
-         GO  : Σ⊢ (″ Rᵗℱ) (op₂ (op₁ ¬ᵇ B) && P)
+         GO  : Σ⊢ (″ Rᵗℱ) (op₂ (op₁ ¬ₑ B) && P)
          GO  = go {″ Lᵗ} ℱ Σ⊢P' Rᵗℱ
          
          -- and finally get the type we need via substitution with Δ'
-         Λ : Σ⊢ (″ ⌊ᵗ𝒬ᵗ⌋) (op₂ (op₁ ¬ᵇ B) && P) 
-         Λ = subst (λ s → Σ⊢ s (op₂ (op₁ ¬ᵇ B) && P)) Δ' GO
+         Λ : Σ⊢ (″ ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₑ B) && P) 
+         Λ = subst (λ s → Σ⊢ s (op₂ (op₁ ¬ₑ B) && P)) Δ' GO
       ---------------------------------------------------------------
       -- case where B is false
       go-false : ∀ {s} {v} → Σ⊢ s P → (evalExp B s ≡ just v)
                  → (toTruthValue {just v} (just tt) ≡ false)
-                 → Σ⊢ s (op₂ (op₁ ¬ᵇ B) && P)            
+                 → Σ⊢ s (op₂ (op₁ ¬ₑ B) && P)            
       go-false {s} {v} Σ⊢P p₁ p₂ = ConjunctionIntro _ _ Σ⊢¬B Σ⊢P
         where
         ⊭B : ⊭ (just v)
         ⊭B rewrite p₁ = (just tt) , subst (T ∘ not) (sym p₂) tt
-        Σ⊢¬B : Σ⊢ s (op₁ ¬ᵇ B)
+        Σ⊢¬B : Σ⊢ s (op₁ ¬ₑ B)
         Σ⊢¬B rewrite p₁ = (NegationIntro (just v) (⊭B))
       ---------------------------------------------------------------
-      go {s} (suc ℱ) Σ⊢P ⌊ᵗ𝒬ᵗ⌋ with
+      go {s} (suc ℱ) Σ⊢P ⌊ᵗCᵗ⌋ with
           evalExp B s  | inspect (evalExp B) s
       ... | f@(just v) | [ p₁ ] with
           toTruthValue {f} (any tt) | inspect (toTruthValue {f}) (any tt)
-      ... | true  | [ p₂ ] = go-true {s} {ℱ} Σ⊢P p₁ p₂ ⌊ᵗ𝒬ᵗ⌋
-      ... | false | [ p₂ ] rewrite Is-just-just ⌊ᵗ𝒬ᵗ⌋ = go-false Σ⊢P p₁ p₂
+      ... | true  | [ p₂ ] = go-true {s} {ℱ} Σ⊢P p₁ p₂ ⌊ᵗCᵗ⌋
+      ... | false | [ p₂ ] rewrite Is-just-just ⌊ᵗCᵗ⌋ = go-false Σ⊢P p₁ p₂
       ---------------------------------------------------------------
       -- ════════════════════════════════════════════════════════════
 
@@ -238,7 +239,7 @@ module Hoare-Logic.Axioms (𝔡 : Data-Implementation )
       ... | v , C▵v , inj₂ (¬⊢v , Σ[ᵗB] , Δ)  rewrite Δ = Ω₂ 
         where
           -- ¬C && P is true in state s
-          Ω₁ : Σ⊢ s (op₂ (op₁ ¬ᵇ C) && P) 
+          Ω₁ : Σ⊢ s (op₂ (op₁ ¬ₑ C) && P) 
           Ω₁ rewrite C▵v = ConjunctionIntro _ _
             μ₂ (Pis𝑃 , ⊢P)
               where

@@ -3,9 +3,9 @@
 ------------------------------------------------------------------
 
 
-open import Representation.Data using (Data-Implementation)
+open import Data using (Data-Implementation)
 
-module Representation.State ( 𝔡 : Data-Implementation ) where
+module State ( 𝔡 : Data-Implementation ) where
 
   open Data-Implementation 𝔡
 
@@ -15,7 +15,7 @@ module Representation.State ( 𝔡 : Data-Implementation ) where
   open import Data.Empty using (⊥)
 
                          
-  record S-Representation  : Set₁ where
+  record State-Implementation  : Set₁ where
     field
       S              : Set
       --H            : Set
@@ -46,9 +46,9 @@ module Representation.State ( 𝔡 : Data-Implementation ) where
     getVarValM i (just s) = getVarVal i s
 
 
-  import State-List-Rep 𝔡 as List-Rep
+  import Representations.State-List-Rep 𝔡 as List-Rep
   -- S = List localVar
-  ListRep : S-Representation
+  ListRep : State-Implementation
   ListRep = record { List-Rep }
 
 

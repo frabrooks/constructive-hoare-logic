@@ -1,0 +1,183 @@
+
+% DOCUMENT CLASS
+\documentclass[oneside,12pt]{article}
+
+
+\usepackage{graphicx}
+
+%Includes "References" in the table of contents
+\usepackage[nottoc]{tocbibind}
+
+\begin{document}
+
+\begin{titlepage}
+  \begin{center}
+    \large
+
+    \textbf{\Large A Constructive Formalisation of Hoare Logic using the Interactive Theorem Prover Agda}
+    
+    \vfill
+
+    Project Report \\
+    Word Count XXXX   \\
+    Fraser L. Brooks 1680975 \\
+    Supervisor: Vincent Rahli
+    
+    \vfill
+    \includegraphics[width=4cm]{Figures/birmingham_shield.png}
+    \vfill
+       
+    Submitted in partial fulfillment \\
+    of the requirements for the degree of\\
+    Master of Science \\
+    (Computer Science) \\
+       
+    \vfill
+       
+    at the \\
+    University of Birmingham\\
+    School of Computer Science\\
+    July 2021
+       
+    \vspace{0.8cm}
+       
+  \end{center}
+\end{titlepage}
+
+\flushbottom
+
+\begin{abstract}
+
+Problem, Approach, What you Produced, Evaluation, What it all means. Nullam enim nisi, elementum eu pellentesque nec, facilisis id tellus. Sed erat sem, maximus vel fermentum et, fringilla quis est. Aliquam tempus nunc ac velit sollicitudin condimentum. Duis sed rutrum tellus. Curabitur rutrum finibus justo ut malesuada. Nullam tincidunt scelerisque iaculis. Quisque tempor massa id urna elementum, sit amet condimentum tellus euismod. Integer est eros, posuere et lacus finibus, pretium aliquam libero.
+
+Mauris scelerisque aliquam vehicula. Fusce id sodales lacus, vitae eleifend ex. Nulla facilisi. Maecenas placerat sem imperdiet ex pellentesque, in ultricies odio vulputate. Nulla facilisi. Donec eget suscipit sapien. Aenean ipsum neque, cursus quis magna nec, porttitor viverra enim. Nulla tellus augue, convallis at mattis eget, pellentesque et odio. Etiam suscipit, libero nec pretium posuere, leo erat posuere enim, non accumsan nisi mi ac libero. Morbi tortor diam, venenatis vitae nisi non, vulputate hendrerit diam. Nam eget nulla turpis.
+
+Donec posuere mi id pellentesque volutpat. Proin ultricies diam ut velit ultricies congue. Duis molestie aliquet lectus a sodales. Integer mollis sed leo in commodo. Suspendisse potenti. Etiam nec libero quis sapien porttitor vehicula. Proin eleifend dolor egestas, dapibus leo at, pulvinar velit. Proin id erat a turpis accumsan iaculis non sit amet purus. Integer porta, eros non elementum bibendum, libero eros elementum turpis, at fringilla sem sapien hendrerit mi.
+
+Praesent consequat ut mi vel ullamcorper. Nullam a nisi bibendum, ultrices risus at, volutpat neque. Quisque tincidunt ac elit sed pellentesque. Integer sed tristique lectus. Pellentesque lacinia pellentesque magna in viverra. Aenean pharetra sit amet quam non molestie. Nam dictum quam sit amet eros sodales interdum. Morbi porttitor lectus lorem. Sed sagittis ante est, at tempor mauris dictum a. Suspendisse nec est vitae augue porta posuere quis eu velit. Nullam euismod nunc ut eleifend congue. Aliquam fermentum, lectus vel mollis tempor.
+
+  \end{abstract}
+
+\pagebreak
+  
+\tableofcontents
+
+\pagebreak
+
+\raggedbottom
+
+\section{Introduction}
+
+This is some text. That will not be in my report. Lorem  ipsum  dolor  sit  amet,  consectetuer  adipiscing  
+elit.   Etiam  lobortisfacilisis sem.  Nullam nec mi et 
+neque pharetra sollicitudin.  Praesent imperdietmi nec ante. 
+Donec ullamcorper, felis non sodales.. Lorem  ipsum  dolor  sit  amet,  consectetuer  adipiscing  
+elit.   Etiam  lobortisfacilisis sem.  Nullam nec mi et 
+neque pharetra sollicitudin.  Praesent imperdietmi nec ante. 
+Donec ullamcorper, felis non sodales...
+
+\section{Preliminaries \& Literature Review}
+
+\subsection{Weakest Precondition}
+
+How is one to give a semantics to computation? One answer is to provide a model of computation that denotes how a mechansim, a computation, or program\footnote{ the three words here being used synonymously} is to be computed; such as a Turing machine, or a FSA. Another way however is to describe what the mechanism, computation, or program can \emph{do} for us; that is, specifiying what input states it can accept, and what states it will produce.
+
+OR: given a desired output (of states) specifying, how (read, in which input states), if at all, it can produce the desired output.
+
+This approach gives us a way of specifying a \ldots without caring about the eventual form of the mechanism if indeed it ever takes form at all!
+
+
+
+Computation as traversing the state space. Descartes - Cartesian product - [Dijkstra,p12]
+
+Weakest precondition (according to Dijskstra) is unique when considered as a state space, but multiple predicates could denote the same space. (i.e. $x == y$ and $y == x$)
+
+Strongest postcondition?
+[Gries, exercise 4 section 9.1]
+
+
+`If for a given $P$, $S$, and $R$, $P \Rightarrow wp(S,R)$ holds, this can often be proved without explicit formulation --- or, if you prefer, ``computation'', or ``derivation'' --- of the predicate $wp(S,R)$'
+
+
+Note that in the text [dijkstra], $wp(S,R)$, is used interchangeably as a predicate and as the state space that said predicate captures. With our constructive formalisation however, this lack of precision is not possible nor desired, so we end up with the, perhaps superfluous, distinction between predicates and the state space that they describe. Meaning that under our formalisation, $wp(S,F)$ is empty when considered as a state space, but inhabited when considered as a predicate (inhabited uniquely by $F$ itself). This exposition also explains why $<<F>> S <<Q>>$ is an inhabited type, as $F$ \emph{is} a valid precondition of any computation for any postcondition (think absurd function, or bluff function). $<<$ Actually explained by the fact that what we have formalised is the weakest \emph{liberal} precodnition!
+
+
+Weakest Liberal Precondition is what has actually been formalised! (Need to work out the translation)
+
+
+7 regions of the statesapce. As such, we can --- if we wish --- give a semantics to the notion of a derterministic mechanism as one in which the last four regions of the state space are empty.
+
+\subsection{Hoare Logic}
+
+
+\subsection{Agda}
+
+\subsection{Constructive Mathematics}
+
+\subsection{Formal Proof}
+
+\subsection{Applications}
+
+\section{Specification}
+
+\subsection{Obfuscating Interfaces}
+
+Might have also wanted to abstract away expression language
+(page 42 surface properties (Ligler))
+
+\subsection{Exppresion Language}
+
+Carving up state space.
+Every predicate denotes a subset of the statespace
+(which in our case is infinite).
+
+(day = 23) Dijkstra's example
+
+T/F, x == 2
+
+Relationship between logical operators and set theoretic operators
+i.e. $\wedge \Leftrightarrow \cap$
+
+
+Ought to have differentiated between non stuck-ness and termination. I.e. D(E) as domain of expression E, to eliminate divide by zero and non-defined variables in an expression, as that is a problem that can be handled distinctly from termination
+(i.e. (I think anway) that given a state S, and an expression E, one can deterministically/decidably determine whether or not it is a WFF)
+
+\subsection{Language}
+
+\subsection{Axioms \& Rules}
+
+\section{Implementation}
+
+\subsection{Constructive Termination}
+
+\subsection{Small Step Evaluation with Fuel}
+
+\subsection{Termination Splitting}
+
+\subsection{Axiom \& Rules in Agda}
+
+\section{Reflections}
+
+\subsection{Missteps}
+
+\subsection{Future Work}
+
+Gries page 164 'a fine balance between the two' \ldots but! automation, Infer, parse a C program and create formal proof in background. Complain if fail
+
+Hoare's surprise at test case success (see retrospective)
+
+\subsection{Conclusion}
+
+
+\section{Appendix}
+
+
+
+\nocite{*}
+
+\bibliographystyle{plain}
+
+\bibliography{report}
+
+  
+\end{document}

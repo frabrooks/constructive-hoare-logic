@@ -9,19 +9,18 @@ open import Data.Empty
 open import Data.Unit using ( ⊤ )
 open import Data.Product
 
-open import Representation.Data using (Data-Implementation)
-open import Representation.State using (S-Representation)
+open import Data using (Data-Implementation)
+open import State using (State-Implementation)
 
-module Mini-C.Lang (𝔡 : Data-Implementation )
-  (sRep : S-Representation 𝔡 ) where
+module Language.Mini-Imp
+  (𝔡 : Data-Implementation )
+  (𝔖 : State-Implementation 𝔡 ) where
 
   open Data-Implementation 𝔡
-  
-  -- Expressions ---------------------------
-  open import Mini-C.Expressions 𝔡 sRep
+  open import Language.Expressions 𝔡 𝔖
+
 
   -- Commands/Programs/Computations
-  
   data Block : Set
   {-
   -- Assignment
@@ -54,7 +53,9 @@ module Mini-C.Lang (𝔡 : Data-Implementation )
   open Block public
 
   infixr 18 _;_
-  
+  infix  31 _; 
+
+
   _𝔱𝔥𝔢𝔫_ : Block → Block → Block
   (c ;) 𝔱𝔥𝔢𝔫 b = c ; b
   (c ; b₁) 𝔱𝔥𝔢𝔫 b₂ = c ; (b₁ 𝔱𝔥𝔢𝔫 b₂)

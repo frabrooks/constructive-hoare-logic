@@ -14,21 +14,20 @@ open import Data.Product using (Σ ; Σ-syntax ; _×_  ; _,_  ; proj₁ ; proj�
 open import Function using ( _∋_ ; _∘_ ; _$_ )
 
 -- Local imports
-open import Representation.Data using (Data-Implementation)
-open import Representation.State using (S-Representation)
+open import Data using (Data-Implementation)
+open import State using (State-Implementation)
 open import Misc
 
-module Assertions.Props ( 𝔡 : Data-Implementation )
-  (sRep : S-Representation 𝔡 ) where
+module Language.Assertions
+  ( 𝔡 : Data-Implementation )
+  (𝔖 : State-Implementation 𝔡 ) where
 
   open Data-Implementation 𝔡
-  open S-Representation sRep
+  open State-Implementation 𝔖
   
   -- Using the same expression language as the
-  -- Mini-C language itself at the moment,
-  -- This may need to change later
-  open import Mini-C.Expressions 𝔡 sRep 
-
+  -- Mini-Imp language
+  open import Language.Expressions 𝔡 𝔖 
 
   -- Assertions (𝐴) are a synonym for expressions.
   𝐴 = Exp
@@ -57,6 +56,8 @@ module Assertions.Props ( 𝔡 : Data-Implementation )
   -- it will not be a WFF in any state in which 𝔂 := 0 
   𝑃𝑟𝑒𝑑𝑖𝑐𝑎𝑡𝑒 : 𝐴 → Set
   𝑃𝑟𝑒𝑑𝑖𝑐𝑎𝑡𝑒 p = Σ S (WFF ∘ evalExp p)
+  -- Useless
+
   -- This type represents the set of all predicates
   -- which isn't very practical to work with
 
@@ -73,6 +74,10 @@ module Assertions.Props ( 𝔡 : Data-Implementation )
   -- Alternative condensed syntax
   𝑃 : 𝐴 → S → Set
   𝑃 e s = 𝑃𝑟𝑜𝑝𝑜𝑠𝑡𝑖𝑜𝑛 e s
+
+  is𝑃𝑟𝑒𝑑𝑖𝑐𝑎𝑡𝑒 : 𝐴 → Set
+  is𝑃𝑟𝑒𝑑𝑖𝑐𝑎𝑡𝑒 a = Σ S (𝑃 a)
+  -- still useless
 
 
   -- Assertion
@@ -103,6 +108,7 @@ module Assertions.Props ( 𝔡 : Data-Implementation )
 
   Σ⊢ : ∀ s A → Set
   Σ⊢ = AssertΣ
+
 
   -- Alternative syntax
   -- Not sure this syntax is necessary anymore!
@@ -136,12 +142,14 @@ module Assertions.Props ( 𝔡 : Data-Implementation )
   -- _⇒_ : 𝐴 → 𝐴 → Set
   -- P ⇒ Q = (s : S) → Assert P s → Assert Q s
 
+  -- x == 2 ^ y == 1
   a₁ : 𝐴
   a₁ = (op₂
        (op₂ (𝑣𝑎𝑟 𝔁) ==  (𝑐𝑜𝑛𝑠𝑡 ➋))
                     &&
-       (op₂ (𝑐𝑜𝑛𝑠𝑡 ➊) == (𝑐𝑜𝑛𝑠𝑡 ➊)))
+       (op₂ (𝑣𝑎𝑟 𝔂) == (𝑐𝑜𝑛𝑠𝑡 ➊)))
 
+  -- x == 2
   a₂ : 𝐴
   a₂ = (op₂ (𝑣𝑎𝑟 𝔁) == (𝑐𝑜𝑛𝑠𝑡 ➋))
 
@@ -155,7 +163,7 @@ module Assertions.Props ( 𝔡 : Data-Implementation )
 
   test : a₁ ⇒ a₂
   test  s ⊢x&y = let x = getVarVal 𝔁 s ==𝓿 (just ➋) in
-                 let y = just ➊ ==𝓿 just ➊  in
+                 let y = getVarVal 𝔂 s ==𝓿 (just ➊)  in
                  ConjunctionElim₁ x y ⊢x&y
 
 {-

@@ -25,9 +25,9 @@ open ℤ
 
 -- Project Imports
 open import Misc
-open import Representation.Data
+open import Data
 
-module Data-Val-as-Int-Rep where
+module Representations.Data-Val-as-Int-Rep where
 
 
 
@@ -86,12 +86,12 @@ module Data-Val-as-Int-Rep where
 
     𝑭isWFF : WFF 𝑭
     𝑭isWFF = any-just tt
+    
+    𝑻is𝑻 : (isWFF : WFF 𝑻) → toTruthValue {𝑻} isWFF ≡ true
+    𝑻is𝑻 _ = refl
 
-    𝑻is𝑻 : toTruthValue {𝑻} 𝑻isWFF ≡ true
-    𝑻is𝑻 = refl
-
-    𝑭is𝑭 : toTruthValue {𝑭} 𝑭isWFF ≡ false
-    𝑭is𝑭 = refl
+    𝑭is𝑭 : (isWFF : WFF 𝑭) → toTruthValue {𝑭} isWFF ≡ false
+    𝑭is𝑭 _ = refl
 
     ⓪ : Val
     ⓪ = (inj₁ (pos 0))

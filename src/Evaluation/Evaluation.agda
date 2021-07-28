@@ -17,19 +17,19 @@ open import Data.Unit using ( ⊤ ; tt )
 
 
 -- Project imports
-open import Representation.Data using (Data-Implementation )
-open import Representation.State using (S-Representation)
+open import Data using (Data-Implementation )
+open import State using (State-Implementation)
 open import Misc
 
 
-module Mini-C.Evaluation (𝔡 : Data-Implementation )
-  (sRep : S-Representation 𝔡 ) where
+module Evaluation.Evaluation (𝔡 : Data-Implementation )
+  (𝔖 : State-Implementation 𝔡 ) where
 
   open Data-Implementation 𝔡
-  open S-Representation sRep
+  open State-Implementation 𝔖
 
-  open import Mini-C.Expressions 𝔡 sRep
-  open import Mini-C.Lang 𝔡 sRep
+  open import Language.Expressions 𝔡 𝔖
+  open import Language.Mini-Imp 𝔡 𝔖
 
   evalAssi : Id → Exp → S → Maybe S
   evalAssi id exp s =  map (λ v → updateState id v s) (evalExp exp s) 

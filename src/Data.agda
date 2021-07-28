@@ -3,7 +3,7 @@
 
 open import Misc
 
-module Representation.Data where
+module Data where
 
   open import Relation.Binary.PropositionalEquality using ( _≡_ ; refl ; sym ; cong ; inspect ; [_] ; subst )
   open import Relation.Binary using (Decidable)
@@ -29,9 +29,16 @@ module Representation.Data where
     field
       Id        : Set
       Val       : Set
+
+      -- Identifiers for use in the
+      -- specification of programs
       𝔁         : Id
       𝔂         : Id
       𝔃         : Id
+      𝑿         : Id
+      𝒀         : Id
+      𝒁         : Id
+      
       -- Truth constants
       𝑻         : Maybe Val
       𝑭         : Maybe Val
@@ -44,18 +51,22 @@ module Representation.Data where
       -- an associated truth value
       toTruthValue  : {v : Maybe Val} → WFF v → Bool
 
-      𝑻is𝑻 : toTruthValue {𝑻} 𝑻isWFF ≡ true
-      𝑭is𝑭 : toTruthValue {𝑭} 𝑭isWFF ≡ false
+      𝑻is𝑻 : (isWFF : WFF 𝑻) → toTruthValue {𝑻} isWFF ≡ true
+      𝑭is𝑭 : (isWFF : WFF 𝑭) → toTruthValue {𝑭} isWFF ≡ false
 
-
-      -- More constants
-      -- (perhaps unnecessary)
+      -- Constant Values
       ⓪        : Val
-      ➊        : Val
-      ➋        : Val
-      ➌        : Val
-
-      -- Truisms
+      ①        : Val
+      ②        : Val
+      ③        : Val
+      ④        : Val
+      ⑤        : Val
+      ⑥        : Val
+      ⑦        : Val
+      ⑧        : Val
+      ⑨        : Val
+ 
+      -- Truisms -- maybe not needed?
       𝔁≢𝔂       : 𝔁 ≡ 𝔂 → ⊥
       𝔁≢𝔃       : 𝔁 ≡ 𝔃 → ⊥
       𝔂≢𝔃       : 𝔂 ≡ 𝔃 → ⊥
@@ -125,9 +136,10 @@ module Representation.Data where
       _/𝓿_      : 𝕍 → 𝕍 → 𝕍
 
       -- unary operations
-      ¬𝓿        : 𝕍 →  𝕍
-      ++𝓿       : 𝕍 →  𝕍
-      ─-𝓿       : 𝕍 →  𝕍
+      ¬𝓿        : 𝕍 → 𝕍
+      ++𝓿       : 𝕍 → 𝕍
+      ─-𝓿       : 𝕍 → 𝕍
+      ──𝓿       : 𝕍 → 𝕍
       --------------------------------------------------------
       -- Operation predicates
       
@@ -151,6 +163,7 @@ module Representation.Data where
       ¬𝓿₁  :  OP₁ (¬𝓿)
       ++𝓿₁ :  OP₁ (++𝓿)
       ─-𝓿₁ :  OP₁ (─-𝓿)
+      ──𝓿₁ :  OP₁ (──𝓿)
 
 
       wffₒᵤₜ⇒wffᵢₙ : ∀ {∙} x (α : OP₂ ∙ ) y → WFF (∙ x y)

@@ -5,19 +5,19 @@ import Relation.Binary.PropositionalEquality as Eq
 open Eq using ( _≡_ )
 open import Data.Sum
 open import Data.Empty
-open import Data.Bool
+open import Data.Bool hiding (_∧_)
 open import Relation.Binary
 open import Relation.Nullary using ( yes ; no )
 open import Relation.Nullary.Decidable using ( map′)
 
-open import Representation.Data using (Data-Implementation)
-open import Representation.State using (S-Representation)
+open import Data using (Data-Implementation)
+open import State using (State-Implementation)
 
-module Mini-C.Expressions ( 𝔡 : Data-Implementation )
-  (sRep : S-Representation 𝔡 ) where
+module Language.Expressions ( 𝔡 : Data-Implementation )
+  (sRep : State-Implementation 𝔡 ) where
 
   open Data-Implementation 𝔡
-  open S-Representation sRep
+  open State-Implementation sRep
 
   open import List-Patterns
   open import Data.Maybe using (Maybe ; nothing ; just )
@@ -49,26 +49,27 @@ module Mini-C.Expressions ( 𝔡 : Data-Implementation )
 
   -- :𝔹 -> binary output (i.e. |x ∙ y| ⊆ Bool )
   data BinOp : Set where
-    &&   : BinOp
-    ||   : BinOp
-    ==   : BinOp
-    ≤    : BinOp
-    <    : BinOp
-    ≥    : BinOp
-    >    : BinOp
-    +    : BinOp
-    -    : BinOp
-    *    : BinOp
-    /    : BinOp
-    %    : BinOp
+    &&ₒ   : BinOp
+    ||ₒ   : BinOp
+    ==ₒ   : BinOp
+    ≤ₒ    : BinOp
+    <ₒ    : BinOp
+    ≥ₒ    : BinOp
+    >ₒ    : BinOp
+    +ₒ    : BinOp
+    -ₒ    : BinOp
+    *ₒ    : BinOp
+    /ₒ    : BinOp
+    %ₒ    : BinOp
 
   -- Unary Operators ------------------------
   
   data UnOp : Set where
-    ++   : UnOp
-    ─-   : UnOp
-    ¬ᵇ   : UnOp
-    
+    ++ₒ   : UnOp
+    ─-ₒ   : UnOp
+    ¬ₒ    : UnOp
+    ──ₒ   : UnOp
+
   -------------------------------------------------
   -- Definition of Expressions
 
@@ -91,52 +92,84 @@ module Mini-C.Expressions ( 𝔡 : Data-Implementation )
   -- Const and var below are to simplify hard coding expressions within agda
   -- e.g.    (op₂ (𝑣𝑎𝑟 𝔁) ( == :𝔹 ) (𝑐𝑜𝑛𝑠𝑡 ➋)) : Exp
   pattern 𝑐𝑜𝑛𝑠𝑡 n = term (Const n)
-  pattern 𝑣𝑎𝑟 i = term (Var i)
+  -- pattern 𝑣𝑎𝑟 i = term (Var i)
+  pattern 𝑣𝑎𝑙 i = term (Var i)
+  infix 40 𝑐𝑜𝑛𝑠𝑡
+  infix 40 𝑣𝑎𝑙
 
 
-  ∀ₛ : Exp
-  ∀ₛ = term 𝒕
+  𝑇 : Exp
+  𝑇 = term 𝒕
 
-  ∅ₛ : Exp
-  ∅ₛ = term 𝒇
+  𝐹 : Exp
+  𝐹 = term 𝒇
+
+  _∧_ : Exp → Exp → Exp
+  P ∧ Q = op₂ P &&ₒ Q
+
+  𝑛𝑜𝑡 : Exp → Exp
+  𝑛𝑜𝑡 = op₁ ¬ₒ
+  infix 40 𝑛𝑜𝑡
+
+  _≥_ : Exp → Exp → Exp
+  _≥_ l r = op₂ l ≥ₒ r
+  infix 36 _≥_
+
+  _>_ : Exp → Exp → Exp
+  _>_ l r = op₂ l >ₒ r
+  infix 36 _>_
+
+  _-_ : Exp → Exp → Exp
+  _-_ l r = op₂ l -ₒ r
+  infix 36 _-_
+
+  ── : Exp → Exp
+  ── = op₁ ──ₒ
+
+  _==_ : Exp → Exp → Exp
+  _==_ l r = op₂ l ==ₒ r
+  infix 36 _==_
+
 
   getOp₁ : UnOp → Maybe Val → Maybe Val
-  getOp₁ ¬ᵇ  = ¬𝓿
-  getOp₁ ++  = ++𝓿
-  getOp₁ ─-  = ─-𝓿
+  getOp₁ ¬ₒ  = ¬𝓿
+  getOp₁ ++ₒ  = ++𝓿
+  getOp₁ ─-ₒ  = ─-𝓿
+  getOp₁ ──ₒ  = ──𝓿
 
   getOp₂ : BinOp → Maybe Val → Maybe Val → Maybe Val
-  getOp₂ +   = _+𝓿_
-  getOp₂ -   = _-𝓿_
-  getOp₂ *   = _*𝓿_
-  getOp₂ /   = _/𝓿_
-  getOp₂ %   = _%𝓿_
-  getOp₂ ≤   = _≤𝓿_
-  getOp₂ <   = _<𝓿_
-  getOp₂ ≥   = _≥𝓿_
-  getOp₂ >   = _>𝓿_
-  getOp₂ ==  = _==𝓿_
-  getOp₂ &&  = _&&𝓿_
-  getOp₂ ||  = _||𝓿_
+  getOp₂ +ₒ   = _+𝓿_
+  getOp₂ -ₒ   = _-𝓿_
+  getOp₂ *ₒ   = _*𝓿_
+  getOp₂ /ₒ   = _/𝓿_
+  getOp₂ %ₒ   = _%𝓿_
+  getOp₂ ≤ₒ   = _≤𝓿_
+  getOp₂ <ₒ   = _<𝓿_
+  getOp₂ ≥ₒ   = _≥𝓿_
+  getOp₂ >ₒ   = _>𝓿_
+  getOp₂ ==ₒ  = _==𝓿_
+  getOp₂ &&ₒ  = _&&𝓿_
+  getOp₂ ||ₒ  = _||𝓿_
 
   _isAry₁ : ∀ ∙ → (OP₁ (getOp₁ ∙))
-  ¬ᵇ isAry₁ = ¬𝓿₁
-  ++ isAry₁ = ++𝓿₁
-  ─- isAry₁ = ─-𝓿₁
+  ¬ₒ  isAry₁ = ¬𝓿₁
+  ++ₒ  isAry₁ = ++𝓿₁
+  ─-ₒ  isAry₁ = ─-𝓿₁
+  ──ₒ isAry₁ = ──𝓿₁
 
   _isAry₂ : ∀ ∙ → (OP₂ (getOp₂ ∙))
-  +  isAry₂ = +𝓿₂
-  -  isAry₂ = -𝓿₂
-  *  isAry₂ = *𝓿₂
-  /  isAry₂ = /𝓿₂
-  %  isAry₂ = %𝓿₂
-  && isAry₂ = &&𝓿₂
-  || isAry₂ = ||𝓿₂
-  == isAry₂ = ==𝓿₂
-  ≤  isAry₂ = ≤𝓿₂
-  <  isAry₂ = <𝓿₂
-  ≥  isAry₂ = ≥𝓿₂
-  >  isAry₂ = >𝓿₂
+  +ₒ  isAry₂ = +𝓿₂
+  -ₒ  isAry₂ = -𝓿₂
+  *ₒ  isAry₂ = *𝓿₂
+  /ₒ  isAry₂ = /𝓿₂
+  %ₒ  isAry₂ = %𝓿₂
+  &&ₒ isAry₂ = &&𝓿₂
+  ||ₒ isAry₂ = ||𝓿₂
+  ==ₒ isAry₂ = ==𝓿₂
+  ≤ₒ  isAry₂ = ≤𝓿₂
+  <ₒ  isAry₂ = <𝓿₂
+  ≥ₒ  isAry₂ = ≥𝓿₂
+  >ₒ  isAry₂ = >𝓿₂
 
   -------------------------------------------------
   -- Evaluation of Expressions (Decidable)

@@ -18,11 +18,11 @@ open import Data.Empty
 
 
 -- Local imports
-open import Representation.Data using (Data-Implementation)
+open import Data using (Data-Implementation)
 open import List-Patterns
 
 
-module State-List-Rep ( 𝔡 : Data-Implementation) where
+module Representations.State-List-Rep ( 𝔡 : Data-Implementation) where
 
   open Data-Implementation 𝔡
 
