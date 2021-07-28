@@ -25,6 +25,8 @@ module Representation.State (dRep : D-Representation ) where
       dropValue      : S → Id → S
       hasVarVal      : Id → Val → S → Set
       updateGet      : ∀ i v s  → getVarVal i (updateState i v s) ≡ just v
+      ignoreTop      : ∀ i x v  → ¬ i ≡ x → (s : S) →
+                       getVarVal x (updateState i v s) ≡ getVarVal x s
       irrelUpdate    : ∀ i x v y → ¬ i ≡ x → (s : S) →
                        getVarVal x (updateState i v s) ≡ y → getVarVal x s ≡ y
       nothingRec     : ∀ x i v s → getVarVal x (updateState i v s) ≡ nothing
@@ -37,6 +39,11 @@ module Representation.State (dRep : D-Representation ) where
                        → (hasVarVal x xval s)
       updateState¬●  : (i : Id) → (f : Val) → (s : S )
                        → ( updateState i f s ≡ ● ) → ⊥
+
+    
+    getVarValM : Id → Maybe S → Maybe Val
+    getVarValM i nothing = nothing
+    getVarValM i (just s) = getVarVal i s
 
 
   import State-List-Rep dRep as List-Rep'

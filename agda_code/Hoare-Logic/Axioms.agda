@@ -21,7 +21,9 @@ module Hoare-Logic.Axioms (dRep : D-Representation )
   open import Assertions.Props dRep sRep
 
   open import Mini-C.Lang dRep sRep
+  open import Mini-C.Evaluation dRep sRep
 
+  open import Hoare-Logic.Semantics dRep sRep
   
   private sub-helpᶻ : ∀ l r v i α → subℤExp v i  (⇉ᶻ l α r) ≡ (⇉ᶻ (subℤExp v i l) α (subℤExp v i r))
   sub-helpᶻ l r v i +ᶻ = refl
@@ -51,7 +53,7 @@ module Hoare-Logic.Axioms (dRep : D-Representation )
   subRecᵇ : ∀ {i} {v} {s} p → getVarVal i s ≡ just v → eval𝔹Exp (sub v i p) s ≡ eval𝔹Exp p s
   subRecᵇ {i} {v} (ᶻ⇉ᵇ l α r) q rewrite sub-helpᶻᵇ l r v i α | subRecᶻ l q | subRecᶻ r q = refl
   subRecᵇ {i} {v} (⇉ᵇ  l α r) q rewrite sub-helpᵇ l r v i α | subRecᵇ l q | subRecᵇ r q = refl
-  subRecᵇ {i} {v} (⇾ᵇ ! p) q rewrite subRecᵇ p q = refl
+  subRecᵇ {i} {v} (⇾ᵇ ¬ᵇ p) q rewrite subRecᵇ p q = refl
   subRecᵇ {i} {v} 𝒕 q = refl
   subRecᵇ {i} {v} 𝒇 q = refl
 
@@ -65,20 +67,34 @@ module Hoare-Logic.Axioms (dRep : D-Representation )
   s⇔u : ∀ i v s p → eval𝔹Exp p (updateState i v s) ≡ eval𝔹Exp (sub v i p) s
   s⇔u i v s (ᶻ⇉ᵇ l α r) rewrite sub-helpᶻᵇ l r v i α | s⇔ᶻu i v s l | s⇔ᶻu i v s r = refl
   s⇔u i v s (⇉ᵇ l α r) rewrite sub-helpᵇ l r v i α | s⇔u i v s l | s⇔u i v s r = refl
-  s⇔u i v s (⇾ᵇ ! p) rewrite s⇔u i v s p = refl
+  s⇔u i v s (⇾ᵇ ¬ᵇ p) rewrite s⇔u i v s p = refl
   s⇔u i v s 𝒕 = refl
   s⇔u i v s 𝒇 = refl
 
+  vExp : Val → Exp
+  vExp v = ℤ: (Const v)
+
+  {-
+  axiomOfAssignment : ∀ {i} {v} {e} (p  :  𝑃) → ( a :  i := e )
+                        → ( ( s : S ) →  evalExp e s ≡ (just v))
+                        → ⟪ (sub v i p) ⟫ ( 𝑎𝑠𝑠𝑖꞉ a ) ⟪ p ⟫
+  axiomOfAssignment {i} {v} {e} p (.i ꞉= .e) pr s pre s' eval =  {!!}
+  -}                          
+ 
+  axiomOfAssignment : ∀ {i} {v}  (p  :  𝑃) → ( a :  i := (vExp v) )
+                        → ⟪ (sub v i p) ⟫ ( 𝑎𝑠𝑠𝑖꞉ a ) ⟪ p ⟫
+  axiomOfAssignment {i} {v} p (.i ꞉= .(ℤ: (Const v))) s pre s' eval = {!!}
+ 
 
 
+
+{-
   -- Axioms
-
-
   axiom-of-assignment : ∀ {i} {v} {p} {s s'} {e}
-                        → (Assert s ⟹ (sub v i p))
+                        → ((sub v i p) ← s)
                         -- Proof that assignment terminates
                         → (i := e |evalExp= v USING s GIVES s') 
-                        → (Assert s' ⟹ p) 
+                        → ( p ← s' ) 
   axiom-of-assignment {i} {v} {p} {s} {.(updateState i v s)}
                           (holdsBecause eval→𝑻)
                           ((.i :=' _ w/ .s andPExp) x)
@@ -87,44 +103,50 @@ module Hoare-Logic.Axioms (dRep : D-Representation )
 
 
 
+   -- R⊃S → P{Q}R → P{Q}S
+  
+   -- {Q} S {R}
+
+  
+
 
   -- Not sure about these, probs need to have Hoare triple (i.e.  ⊢P{Q}R ) for these to make sense 
 
   rule-of-consequence1 : ∀ {i} {v} {p q r} {s s'} {e}
 
-                         → ((Assert s' ⟹ q) → (Assert s' ⟹ r))
+                         → ((Assert q ∵ s') → (Assert r ∵ s' ))          --       R ⊃ S
                          
-                         → (Assert s ⟹ p)
+                         → (Assert p ∵ s')                                --        P
                          
                          -- Proof that program terminates
                          -- TODO: All program kinds need to go here, not just
                          -- assignment (i.e. while, block, ifelse etc.)
-                         → (i := e |evalExp= v USING s GIVES s')
+                         → (i := e |evalExp= v USING s GIVES s')                  -- {Q}
 
-                         → (Assert s' ⟹ q)
+                         → (Assert q ∵ s')                                    -- R
 
-                         → (Assert s' ⟹ r)
+                         → (Assert r ∵ s')
   rule-of-consequence1 {i} {v} {p} {q} {r} {s} {s'} q⊃r a prog b = q⊃r b
 
 
 
   rule-of-consequence2 : ∀ {i} {v} {p q r} {s s'} {e}
 
-                         → ((Assert s ⟹ p) → (Assert s ⟹ r))
+                         → ((Assert p ∵ s) → (Assert r ∵ s' ))
                          
-                         → (Assert s ⟹ p)
+                         → (Assert p ∵ s)
                          
                          -- Proof that program terminates
                          -- TODO: All program kinds need to go here, not just
                          -- assignment (i.e. while, block, ifelse etc.)
                          → (i := e |evalExp= v USING s GIVES s')
 
-                         → (Assert s' ⟹ q)
+                         → (Assert q ∵ s')
 
-                         → (Assert s ⟹ r)
-  rule-of-consequence2 {i} {v} {p} {q} {r} {s} {s'} q⊃r a prog b = q⊃r a
+                         → (Assert r ∵ s)
+  rule-of-consequence2 {i} {v} {p} {q} {r} {s} {s'} q⊃r a prog b = {!!}
 
-
+-}
 
 
 

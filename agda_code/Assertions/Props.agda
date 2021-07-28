@@ -27,12 +27,18 @@ module Assertions.Props (dRep : D-Representation )
   -- i.e. `(x < 3) || (y > 6)` is a proposition but `(x + 3)` is not
   -- even though both are valid expressions in the Mini-C language
   -- as both `x := (x < 3)` and `x := (x + 4)` are valid assignment ops
-  P = 𝔹Exp
+  𝑃 = 𝔹Exp
 
   -- Backwards epsilon notation for 'such that' from Peano
-  data Assert_⟹_ :  S → P → Set where
-    holdsBecause : ∀ {s} {p} → eval𝔹Exp p s ≡ just 𝑻
-                      →  Assert s ⟹ p
+  Assert :  𝑃 → S → Set
+  Assert p s = eval𝔹Exp p s ≡ just 𝑻
+
+
+  -- Alternative syntax
+  _←_ : 𝑃 → S → Set
+  p ← s = Assert p s 
+
+  --    x :=  T
 
   -- substitute Value for Identifier in Integer expression
   subℤExp : Val → Id → ℤExp → ℤExp
@@ -47,7 +53,7 @@ module Assertions.Props (dRep : D-Representation )
   ... | no  _ = (Var x)
 
   -- substitute Value for Identifier in Proposition
-  sub : Val → Id → P → P
+  sub : Val → Id → 𝑃 → 𝑃
   sub v i (ᶻ⇉ᵇ l ≤ r)  =  (ᶻ⇉ᵇ ( subℤExp v i l ) ≤  ( subℤExp v i r ))
   sub v i (ᶻ⇉ᵇ l < r)  =  (ᶻ⇉ᵇ ( subℤExp v i l ) <  ( subℤExp v i r ))
   sub v i (ᶻ⇉ᵇ l == r) =  (ᶻ⇉ᵇ ( subℤExp v i l ) == ( subℤExp v i r ))

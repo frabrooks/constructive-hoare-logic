@@ -13,6 +13,7 @@ module Representation.Data where
   --open import Data.Product using ()
   open import Data.Maybe
   open import Level
+  open import Data.Empty using ( ⊥ )
 
   import Data.Integer as Int -- using (ℤ ; pose ; negsuc )
   import Data.Nat as Nat  -- renaming (_+_ to _⊕_ ; _*_ to _⊛_ ) using (ℕ; zero; suc; _∸_; _≤_; pred ; _≟_ ; _≤?_)
@@ -23,6 +24,16 @@ module Representation.Data where
     field
       Id        : Set
       Val       : Set
+      𝔁         : Id
+      𝔂         : Id
+      𝔃         : Id
+      𝔁≢𝔂       : 𝔁 ≡ 𝔂 → ⊥
+      𝔁≢𝔃       : 𝔁 ≡ 𝔃 → ⊥
+      𝔂≢𝔃       : 𝔂 ≡ 𝔃 → ⊥
+      ⓪        : Val
+      ➊        : Val
+      ➋        : Val
+      ➌        : Val
       𝑻         : Val
       𝑭         : Val
       _?id=_    : Decidable {A = Id} _≡_
@@ -55,8 +66,25 @@ module Representation.Data where
     Id  = Nat.ℕ
     Val = Int.ℤ
 
-    𝑻 = (pos 1)
-    𝑭 = (pos 0)
+    𝔁 = 0
+    𝔂 = 1
+    𝔃 = 2
+
+    𝔁≢𝔂 : 𝔁 ≡ 𝔂 → ⊥
+    𝔁≢𝔂 ()
+    𝔁≢𝔃 : 𝔁 ≡ 𝔃 → ⊥
+    𝔁≢𝔃 ()
+    𝔂≢𝔃 : 𝔂 ≡ 𝔃 → ⊥
+    𝔂≢𝔃 ()
+
+    𝑻 = pos 1
+    𝑭 = pos 0
+
+    ⓪ = pos 0
+    ➊ = pos 1
+    ➋ = pos 2
+    ➌ = pos 3
+    
 
     _?id=_ : Decidable {A = Id} _≡_ 
     _?id=_ = Nat._≟_

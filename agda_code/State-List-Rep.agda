@@ -80,6 +80,27 @@ module State-List-Rep (dRep : D-Representation) where
   updateGet i v ( (x , w )  ∷ s) | no ¬p | yes q = ⊥-elim (¬p (sym q))
   updateGet i v ( (x , w )  ∷ s) | no ¬p | no ¬q = updateGet i v s
 
+  ignoreTop : ∀ i x v  → ¬ i ≡ x → (s : S) → getVarVal x (updateState i v s) ≡ getVarVal x s
+  ignoreTop i x v ≢ []       with x ?id= i
+  ... | yes p = ⊥-elim (≢ (sym p))
+  ... | no  _ = refl
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) with x ?id= i
+
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | yes p = ⊥-elim (≢ (sym p))
+  
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p with x ?id= i' | i' ?id= i
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p | yes q | yes r rewrite q | r = ⊥-elim (≢ refl)
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p | no ¬q | yes r rewrite r  with x ?id= i
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p | no ¬q | yes r | yes k = ⊥-elim (≢ (sym k))
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p | no ¬q | yes r | no ¬k = refl
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p | yes q | no ¬r rewrite q with i' ?id= i'
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p | yes q | no ¬r | yes t = refl
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p | yes q | no ¬r | no ¬t = ⊥-elim (¬t refl)
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p | no ¬q | no ¬r with x ?id= i
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p | no ¬q | no ¬r | yes j = ⊥-elim (¬p j)
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p | no ¬q | no ¬r | no ¬j with x ?id= i'
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p | no ¬q | no ¬r | no ¬j | yes w = ⊥-elim (¬q w)
+  ignoreTop i x v ≢ ( (i' , v')  ∷ s) | no ¬p | no ¬q | no ¬r | no ¬j | no ¬w = ignoreTop i x v ≢ s
 
   irrelUpdate : ∀ i x v y → ¬ i ≡ x → (s : S) →  getVarVal x (updateState i v s) ≡ y → getVarVal x s ≡ y
   irrelUpdate i x v y n [] pr with x ?id= i

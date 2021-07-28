@@ -47,7 +47,7 @@ data 𝔹→𝔹→𝔹 : Set where
 
 
 data 𝔹→𝔹 : Set where
-  !    : 𝔹→𝔹
+  ¬ᵇ    : 𝔹→𝔹
 
 data 𝔹Exp : Set where  
   binary-ℤ-op:𝔹 : ℤExp → ℤ→ℤ→𝔹 → ℤExp → 𝔹Exp
@@ -111,10 +111,18 @@ evalℤExp (Var x) s = getVarVal x s
 eval𝔹Exp : 𝔹Exp → S → Maybe Val
 eval𝔹Exp (binary-ℤ-op:𝔹 l α r) s = let _∙_ = getOpᶻᵇ α in evalℤExp l s ∙ evalℤExp r s
 eval𝔹Exp (binary-𝔹-op:𝔹 l α r) s = let _∙_ = getOpᵇ α in eval𝔹Exp l s ∙ eval𝔹Exp r s
-eval𝔹Exp (unary-𝔹-op:𝔹 ! e) s = !𝓿 (eval𝔹Exp e s)
+eval𝔹Exp (unary-𝔹-op:𝔹 ¬ᵇ e) s = !𝓿 (eval𝔹Exp e s)
 eval𝔹Exp 𝒕 s = just 𝑻
 eval𝔹Exp 𝒇 s = just 𝑭
 
+evalExp' : Exp → S → Maybe Val
+evalExp' (𝔹: e) s = eval𝔹Exp e s
+evalExp' (ℤ: e) s = evalℤExp e s
+
+
 evalExp : Exp → S → Maybe Val
 evalExp (𝔹: e) s = eval𝔹Exp e s
-evalExp (ℤ: e) s = evalℤExp e s
+evalExp (ℤ: e) s = evalℤExp e s 
+
+
+
