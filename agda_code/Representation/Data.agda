@@ -1,6 +1,8 @@
 
 -- Abstract out the representation of data (i.e. the Values and Variables)
 
+open import Misc
+
 module Representation.Data where
 
   open import Relation.Binary.PropositionalEquality using ( _≡_ ; refl ; sym ; cong ; inspect ; [_] ; subst )
@@ -23,7 +25,6 @@ module Representation.Data where
   
   record Value-Implementation : Set₁ where
 
-    WFF = Is-just
 
     field
       Id        : Set
@@ -43,8 +44,8 @@ module Representation.Data where
       -- an associated truth value
       toTruthValue  : {v : Maybe Val} → WFF v → Bool
 
-      𝑻is𝑻 : ( isWFF : WFF 𝑻 ) → toTruthValue {𝑻} isWFF ≡ true
-      𝑭is𝑭 : ( isWFF : WFF 𝑭 ) → toTruthValue {𝑭} isWFF ≡ false
+      𝑻is𝑻 : toTruthValue {𝑻} 𝑻isWFF ≡ true
+      𝑭is𝑭 : toTruthValue {𝑭} 𝑭isWFF ≡ false
 
 
       -- More constants
@@ -88,10 +89,14 @@ module Representation.Data where
   
       _?id=_    : Decidable {A = Id} _≡_
       --_?val=_   : Val → Val → Bool
-      
+    
     ⊨ : Maybe Val → Set
     ⊨ x = Σ (WFF x) (T ∘ toTruthValue)
 
+    ⊭ : Maybe Val → Set
+    ⊭ x = Σ (WFF x) (T ∘ not ∘ toTruthValue)
+
+  
 
   record Operation-Implementation (𝔡 : Value-Implementation) : Set₁ where
       
@@ -169,61 +174,31 @@ module Representation.Data where
       -𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 -𝓿₂
       *𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 *𝓿₂
       
-      :𝑤𝑓𝑓₂ : ∀ {∙} {α : OP₂ ∙} {x} {y} → (𝑤𝑓𝑓 : OP₂:𝑤𝑓𝑓 α)
+      :𝑤𝑓𝑓₂ : ∀ {∙} {x} {y} {α : OP₂ ∙} → (𝑤𝑓𝑓 : OP₂:𝑤𝑓𝑓 α)
               → WFF x → WFF y → WFF (∙ x y)
 
-      :𝑤𝑓𝑓₁ : ∀ {x} {∙} (α : OP₁ ∙) → WFF x → WFF (∙ x)
-
-      {-
-      :𝔹₁⇒Prop : ∀ {∙} {∙is₁ : OP₁ ∙} ( ∙is:𝔹 : OP₁:𝔹 ∙is₁ )
-                 x → WFF (∙ x) → isProposition (∙ x) 
-
-      :𝔹₂⇒Prop : ∀ {∙} {∙is₂ : OP₂ ∙} (∙is:𝔹 : OP₂:𝔹 ∙is₂ )
-                 x y → WFF (∙ x y ) → isProposition (∙ x y)
-      -}
-
-      {-
-      -- :𝕍 = Integer/Value operation/output
-      -- i.e. inputs ≢ nothing ⇒ output ≃ Val(:𝕍)
-      OP₂:𝕍    : ∀ {∙} → OP₂ ∙ → Set
-      +𝓿:𝕍  : OP₂:𝕍 +𝓿₂
-      -𝓿:𝕍  : OP₂:𝕍 -𝓿₂
-      *𝓿:𝕍  : OP₂:𝕍 *𝓿₂
-      %𝓿:𝕍  : OP₂:𝕍 %𝓿₂
-      /𝓿:𝕍  : OP₂:𝕍 /𝓿₂
-
-      OP₁:𝕍    : ∀ {∙} → OP₁ ∙ → Set
-      ++𝓿:𝕍  : OP₁:𝕍 ++𝓿₁
-      ─-𝓿:𝕍  : OP₁:𝕍 ─-𝓿₁
-      -}
-
-      {-
-      :𝕍₁⇒¬Prop : ∀ {∙} {∙is₁ : OP₁ ∙} ( ∙is:𝔹 : OP₁:𝕍 ∙is₁ )
-                    x → isProposition (∙ x) → ⊥      
-
-      :𝕍₂⇒¬Prop : ∀ {∙} {∙is₂ : OP₂ ∙} (∙is:𝔹 : OP₂:𝕍 ∙is₂ )
-                    x y → isProposition (∙ x y) → ⊥
-      -}
+      :𝑤𝑓𝑓₁ : ∀ {∙} {x} (α : OP₁ ∙) → WFF x → WFF (∙ x)
 
       DeMorgan₁ : ∀ x y → ¬𝓿 (x ||𝓿 y) ≡ (¬𝓿 x) &&𝓿 (¬𝓿 y)
 
       DeMorgan₂ : ∀ x y → ¬𝓿 (x &&𝓿 y) ≡ (¬𝓿 x) ||𝓿 (¬𝓿 y)
-
       
       ConjunctionElim₁ : ∀ x y → ⊨ (x &&𝓿 y) → ⊨ x
       ConjunctionElim₂ : ∀ x y → ⊨ (x &&𝓿 y) → ⊨ y
 
       ConjunctionIntro : ∀ x y → ⊨ x → ⊨ y → ⊨ (x &&𝓿 y)
 
+      NegationIntro : ∀ v → ⊭ v → ⊨ (¬𝓿 v)
+      NegationElim  : ∀ v → ⊭ (¬𝓿 v) → ⊨ v
+
 
   record Data-Implementation : Set₁ where
     field
       𝔙 : Value-Implementation
       𝒪 : Operation-Implementation 𝔙
-
+      
     open Value-Implementation 𝔙 public
     open Operation-Implementation 𝒪 public
-
 
 
 

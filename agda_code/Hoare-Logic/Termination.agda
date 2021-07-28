@@ -1,18 +1,21 @@
--- {-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --allow-unsolved-metas #-}
 
 -- Lib imports
 open import Relation.Binary.PropositionalEquality using ( _≡_ ; refl ; sym ; inspect ; [_] ; cong ; subst )
 open import Data.Maybe using ( Maybe ; just ; nothing ; _>>=_ ; Is-just ; to-witness ; map ; maybe )
 open import Data.Maybe.Relation.Unary.Any using (Any)
 open import Data.Product using (Σ ; Σ-syntax ; _×_  ; _,_  ; proj₁ ; proj₂ )
-open import Data.Nat using (ℕ ; suc ; zero ; _≤_  ) renaming (_+_ to _+ᴺ_ )
+open import Data.Nat using (ℕ ; suc ; zero ; _≤″_  ) renaming (_+_ to _+ᴺ_ ; less-than-or-equal to ≤with )
+open _≤″_
+open import Data.Nat.Properties using ( +-comm ; +-identityʳ )
+
 open import Data.Bool using ( true ; false )
 open import Data.Unit using ( ⊤ ; tt )
 open import Relation.Unary using (Pred)
 open import Data.Empty
-open import Function using ( _∘_  ; _∋_ )
-open import Function.Equivalence hiding (sym ; _∘_ ; map )
-
+open import Function using ( _∘_  ; _∋_ ; id )
+open import Function.Equivalence hiding (sym ; _∘_ ; map ; id )
+open import Data.Sum using (_⊎_ ; inj₁ ; inj₂)
 
 -- Project imports
 open import Representation.Data using (Data-Implementation )
@@ -33,15 +36,11 @@ module Hoare-Logic.Termination (𝔡 : Data-Implementation  )
 
   -- Proof of termination
   Terminates : C → S → Set
-  Terminates c s = Σ[ n ∈ ℕ ] ( Is-just (ssEvalwithFuel n c s ))
+  Terminates c s = Σ[ ℱ ∈ ℕ ] ( Is-just (ssEvalwithFuel ℱ c s ))
 
   -- Alternative condensed syntax
   ⌊ᵗ_⸴_ᵗ⌋ : C → S → Set
   ⌊ᵗ_⸴_ᵗ⌋ = Terminates
-
-  skipTerminates : ∀ s → Terminates (𝑠𝑘𝑖𝑝 ;) s
-  skipTerminates s = 2 , Any.just tt  
-
 
   assiProg-WFF[Exp]-Terminates : ∀ i exp s
     → Is-just (evalExp exp s)
@@ -49,12 +48,32 @@ module Hoare-Logic.Termination (𝔡 : Data-Implementation  )
   assiProg-WFF[Exp]-Terminates i e s p
    = 1 , (is-JustExp→is-JustAssi {i}{e} p)
 
-  Result : ∀ {C s} → ⌊ᵗ C ⸴ s ᵗ⌋ → S
+  -- Get Result of Evaluation
+  Result : ∀ {c s} → ⌊ᵗ c ⸴ s ᵗ⌋ → S
   Result = to-witness ∘ proj₂
-
+  
   -- Alternative condensed syntax
-  ‵ : ∀ {C s} → ⌊ᵗ C ⸴ s ᵗ⌋ → S
+  ‵ : ∀ {c s} → ⌊ᵗ c ⸴ s ᵗ⌋ → S
   ‵ = Result
+
+  -- Alternative definition indexed by fuel
+  ⌊ᵗ_⸴_⸴_ᵗ⌋ : ℕ → C → S → Set
+  ⌊ᵗ ℱ ⸴ c ⸴ s ᵗ⌋ = Is-just (ssEvalwithFuel ℱ c s)
+
+  -- Get Result of Evaluation
+  Result″ = to-witness
+  
+  -- Alternative condensed syntax
+  ″ = to-witness
+
+
+  -- Simple lemmas
+
+  -- 𝑠𝑘𝑖𝑝 terminates with any amount of fuel
+  ⌊ᵗ𝑠𝑘𝑖𝑝ᵗ⌋ : ∀ {s} n → ⌊ᵗ n ⸴ 𝑠𝑘𝑖𝑝 ; ⸴ s ᵗ⌋ 
+  ⌊ᵗ𝑠𝑘𝑖𝑝ᵗ⌋ {s} zero    = Any.just tt
+  ⌊ᵗ𝑠𝑘𝑖𝑝ᵗ⌋ {s} (suc ℱ) = Any.just tt
+
 
   uniqueIJ : ∀ (x : Maybe S) → ( a b : Is-just x) → a ≡ b
   uniqueIJ .(just _) (Any.just x) (Any.just x₁) = refl
@@ -108,96 +127,6 @@ module Hoare-Logic.Termination (𝔡 : Data-Implementation  )
     with evalExp exp s
   ... | (just v) = EvaluationIsDeterministic _ (f₁ , ij₁) (f₂ , ij₂) refl refl 
 
-  {-
-  -- Not used
-  lemm-π : ∀ n b s → ssEvalwithFuel n (𝑠𝑘𝑖𝑝 ; b) s ≡ ssEvalwithFuel n b s
-  lemm-π zero b s = refl
-  lemm-π (suc n) b s = refl
-
-  -- Not used
-  lemm-ψ : ∀ ↪s₁ ↪s₂ c → c 𝔱𝔥𝔢𝔫 ↪s₁ ; (↪s₂ ;) ≡ c 𝔱𝔥𝔢𝔫 ↪s₁ ; 𝔱𝔥𝔢𝔫 ↪s₂ ;
-  lemm-ψ ↪s₁ ↪s₂ (↪s ;) = refl
-  lemm-ψ ↪s₁ ↪s₂ (↪s ; c) rewrite ψ ↪s₁ ↪s₂ c = refl
-
-  -- Not used
-  lemm-φ : ∀ ↪s c₁ c₂ → ↪s ; c₁ 𝔱𝔥𝔢𝔫 c₂ ≡ ↪s ; (c₁ 𝔱𝔥𝔢𝔫 c₂)
-  lemm-φ ↪s c₁ c₂ = refl
-
-  -- Not used
-  lemm-ι : ∀ ↪s c → ↪s ; c ≡ (↪s ;) 𝔱𝔥𝔢𝔫 c
-  lemm-ι ↪s c = refl
-  -}
-
-  𝑠𝑘𝑖𝑝Elimₗ : ∀ n b s
-    → ssEvalwithFuel n ((𝑠𝑘𝑖𝑝 ;) 𝔱𝔥𝔢𝔫 b) s ≡ ssEvalwithFuel n b s
-  𝑠𝑘𝑖𝑝Elimₗ zero _ _ = refl
-  𝑠𝑘𝑖𝑝Elimₗ (suc _) _ _ = refl
-
-  𝑠𝑘𝑖𝑝Elimᵣ : ∀ n b s
-    → ssEvalwithFuel n (b 𝔱𝔥𝔢𝔫 𝑠𝑘𝑖𝑝 ; ) s ≡ ssEvalwithFuel n b s
-  𝑠𝑘𝑖𝑝Elimᵣ zero (𝑠𝑘𝑖𝑝 ;) _ = refl
-  𝑠𝑘𝑖𝑝Elimᵣ zero ((𝔴𝔥𝔦𝔩𝔢 _ 𝒹ℴ _) ;) _ = refl
-  𝑠𝑘𝑖𝑝Elimᵣ zero ((𝔦𝔣 _ 𝔱𝔥𝔢𝔫 _ 𝔢𝔩𝔰𝔢 _) ;) s = refl
-  𝑠𝑘𝑖𝑝Elimᵣ zero ((_ := _) ;) _ = refl
-  𝑠𝑘𝑖𝑝Elimᵣ zero (𝑠𝑘𝑖𝑝 ; c) s = 𝑠𝑘𝑖𝑝Elimᵣ zero c s
-  𝑠𝑘𝑖𝑝Elimᵣ zero ((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c₁) ; _) s
-    = 𝑠𝑘𝑖𝑝Elimᵣ zero ((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c₁) ;) s
-  𝑠𝑘𝑖𝑝Elimᵣ zero ((𝔦𝔣 exp 𝔱𝔥𝔢𝔫 c₁ 𝔢𝔩𝔰𝔢 c₂) ; c₃) s
-    = 𝑠𝑘𝑖𝑝Elimᵣ zero ((𝔦𝔣 exp 𝔱𝔥𝔢𝔫 c₁ 𝔢𝔩𝔰𝔢 c₂) ;) s
-  𝑠𝑘𝑖𝑝Elimᵣ zero ((id := exp) ; c) s
-    = 𝑠𝑘𝑖𝑝Elimᵣ zero ((id := exp) ;) s
-  𝑠𝑘𝑖𝑝Elimᵣ (suc n) (𝑠𝑘𝑖𝑝 ;) _ = refl
-  𝑠𝑘𝑖𝑝Elimᵣ (suc n) ((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c) ;) s
-    with evalExp exp s
-  ... | nothing = refl
-  ... | f@(just _) with toTruthValue {f} (Any.just tt)
-  ... | true
-       rewrite 𝔱𝔥𝔢𝔫-comm c ((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c) ;) (𝑠𝑘𝑖𝑝 ;)
-       = 𝑠𝑘𝑖𝑝Elimᵣ n (c 𝔱𝔥𝔢𝔫 ((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c) ;)) s 
-  ... | false with n
-  ... | zero  = refl
-  ... | suc _ = refl
-  𝑠𝑘𝑖𝑝Elimᵣ (suc n) ((𝔦𝔣 exp 𝔱𝔥𝔢𝔫 c₁ 𝔢𝔩𝔰𝔢 c₂) ;) s
-    with evalExp exp s
-  ... | nothing = refl
-  ... | f@(just _) with toTruthValue {f} (Any.just tt)
-  ... | true  = 𝑠𝑘𝑖𝑝Elimᵣ n c₁ s
-  ... | false = 𝑠𝑘𝑖𝑝Elimᵣ n c₂ s
-  𝑠𝑘𝑖𝑝Elimᵣ (suc n) ((id := exp) ;) s
-    with evalExp exp s | n
-  ... | nothing  | _ = refl
-  ... | just v | zero  = refl
-  ... | just v | suc _ = refl
-  𝑠𝑘𝑖𝑝Elimᵣ (suc n) (𝑠𝑘𝑖𝑝 ; c) s = 𝑠𝑘𝑖𝑝Elimᵣ (suc n) c s
-  𝑠𝑘𝑖𝑝Elimᵣ (suc n) ((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c₁) ; c₂) s
-    with evalExp exp s
-  ... | nothing = refl
-  ... | f@(just _) with toTruthValue {f} (Any.just tt)
-  ... | true
-     rewrite  
-       𝔱𝔥𝔢𝔫-comm c₁ (𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c₁ ;) (c₂ 𝔱𝔥𝔢𝔫 (𝑠𝑘𝑖𝑝 ;))
-     | 𝔱𝔥𝔢𝔫-comm (c₁ 𝔱𝔥𝔢𝔫 (𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c₁ ;)) c₂ (𝑠𝑘𝑖𝑝 ;)
-     | 𝔱𝔥𝔢𝔫-comm  c₁ (𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c₁ ;) c₂
-     =  𝑠𝑘𝑖𝑝Elimᵣ n ((c₁ 𝔱𝔥𝔢𝔫 ((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c₁) ;)) 𝔱𝔥𝔢𝔫 c₂) s
-  ... | false = 𝑠𝑘𝑖𝑝Elimᵣ n c₂ s 
-  𝑠𝑘𝑖𝑝Elimᵣ (suc n) ((𝔦𝔣 exp 𝔱𝔥𝔢𝔫 c₁ 𝔢𝔩𝔰𝔢 c₂) ; c₃) s
-    with evalExp exp s
-  ... | nothing = refl
-  ... | f@(just _) with toTruthValue {f} (Any.just tt)
-  ... | true
-     rewrite
-       𝔱𝔥𝔢𝔫-comm c₁ c₃ (𝑠𝑘𝑖𝑝 ;)
-       = 𝑠𝑘𝑖𝑝Elimᵣ n (c₁ 𝔱𝔥𝔢𝔫 c₃) s
-  ... | false
-     rewrite
-       𝔱𝔥𝔢𝔫-comm c₂ c₃ (𝑠𝑘𝑖𝑝 ;)
-       = 𝑠𝑘𝑖𝑝Elimᵣ n (c₂ 𝔱𝔥𝔢𝔫 c₃) s
-  𝑠𝑘𝑖𝑝Elimᵣ (suc n) ((id := exp) ; c) s
-    with evalExp exp s
-  ... | nothing = refl
-  ... | (just v) = 𝑠𝑘𝑖𝑝Elimᵣ n c (updateState id v s)
-
-
   ij0⇒ijn : ∀ {c} {s} n
     → Is-just (ssEvalwithFuel zero c s)
     → Is-just (ssEvalwithFuel n c s)
@@ -246,6 +175,59 @@ module Hoare-Logic.Termination (𝔡 : Data-Implementation  )
   sucᵣ zero y = refl
   sucᵣ (suc x) y rewrite sucᵣ x y = refl
 
+{-
++-identityˡ : LeftIdentity 0 _+_
++-identityˡ _ = refl
+
++-identityʳ : RightIdentity 0 _+_
++-identityʳ zero    = refl
++-identityʳ (suc n) = cong suc (+-identityʳ n)
+
++-identity : Identity 0 _+_
++-identity = +-identityˡ , +-identityʳ
+
+-}
+
+
+  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+  -- Adding fuel still terminates
+  addFuel' : ∀ {C} {s} ℱ ℱ' → ⌊ᵗ ℱ ⸴ C ⸴ s ᵗ⌋ → ⌊ᵗ (ℱ +ᴺ ℱ') ⸴ C ⸴ s ᵗ⌋
+  ----------------------------------------------------------------
+  addFuel' {𝑠𝑘𝑖𝑝 ;}   {s} ℱ ℱ' t₁ = ⌊ᵗ𝑠𝑘𝑖𝑝ᵗ⌋ (ℱ +ᴺ ℱ')
+  addFuel' {𝑠𝑘𝑖𝑝 ; C} {s} ℱ ℱ' t₁
+           rewrite 𝑠𝑘𝑖𝑝Elimₗ (ℱ +ᴺ ℱ') C s | 𝑠𝑘𝑖𝑝Elimₗ ℱ C s
+           = addFuel' {C} {s} ℱ ℱ' t₁
+  ----------------------------------------------------------------           
+  addFuel' {(𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c) ;} {s} (suc ℱ) ℱ' t₁
+      with evalExp exp s
+  ... | f@(just _) with toTruthValue {f} (Any.just tt)
+  ... | false = Any.just tt  
+  ... | true  = addFuel' ℱ ℱ' t₁
+  addFuel' {(𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c) ; C} {s} (suc ℱ) ℱ' t₁ 
+      with evalExp exp s
+  ... | f@(just _) with toTruthValue {f} (Any.just tt)
+  ... | false = addFuel' ℱ ℱ' t₁
+  ... | true  = addFuel' ℱ ℱ' t₁
+  ---------------e-------------------------------------------------
+  addFuel' {(𝔦𝔣 exp 𝔱𝔥𝔢𝔫 c₁ 𝔢𝔩𝔰𝔢 c₂) ;} {s} (suc ℱ) ℱ' t₁
+      with evalExp exp s
+  ... | f@(just _) with toTruthValue {f} (Any.just tt)
+  ... | false = addFuel' ℱ ℱ' t₁
+  ... | true  = addFuel' ℱ ℱ' t₁
+  addFuel' {(𝔦𝔣 exp 𝔱𝔥𝔢𝔫 c₁ 𝔢𝔩𝔰𝔢 c₂) ; C} {s} (suc ℱ) ℱ' t₁
+      with evalExp exp s
+  ... | f@(just _) with toTruthValue {f} (Any.just tt)
+  ... | false = addFuel' ℱ ℱ' t₁
+  ... | true  = addFuel' ℱ ℱ' t₁  
+  ----------------------------------------------------------------  
+  addFuel' {(id := exp) ;} {s} (suc ℱ) ℱ' t₁ with evalExp exp s
+  ... | f@(just _) = t₁
+  addFuel' {(id := exp) ; C} {s} (suc ℱ) ℱ' t₁ with evalExp exp s
+  ... | f@(just _) = addFuel' ℱ ℱ' t₁  
+
+
+
+{-
   -- Adding fuel still terminates
   addFuel : ∀ {C} {s} fuel → ( t : ⌊ᵗ C ⸴ s ᵗ⌋ ) → Σ ⌊ᵗ C ⸴ s ᵗ⌋ (λ t' → proj₁ t' ≡ fuel +ᴺ (proj₁ t))
   addFuel {C} {s} zero t = ((zero +ᴺ (proj₁ t) ) , proj₂ t) , refl
@@ -302,4 +284,147 @@ module Hoare-Logic.Termination (𝔡 : Data-Implementation  )
     go with evalExp exp s
     ... | just v rewrite sucᵣ fuel fuel₁ with addFuel {c} fuel (fuel₁ , snd)
     ... | (.(fuel +ᴺ fuel₁) , ij) , refl = ijn⇒ijsucn (fuel +ᴺ fuel₁) ij
+-}
+
+  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⌊ᵗ⌋-split' : ∀ ℱ s Q₁ Q₂ → (t₁₂ : ⌊ᵗ ℱ ⸴ Q₁ 𝔱𝔥𝔢𝔫 Q₂ ⸴ s ᵗ⌋)
+              → Σ ⌊ᵗ ℱ ⸴ Q₁ ⸴ s ᵗ⌋ (λ t₁
+              → Σ ℕ (λ ℱ'
+              → ℱ' ≤″ ℱ × Σ ⌊ᵗ ℱ' ⸴ Q₂ ⸴ ″ t₁ ᵗ⌋ (λ t₂
+              → ″ t₂ ≡ ″ t₁₂ )))
+              
+  -----------------------------------------------------------------
+  -- Base case: Q₁ = 𝑠𝑘𝑖𝑝 ;
+  ⌊ᵗ⌋-split' ℱ@0 s (𝑠𝑘𝑖𝑝 ;) Q₂ t₁₂ =
+          (Any.just tt) , ℱ , ≤with refl  , t₁₂ , refl
+  ⌊ᵗ⌋-split' ℱ@(suc _) s (𝑠𝑘𝑖𝑝 ;) Q₂ t₁₂ =
+          (Any.just tt) , ℱ , ≤with (+-comm ℱ 0) , t₁₂ , refl          
+  -- Q₁ = 𝑠𝑘𝑖𝑝 : Q₁ '
+  ⌊ᵗ⌋-split' ℱ@0       s (𝑠𝑘𝑖𝑝 ; Q₁') = ⌊ᵗ⌋-split' ℱ s Q₁'
+  ⌊ᵗ⌋-split' ℱ@(suc _) s (𝑠𝑘𝑖𝑝 ; Q₁') = ⌊ᵗ⌋-split' ℱ s Q₁'
+  
+  -----------------------------------------------------------------
+  -- Most interesting case: 𝔴𝔥𝔦𝔩𝔢 followed by blocks Q₁' 𝔱𝔥𝔢𝔫 Q₂
+  -- All other cases follow a similar recursive mechanism
+  ⌊ᵗ⌋-split' (suc ℱ) s Q₁@((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c) ; Q₁') Q₂ t₁₂ = go
+    where
+    go : Σ ⌊ᵗ suc ℱ ⸴ Q₁ ⸴ s ᵗ⌋ (λ t₁ → Σ ℕ (λ ℱ' → ℱ' ≤″ suc ℱ ×
+         Σ ⌊ᵗ ℱ' ⸴ Q₂ ⸴ ″ t₁ ᵗ⌋ (λ t₂ → ″ t₂ ≡ ″ t₁₂ )))             
+    go with evalExp exp s
+    go | f@(just _) with toTruthValue {f} (Any.just tt)
+    -- if false ---------------------------------------
+    go | f@(just _) | false with ⌊ᵗ⌋-split' ℱ s Q₁' Q₂ t₁₂
+    go | just _     | false |  t₁ , ℱ' , lt       , t₂ , Δ
+                            =  t₁ , ℱ' , suc≤″ lt , t₂ , Δ
+    -- if true ---------------------------------------- 
+    go | f@(just _) | true rewrite
+         𝔱𝔥𝔢𝔫-comm ((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c) ;) Q₁' Q₂
+       | 𝔱𝔥𝔢𝔫-comm c ((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c) ;  Q₁' ) Q₂ with
+         ⌊ᵗ⌋-split' ℱ s (c 𝔱𝔥𝔢𝔫 𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c ; Q₁') Q₂ t₁₂
+    go | f@(just _) | true |  t₁ , ℱ' , lt       , t₂ , Δ
+                           =  t₁ , ℱ' , suc≤″ lt , t₂ , Δ
+                           
+  -----------------------------------------------------------------
+  -- Q₁ = 𝔴𝔥𝔦𝔩𝔢 ;
+  ⌊ᵗ⌋-split' (suc ℱ) s Q₁@((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c) ;) Q₂ t₁₂ = go
+    where
+    go : Σ ⌊ᵗ suc ℱ ⸴ Q₁ ⸴ s ᵗ⌋ (λ t₁ → Σ ℕ (λ ℱ' → ℱ' ≤″ suc ℱ ×
+         Σ ⌊ᵗ ℱ' ⸴ Q₂ ⸴ ″ t₁ ᵗ⌋ (λ t₂ → ″ t₂ ≡ ″ t₁₂ )))             
+    go with evalExp exp s
+    go | f@(just _) with toTruthValue {f} (Any.just tt)
+    -- if false ---------------------------------------
+    go | f@(just _) | false
+       = (Any.just tt) , ℱ , ≤with (+-comm ℱ 1) , t₁₂ , refl
+    -- if true ---------------------------------------- 
+    go | f@(just _) | true  rewrite
+         𝔱𝔥𝔢𝔫-comm c ((𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c) ;) Q₂ with
+         ⌊ᵗ⌋-split' ℱ s (c 𝔱𝔥𝔢𝔫 𝔴𝔥𝔦𝔩𝔢 exp 𝒹ℴ c ;) Q₂ t₁₂
+    go | f@(just _) | true |  t₁ , ℱ' , lt       , t₂ , Δ
+                           =  t₁ , ℱ' , suc≤″ lt , t₂ , Δ
+  -----------------------------------------------------------------
+  -- Q₁ = if then else ; Q₁'
+  ⌊ᵗ⌋-split' (suc ℱ) s Q₁@((𝔦𝔣 exp 𝔱𝔥𝔢𝔫 c₁ 𝔢𝔩𝔰𝔢 c₂) ; Q₁') Q₂ t₁₂
+    = go
+    where
+    go : Σ ⌊ᵗ suc ℱ ⸴ Q₁ ⸴ s ᵗ⌋ (λ t₁ → Σ ℕ (λ ℱ' → ℱ' ≤″ suc ℱ ×
+         Σ ⌊ᵗ ℱ' ⸴ Q₂ ⸴ ″ t₁ ᵗ⌋ (λ t₂ → ″ t₂ ≡ ″ t₁₂ )))             
+    go with evalExp exp s
+    go | f@(just _) with toTruthValue {f} (Any.just tt)
+    -- if false ---------------------------------------
+    go | f@(just _) | false rewrite 𝔱𝔥𝔢𝔫-comm c₂ Q₁' Q₂
+                      with  ⌊ᵗ⌋-split' ℱ s (c₂ 𝔱𝔥𝔢𝔫 Q₁') Q₂ t₁₂
+    go | f@(just _) | false |  t₁ , ℱ' , lt       , t₂ , Δ
+                            =  t₁ , ℱ' , suc≤″ lt , t₂ , Δ
+    -- if true ---------------------------------------- 
+    go | f@(just _) | true  rewrite 𝔱𝔥𝔢𝔫-comm c₁ Q₁' Q₂
+                    with  ⌊ᵗ⌋-split' ℱ s (c₁ 𝔱𝔥𝔢𝔫 Q₁') Q₂ t₁₂
+    go | f@(just _) | true  |  t₁ , ℱ' , lt       , t₂ , Δ
+                            =  t₁ , ℱ' , suc≤″ lt , t₂ , Δ
+  -----------------------------------------------------------------
+  -- Q₁ = if then else                            
+  ⌊ᵗ⌋-split' (suc ℱ) s Q₁@((𝔦𝔣 exp 𝔱𝔥𝔢𝔫 c₁ 𝔢𝔩𝔰𝔢 c₂) ;) Q₂ t₁₂
+    = go
+    where
+    go : Σ ⌊ᵗ suc ℱ ⸴ Q₁ ⸴ s ᵗ⌋ (λ t₁ → Σ ℕ (λ ℱ' → ℱ' ≤″ suc ℱ ×
+         Σ ⌊ᵗ ℱ' ⸴ Q₂ ⸴ ″ t₁ ᵗ⌋ (λ t₂ → ″ t₂ ≡ ″ t₁₂ )))             
+    go with evalExp exp s
+    go | f@(just _) with toTruthValue {f} (Any.just tt)
+    -- if false ---------------------------------------
+    go | f@(just _) | false with ⌊ᵗ⌋-split' ℱ s c₂ Q₂ t₁₂
+    go | f@(just _) | false |  t₁ , ℱ' , lt       , t₂ , Δ
+                            =  t₁ , ℱ' , suc≤″ lt , t₂ , Δ
+    -- if true ---------------------------------------- 
+    go | f@(just _) | true  with ⌊ᵗ⌋-split' ℱ s c₁ Q₂ t₁₂
+    go | f@(just _) | true  |  t₁ , ℱ' , lt       , t₂ , Δ
+                            =  t₁ , ℱ' , suc≤″ lt , t₂ , Δ 
+  -----------------------------------------------------------------
+  -- Q₁ = x := exp ; Q₁'
+  ⌊ᵗ⌋-split' (suc ℱ) s Q₁@( id := exp  ; Q₁') Q₂ t₁₂ = go
+    where
+    go : Σ ⌊ᵗ suc ℱ ⸴ Q₁ ⸴ s ᵗ⌋ (λ t₁ → Σ ℕ (λ ℱ' → ℱ' ≤″ suc ℱ ×
+         Σ ⌊ᵗ ℱ' ⸴ Q₂ ⸴ ″ t₁ ᵗ⌋ (λ t₂ → ″ t₂ ≡ ″ t₁₂ )))             
+    go with evalExp exp s
+    go | f@(just v)
+       with ⌊ᵗ⌋-split' ℱ (updateState id v s) Q₁' Q₂ t₁₂
+    go | f@(just v) |  t₁ , ℱ' , lt       , t₂ , Δ
+                    =  t₁ , ℱ' , suc≤″ lt , t₂ , Δ     
+  ----------------------------------------------------------------- 
+  -- Q₁ = id := exp ;
+  ⌊ᵗ⌋-split' (suc ℱ) s Q₁@( id := exp ;) Q₂ t₁₂ = go
+    where
+    go : Σ ⌊ᵗ suc ℱ ⸴ Q₁ ⸴ s ᵗ⌋ (λ t₁ → Σ ℕ (λ ℱ' → ℱ' ≤″ suc ℱ ×
+         Σ ⌊ᵗ ℱ' ⸴ Q₂ ⸴ ″ t₁ ᵗ⌋ (λ t₂ → ″ t₂ ≡ ″ t₁₂ )))             
+    go with evalExp exp s
+    ... | f@(just _)
+        = (Any.just tt) , ℱ , ≤with (+-comm ℱ 1) , t₁₂ , refl
+  -----------------------------------------------------------------
+  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  -- Alternative definition with record as output
+  
+  record Split-⌊ᵗ⌋ s ℱ Q₁ Q₂ (ϕ : ⌊ᵗ ℱ ⸴ Q₁ 𝔱𝔥𝔢𝔫 Q₂ ⸴ s ᵗ⌋) : Set where
+    field
+      ----- Termination Left
+      Lᵗ    : ⌊ᵗ ℱ ⸴  Q₁ ⸴ s ᵗ⌋
+      ----- There's an ℱ' s.t.
+      ℱ'   : ℕ
+      ----- Termination Right
+      Rᵗ    : ⌊ᵗ ℱ' ⸴ Q₂  ⸴ (″ Lᵗ) ᵗ⌋
+      ----- and:
+      lt : ℱ' ≤″ ℱ 
+      ----- Output unchanged
+      Δ  : ″ Rᵗ ≡ ″ ϕ   
+  open Split-⌊ᵗ⌋ public
+
+
+  ⌊ᵗ⌋-split : ∀ ℱ s Q₁ Q₂ → (t₁₂ : ⌊ᵗ ℱ ⸴ Q₁ 𝔱𝔥𝔢𝔫 Q₂ ⸴ s ᵗ⌋)
+             → Split-⌊ᵗ⌋ s ℱ Q₁ Q₂ t₁₂
+  ⌊ᵗ⌋-split ℱ s Q₁ Q₂ t₁₂ with ⌊ᵗ⌋-split' ℱ s Q₁ Q₂ t₁₂
+  ...| t₁ , ℱ' , lt , t₂ , Δ
+     = record { Lᵗ = t₁ ; ℱ' = ℱ' ; Rᵗ = t₂ ; lt = lt ; Δ = Δ }
+     
+  -----------------------------------------------------------------     
+  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+
 

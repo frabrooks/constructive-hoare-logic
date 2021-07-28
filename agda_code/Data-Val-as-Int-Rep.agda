@@ -1,4 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
 
 -- Lib imports
 open import Relation.Binary.PropositionalEquality using ( _≡_ ; refl ; sym ; cong ; inspect ; [_] ; subst )
@@ -23,14 +22,17 @@ open import Data.Integer.DivMod using (_div_ ; _mod_ )
 open Int 
 open ℤ
 
--- Project Imports
-open import Representation.Data
-open import Misc
 
+-- Project Imports
+open import Misc
+open import Representation.Data
 
 module Data-Val-as-Int-Rep where
 
+
+
   module ℤ-Value-Imp where
+
 
     pattern s n = (sucn n)
     pattern ns n = (negsuc n)
@@ -85,72 +87,11 @@ module Data-Val-as-Int-Rep where
     𝑭isWFF : WFF 𝑭
     𝑭isWFF = any-just tt
 
-    𝑻is𝑻 : ( isWFF : WFF 𝑻 ) → toTruthValue {𝑻} isWFF ≡ true
-    𝑻is𝑻 _ = refl
-
-    𝑭is𝑭 : ( isWFF : WFF 𝑭 ) → toTruthValue {𝑭} isWFF ≡ false
-    𝑭is𝑭 _ = refl
-
-    {-
     𝑻is𝑻 : toTruthValue {𝑻} 𝑻isWFF ≡ true
     𝑻is𝑻 = refl
 
     𝑭is𝑭 : toTruthValue {𝑭} 𝑭isWFF ≡ false
     𝑭is𝑭 = refl
-    -}
-
-    {-
-    is𝑻 : Maybe Val → Set
-    is𝑻 nothing = ⊥
-    is𝑻 (just (inj₁ _)) = ⊥
-    is𝑻 (just (inj₂ b)) = T b
-
-    is𝑭 : Maybe Val → Set
-    is𝑭 nothing = ⊥            
-    is𝑭 (just (inj₁ _)) = ⊥
-    is𝑭 (just (inj₂ b)) = T (not b)
-
-
-
-    𝑻istrue : ∀ v → is𝑻 v → Σ (WFF v)
-             (λ w → ((toTruthValue w) ≡ true)) 
-    𝑻istrue (just (inj₂ true)) isT = isjust , refl
-
-    𝑭isfalse : ∀ v → is𝑭 v → Σ (WFF v)
-             (λ w → ((toTruthValue w) ≡ false)) 
-    𝑭isfalse (just (inj₂ false)) isF = isjust , refl
-    -}
-
-    {-
-    isProposition : Maybe Val → Set
-    isProposition = (λ { (just (inj₂ _ )) → ⊤  ;
-                         otherwise           → ⊥ })
-
-
-    propIsProp : (Σ[ v ∈ Maybe Val ] isProposition v  ) ≃ Bool 
-    propIsProp = record
-      { to = (λ { (just (inj₂ false) , _) → false    ;
-                  (just (inj₂ true ) , _) → true       })    ;
-
-        from = (λ {true → (just (inj₂ true))   , tt  ;
-                  false → (just (inj₂ false))  , tt    })    ;
-
-        from∘to = (λ {(just (inj₂ false) , _) → refl ;
-                      (just (inj₂ true ) , _) → refl })      ;
-
-        to∘from = (λ {true → refl ; false → refl})           }
-    -}
-
-
-    {-
-    is𝔹→isProposition : ∀ f → is𝑻 f ⊎ is𝑭 f → isProposition f
-    is𝔹→isProposition (just (inj₁ _)) (inj₁ ())
-    is𝔹→isProposition (just (inj₁ _)) (inj₂ ())
-    is𝔹→isProposition (just (inj₂ true )) (inj₁ _) = tt
-    is𝔹→isProposition (just (inj₂ true )) (inj₂ _) = tt    
-    is𝔹→isProposition (just (inj₂ false)) (inj₁ _) = tt    
-    is𝔹→isProposition (just (inj₂ false)) (inj₂ _) = tt
-    -}
 
     ⓪ : Val
     ⓪ = (inj₁ (pos 0))
@@ -179,7 +120,7 @@ module Data-Val-as-Int-Rep where
     𝔡 : Value-Implementation
     𝔡 = record { ℤ-Value-Imp }
 
-    open Value-Implementation 𝔡 using (⊨)
+    open Value-Implementation 𝔡 using (⊨ ; ⊭)
 
     ----------------------------------------------------------
     -- Basic lemmas / operations
@@ -397,52 +338,24 @@ module Data-Val-as-Int-Rep where
     wffₒᵤₜ⇒wffᵢₙ (just _) %𝓿₂  (just _) _ = isjust , isjust
     wffₒᵤₜ⇒wffᵢₙ (just _) /𝓿₂  (just _) _ = isjust , isjust
 
-    :𝑤𝑓𝑓₂ : ∀ {∙} {α : OP₂ ∙} {x} {y} → (𝑤𝑓𝑓 : OP₂:𝑤𝑓𝑓 α)
+    :𝑤𝑓𝑓₂ : ∀ {∙} {x} {y} {α : OP₂ ∙} → (𝑤𝑓𝑓 : OP₂:𝑤𝑓𝑓 α)
             → WFF x → WFF y → WFF ( ∙ x y)
-    :𝑤𝑓𝑓₂ {x} {y} wff _ _ = {!!}
+    :𝑤𝑓𝑓₂ {||𝓿} {just _} {just _} (||𝓿:𝑤𝑓𝑓) _ _ = any-just tt
+    :𝑤𝑓𝑓₂ {&&𝓿} {just _} {just _} (&&𝓿:𝑤𝑓𝑓) _ _ = any-just tt
+    :𝑤𝑓𝑓₂ {==𝓿} {just _} {just _} (==𝓿:𝑤𝑓𝑓) _ _ = any-just tt
+    :𝑤𝑓𝑓₂ {≤𝓿}  {just _} {just _} (≤𝓿:𝑤𝑓𝑓) _ _ = any-just tt
+    :𝑤𝑓𝑓₂ {<𝓿}  {just _} {just _} (<𝓿:𝑤𝑓𝑓) _ _ = any-just tt
+    :𝑤𝑓𝑓₂ {≥𝓿}  {just _} {just _} (≥𝓿:𝑤𝑓𝑓) _ _ = any-just tt
+    :𝑤𝑓𝑓₂ {>𝓿}  {just _} {just _} (>𝓿:𝑤𝑓𝑓) _ _ = any-just tt
+    :𝑤𝑓𝑓₂ {+𝓿}  {just _} {just _} (+𝓿:𝑤𝑓𝑓) _ _ = any-just tt
+    :𝑤𝑓𝑓₂ {─𝓿}  {just _} {just _} (-𝓿:𝑤𝑓𝑓) _ _ = any-just tt
+    :𝑤𝑓𝑓₂ {*𝓿}  {just _} {just _} (*𝓿:𝑤𝑓𝑓) _ _ = any-just tt
 
 
-    :𝑤𝑓𝑓₁ : ∀ {x} {∙} (α : OP₁ ∙) → WFF x → WFF (∙ x)
-    :𝑤𝑓𝑓₁ {x} {∙} α _ = {!!}
-
-    {-
-    :𝕍₂⇒¬Prop : ∀ {∙} {∙is₂ : OP₂ ∙} (∙is:𝑤𝑓𝑓 : OP₂:𝕍 ∙is₂ )
-                  x y → isProposition (∙ x y) → ⊥
-    :𝕍₂⇒¬Prop +𝓿:𝕍 (just _) (just _) ()
-    :𝕍₂⇒¬Prop -𝓿:𝕍 (just _) (just _) ()
-    :𝕍₂⇒¬Prop *𝓿:𝕍 (just _) (just _) ()
-    :𝕍₂⇒¬Prop %𝓿:𝕍 (just _) (just (inj₁ (𝑝 0))) ()
-    :𝕍₂⇒¬Prop %𝓿:𝕍 (just _) (just (inj₁ +[1+ n ])) ()
-    :𝕍₂⇒¬Prop %𝓿:𝕍 (just _) (just (inj₂ false)) ()
-    :𝕍₂⇒¬Prop %𝓿:𝕍 (just _) (just (inj₂ true)) ()
-    :𝕍₂⇒¬Prop /𝓿:𝕍 (just _) (just (inj₁ (𝑝 0))) ()
-    :𝕍₂⇒¬Prop /𝓿:𝕍 (just _) (just (inj₁ +[1+ n ])) ()
-    :𝕍₂⇒¬Prop /𝓿:𝕍 (just _) (just (inj₂ false)) ()
-    :𝕍₂⇒¬Prop /𝓿:𝕍 (just _) (just (inj₂ true)) ()
-
-
-    :𝕍₁⇒¬Prop : ∀ {∙} {∙is₁ : OP₁ ∙}  ( ∙is:𝑤𝑓𝑓 : OP₁:𝕍 ∙is₁ )
-                  x → isProposition (∙ x) → ⊥      
-    :𝕍₁⇒¬Prop ++𝓿:𝕍 nothing ()
-    :𝕍₁⇒¬Prop ++𝓿:𝕍 (just x) ()
-    :𝕍₁⇒¬Prop ─-𝓿:𝕍 nothing ()
-    :𝕍₁⇒¬Prop ─-𝓿:𝕍 (just x) ()
-
-    :𝑤𝑓𝑓₂⇒Prop : ∀ {∙} {∙is₂ : OP₂ ∙} (∙is:𝑤𝑓𝑓 : OP₂:𝑤𝑓𝑓 ∙is₂ )
-                  x y → WFF (∙ x y ) → isProposition (∙ x y)
-    :𝑤𝑓𝑓₂⇒Prop ||𝓿:𝑤𝑓𝑓 (just _) (just _) _ = tt
-    :𝑤𝑓𝑓₂⇒Prop &&𝓿:𝑤𝑓𝑓 (just _) (just _) _ = tt
-    :𝑤𝑓𝑓₂⇒Prop ==𝓿:𝑤𝑓𝑓 (just _) (just _) _ = tt
-    :𝑤𝑓𝑓₂⇒Prop ≤𝓿:𝑤𝑓𝑓  (just _) (just _) _ = tt
-    :𝑤𝑓𝑓₂⇒Prop <𝓿:𝑤𝑓𝑓  (just _) (just _) _ = tt
-    :𝑤𝑓𝑓₂⇒Prop ≥𝓿:𝑤𝑓𝑓  (just _) (just _) _ = tt
-    :𝑤𝑓𝑓₂⇒Prop >𝓿:𝑤𝑓𝑓  (just _) (just _) _ = tt
-
-
-    :𝑤𝑓𝑓₁⇒Prop : ∀ {∙} {∙is₁ : OP₁ ∙} ( ∙is:𝑤𝑓𝑓 : OP₁:𝑤𝑓𝑓 ∙is₁ )
-                 x → WFF (∙ x) → isProposition (∙ x)
-    :𝑤𝑓𝑓₁⇒Prop ¬𝓿:𝑤𝑓𝑓 (just x) _ = tt
-    -}
+    :𝑤𝑓𝑓₁ : ∀ {∙} {x} (α : OP₁ ∙) → WFF x → WFF (∙ x)
+    :𝑤𝑓𝑓₁ {¬𝓿}  {just _} ¬𝓿₁  _ = any-just tt
+    :𝑤𝑓𝑓₁ {++𝓿} {just _} ++𝓿₁ _ = any-just tt
+    :𝑤𝑓𝑓₁ {─-𝓿} {just _} ─-𝓿₁ _ = any-just tt
 
     DeMorgan₁ : ∀ x y → ¬𝓿 (x ||𝓿 y) ≡ (¬𝓿 x) &&𝓿 (¬𝓿 y)
     DeMorgan₁ nothing nothing = refl
@@ -509,11 +422,25 @@ module Data-Val-as-Int-Rep where
 
 
     ConjunctionElim₁ : ∀ x y → ⊨ (x &&𝓿 y) → ⊨ x
-    ConjunctionElim₁ x y T = {!!}
+    ConjunctionElim₁ (just (inj₁ +[1+ _ ])) (just (inj₁ +[1+ _ ])) T = (any-just tt) , tt
+    ConjunctionElim₁ (just (inj₁ +[1+ _ ])) (just (inj₁ (ns _))) T = (any-just tt) , tt
+    ConjunctionElim₁ (just (inj₁ (ns _))) (just (inj₁ _)) T = (any-just tt) , tt
+    ConjunctionElim₁ (just (inj₁ +[1+ _ ])) (just (inj₂ _)) T = (any-just tt) , tt
+    ConjunctionElim₁ (just (inj₁ (ns _))) (just (inj₂ _)) T = (any-just tt) , tt
+    ConjunctionElim₁ (just (inj₂ true)) (just (inj₁ _)) T = (any-just tt) , tt
+    ConjunctionElim₁ (just (inj₂ true)) (just (inj₂ _)) T = (any-just tt) , tt
+
 
     ConjunctionElim₂ : ∀ x y → ⊨ (x &&𝓿 y) → ⊨ y
-    ConjunctionElim₂ x y T = {!!}
-
+    ConjunctionElim₂ (just (inj₁ +[1+ _ ])) (just (inj₁ +[1+ _ ])) T = (any-just tt) , tt
+    ConjunctionElim₂ (just (inj₁ (ns _))) (just (inj₁ +[1+ _ ])) T = (any-just tt) , tt
+    ConjunctionElim₂ (just (inj₁ +[1+ _ ])) (just (inj₁ (ns _))) T = (any-just tt) , tt
+    ConjunctionElim₂ (just (inj₁ (ns _))) (just (inj₁ (ns _))) T = (any-just tt) , tt
+    ConjunctionElim₂ (just (inj₁ +[1+ _ ])) (just (inj₂ true)) T = (any-just tt) , tt
+    ConjunctionElim₂ (just (inj₁ (ns _))) (just (inj₂ true)) T = (any-just tt) , tt
+    ConjunctionElim₂ (just (inj₂ true)) (just (inj₁ +[1+ _ ])) T = (any-just tt) , tt
+    ConjunctionElim₂ (just (inj₂ true)) (just (inj₁ (ns _))) T = (any-just tt) , tt
+    ConjunctionElim₂ (just (inj₂ true)) (just (inj₂ true)) T = any-just tt , tt
 
     ConjunctionIntro : ∀ x y → ⊨ x → ⊨ y → ⊨ (x &&𝓿 y)
     ConjunctionIntro (just (inj₁ +[1+ _ ])) (just (inj₁ +[1+ _ ])) _ _ = any-just tt , tt
@@ -526,6 +453,16 @@ module Data-Val-as-Int-Rep where
     ConjunctionIntro (just (inj₂ true)) (just (inj₁ +[1+ _ ])) _ _ = any-just tt , tt
     ConjunctionIntro (just (inj₂ true)) (just (inj₁ (ns _))) _ _ = any-just tt , tt
     ConjunctionIntro (just (inj₂ true)) (just (inj₂ true)) _ _ = any-just tt , tt
+
+    NegationIntro : ∀ v → ⊭ v → ⊨ (¬𝓿 v)
+    NegationIntro (just (inj₁ (𝑝 Nat.zero))) ⊭v = (any-just tt) , tt
+    NegationIntro (just (inj₂ false)) ⊭v = (any-just tt) , tt
+
+    NegationElim  : ∀ v → ⊭ (¬𝓿 v) → ⊨ v
+    NegationElim (just (inj₁ +[1+ _ ])) ⊭¬v = (any-just tt) , tt
+    NegationElim (just (inj₁ (ns _))) ⊭¬v = (any-just tt) , tt
+    NegationElim (just (inj₂ true)) ⊭¬v = (any-just tt) , tt
+
 
   -- Identifier = ℕ
   -- Values(:𝕍) = ℤ
