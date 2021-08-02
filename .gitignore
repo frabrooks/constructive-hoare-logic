@@ -1,9 +1,9 @@
 *.agdai
-.#*.agda
-
+.#*.*
 
 
 *.vtc
+*.ptb
 
 ## Latex gitignore from:
 ##     https://github.com/github/gitignore/blob/master/TeX.gitignore
