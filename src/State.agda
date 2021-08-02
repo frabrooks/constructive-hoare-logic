@@ -13,13 +13,13 @@ module State ( 𝔡 : Data-Implementation ) where
   open import Relation.Nullary using ( ¬_ )
   open import Relation.Binary.PropositionalEquality using (_≡_)
   open import Data.Empty using (⊥)
-
+  open import Data.Nat using (ℕ)
                          
   record State-Implementation  : Set₁ where
     field
       S              : Set
-      --H            : Set
-      ●              : S  -- Initial State 
+      ●              : S  -- Initial/Empty State
+      
       updateState    : Id → Val → S → S
       getVarVal      : Id → S → Maybe Val
       dropValue      : S → Id → S
@@ -39,6 +39,12 @@ module State ( 𝔡 : Data-Implementation ) where
                        → (hasVarVal x xval s)
       updateState¬●  : (i : Id) → (f : Val) → (s : S )
                        → ( updateState i f s ≡ ● ) → ⊥
+
+{-      
+      newArray       : Id → ℕ → S → S
+      getArrVal      : Id → ℕ → S → Maybe Val
+      updateArr      : Id → ℕ → Val → S → Maybe S
+-}
 
     
     getVarValM : Id → Maybe S → Maybe Val

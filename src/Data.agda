@@ -32,9 +32,9 @@ module Data where
 
       -- Identifiers for use in the
       -- specification of programs
-      𝔁         : Id
-      𝔂         : Id
-      𝔃         : Id
+      𝒙         : Id
+      𝒚         : Id
+      𝒛         : Id
       𝑿         : Id
       𝒀         : Id
       𝒁         : Id
@@ -66,10 +66,10 @@ module Data where
       ⑧        : Val
       ⑨        : Val
  
-      -- Truisms -- maybe not needed?
-      𝔁≢𝔂       : 𝔁 ≡ 𝔂 → ⊥
-      𝔁≢𝔃       : 𝔁 ≡ 𝔃 → ⊥
-      𝔂≢𝔃       : 𝔂 ≡ 𝔃 → ⊥
+      -- maybe not needed?
+      𝔁≢𝔂       : 𝒙 ≡ 𝒚 → ⊥
+      𝔁≢𝔃       : 𝒙 ≡ 𝒛 → ⊥
+      𝔂≢𝔃       : 𝒚 ≡ 𝒛 → ⊥
 
       {-
       is𝑻 : Maybe Val → Set -- (As a proposition)

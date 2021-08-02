@@ -19,23 +19,11 @@ module Language.Mini-Imp
   open Data-Implementation 𝔡
   open import Language.Expressions 𝔡 𝔖
 
-
-  -- Commands/Programs/Computations
   data Block : Set
-  {-
-  -- Assignment
-  _:=_ : Id → Exp → Set
-  _ := _ = ⊤
 
-  -- Control Flow
-  𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_ : Exp → Block → Block → Set
-  𝔦𝔣 _ 𝔱𝔥𝔢𝔫 _ 𝔢𝔩𝔰𝔢 _ = ⊤
-
-  -- Looping
-  𝔴𝔥𝔦𝔩𝔢_𝒹ℴ_ : Exp → Block → Set
-  𝔴𝔥𝔦𝔩𝔢 _ 𝒹ℴ _ = ⊤
-  -}
-
+  -- Commands/Programs/Mechanisms/Statements
+  -- Defined as '↪S' (read 'State transformer')
+  -- to emphasise all these different meanings
   data ↪S : Set where
     𝑠𝑘𝑖𝑝  : ↪S
     𝔴𝔥𝔦𝔩𝔢_𝒹ℴ_ : Exp → Block → ↪S
@@ -43,34 +31,35 @@ module Language.Mini-Imp
     _:=_ : Id → Exp → ↪S
   open ↪S public
 
-  infix 30 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_
-  infix 30 𝔴𝔥𝔦𝔩𝔢_𝒹ℴ_
-  infix 32 _:=_
-  
   data Block where
+    -- Terminator:
     _;  : ↪S → Block
+    -- Separator:
     _;_ : ↪S → Block → Block
   open Block public
 
-  infixr 18 _;_
-  infix  31 _; 
-
-
+  -- Program composition
   _𝔱𝔥𝔢𝔫_ : Block → Block → Block
   (c ;) 𝔱𝔥𝔢𝔫 b = c ; b
   (c ; b₁) 𝔱𝔥𝔢𝔫 b₂ = c ; (b₁ 𝔱𝔥𝔢𝔫 b₂)
 
-  infixl 16 _𝔱𝔥𝔢𝔫_ 
-
+  -- Commutativity of program composition
   𝔱𝔥𝔢𝔫-comm : ∀ c₁ c₂ c₃ →
     c₁ 𝔱𝔥𝔢𝔫 (c₂ 𝔱𝔥𝔢𝔫 c₃) ≡ (c₁ 𝔱𝔥𝔢𝔫 c₂) 𝔱𝔥𝔢𝔫 c₃
   𝔱𝔥𝔢𝔫-comm (↪s ;) c₂ c₃ = refl
   𝔱𝔥𝔢𝔫-comm (↪s ; c₁) c₂ c₃
     rewrite 𝔱𝔥𝔢𝔫-comm c₁ c₂ c₃ = refl
 
+
+  infix  30 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_
+  infix  30 𝔴𝔥𝔦𝔩𝔢_𝒹ℴ_
+  infix  32 _:=_
+  infixr 18 _;_
+  infix  31 _; 
+  infixl 16 _𝔱𝔥𝔢𝔫_ 
+
   -- Computation is a block of
   -- State transformers
   C : Set
   C = Block
-
 

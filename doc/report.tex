@@ -2,19 +2,30 @@
 % DOCUMENT CLASS
 \documentclass[oneside,12pt]{article}
 
-
 \usepackage{graphicx}
+
+\usepackage{agda}
+
+%\input{unicode}
+%\usepackage{eufrak}
+%\usepackage{mathabx}
+% Use Chancery Font
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+% Use: \mathpzc{abc...z} for lowercase mathscript
+
 
 %Includes "References" in the table of contents
 \usepackage[nottoc]{tocbibind}
 
 \begin{document}
 
+
 \begin{titlepage}
   \begin{center}
     \large
 
     \textbf{\Large A Constructive Formalisation of Hoare Logic using the Interactive Theorem Prover Agda}
+
     
     \vfill
 
@@ -82,13 +93,13 @@ Donec ullamcorper, felis non sodales...
 
 How is one to give a semantics to computation? One answer is to provide a model of computation that denotes how a mechansim, a computation, or program\footnote{ the three words here being used synonymously} is to be computed; such as a Turing machine, or a FSA. Another way however is to describe what the mechanism, computation, or program can \emph{do} for us; that is, specifiying what input states it can accept, and what states it will produce.
 
+
 OR: given a desired output (of states) specifying, how (read, in which input states), if at all, it can produce the desired output.
 
 This approach gives us a way of specifying a \ldots without caring about the eventual form of the mechanism if indeed it ever takes form at all!
 
-
-
 Computation as traversing the state space. Descartes - Cartesian product - [Dijkstra,p12]
+
 
 Weakest precondition (according to Dijskstra) is unique when considered as a state space, but multiple predicates could denote the same space. (i.e. $x == y$ and $y == x$)
 
@@ -113,6 +124,11 @@ Weakest Liberal Precondition is what has actually been formalised! (Need to work
 \subsection{Agda}
 
 \subsection{Constructive Mathematics}
+
+`Agda is a constructive mathematical system by default, which amounts to saying that it can also be considered as a
+programming language for manipulating mathematical objects.' - MHE
+
+
 
 \subsection{Formal Proof}
 
@@ -140,9 +156,14 @@ i.e. $\wedge \Leftrightarrow \cap$
 
 
 Ought to have differentiated between non stuck-ness and termination. I.e. D(E) as domain of expression E, to eliminate divide by zero and non-defined variables in an expression, as that is a problem that can be handled distinctly from termination
-(i.e. (I think anway) that given a state S, and an expression E, one can deterministically/decidably determine whether or not it is a WFF)
+(i.e. (I think anway) that given a state S, and an expression E, one can deterministically/decidably determine whether or not it is a WFF).
+
 
 \subsection{Language}
+
+A S$\Delta$ is one of the following:
+
+\input{agda/Language/LangCon}
 
 \subsection{Axioms \& Rules}
 
@@ -172,12 +193,12 @@ Hoare's surprise at test case success (see retrospective)
 \section{Appendix}
 
 
-
 \nocite{*}
 
 \bibliographystyle{plain}
 
 \bibliography{report}
+
 
   
 \end{document}

@@ -14,6 +14,7 @@ open import Data.Bool using ( true ; false)
 open import Data.List as List using (List; _∷_; [] ; map ; _++_ )
 open import Data.Maybe using (Maybe ; nothing ; just )
 open import Data.Product
+open import Data.Sum using (_⊎_ ; inj₁ ; inj₂)
 open import Data.Empty
 
 
@@ -26,8 +27,9 @@ module Representations.State-List-Rep ( 𝔡 : Data-Implementation) where
 
   open Data-Implementation 𝔡
 
+
   S = List (Id × Val)
-  -- H = ?
+--  S = List (Id × (Val ⊎ (ℕ → Maybe Val )))
   ● : S
   ● = []
 

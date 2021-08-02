@@ -18,31 +18,53 @@ module Language.ExampleProgs
   
   Program = C
 
-  -- Swap values of 𝔁 and 𝔂
+  -- Swap values of 𝒙 and 𝒚
   swap : Program
-  swap = 𝔃 := 𝑣𝑎𝑙 𝔁 ;
-         𝔁 := 𝑣𝑎𝑙 𝔂 ;
-         𝔂 := 𝑣𝑎𝑙 𝔃 ;
+  swap = 𝒛 := 𝑣𝑎𝑙 𝒙 ;
+         𝒙 := 𝑣𝑎𝑙 𝒚 ;
+         𝒚 := 𝑣𝑎𝑙 𝒛 ;
 
 
-  -- Store absolute value of 𝔁 in 𝔃
+  -- Store absolute value of 𝒙 in 𝒛
   abs : Program
-  abs = (𝔦𝔣 (𝑣𝑎𝑙 𝔁 ≥ 𝑐𝑜𝑛𝑠𝑡 ⓪)
+  abs = (𝔦𝔣 (𝑣𝑎𝑙 𝒙 ≥ 𝑐𝑜𝑛𝑠𝑡 ⓪)
          𝔱𝔥𝔢𝔫
-           𝔃 := 𝑣𝑎𝑙 𝔁 ;
+           𝒛 := 𝑣𝑎𝑙 𝒙 ;
          𝔢𝔩𝔰𝔢
-           𝔃 := ── (𝑣𝑎𝑙 𝔁)  ;);
+           𝒛 := ── (𝑣𝑎𝑙 𝒙)  ;);
 
 
   -- Euclids Algorithm for GCD
   gcd : Program
-  gcd =  𝔁 := 𝑣𝑎𝑙 𝑿 ;
-         𝔂 := 𝑣𝑎𝑙 𝒀 ;
-        (𝔴𝔥𝔦𝔩𝔢 (𝑛𝑜𝑡 ( 𝑣𝑎𝑙 𝔁 == 𝑣𝑎𝑙 𝔂 ))
-         𝒹ℴ (𝔦𝔣 ( 𝑣𝑎𝑙 𝔁 > 𝑣𝑎𝑙 𝔂  )          
+  gcd =  𝒙 := 𝑣𝑎𝑙 𝑿 ;
+         𝒚 := 𝑣𝑎𝑙 𝒀 ;
+        (𝔴𝔥𝔦𝔩𝔢 (𝑛𝑜𝑡 ( 𝑣𝑎𝑙 𝒙 == 𝑣𝑎𝑙 𝒚 ))
+         𝒹ℴ (𝔦𝔣 ( 𝑣𝑎𝑙 𝒙 > 𝑣𝑎𝑙 𝒚  )          
             𝔱𝔥𝔢𝔫                           
-              𝔁 := 𝑣𝑎𝑙 𝔁 - 𝑣𝑎𝑙 𝔂 ;    
+              𝒙 := 𝑣𝑎𝑙 𝒙 - 𝑣𝑎𝑙 𝒚 ;    
             𝔢𝔩𝔰𝔢                           
-              𝔂 := 𝑣𝑎𝑙 𝔂 - 𝑣𝑎𝑙 𝔁 ;  ););
+              𝒚 := 𝑣𝑎𝑙 𝒚 - 𝑣𝑎𝑙 𝒙 ;  ););
+
+
+  -- Multiply 𝑿 and 𝒀, and store in 𝒛, but
+  -- without using multiplication operator
+  -- ((11.4) in TSOP,Gries)
+  -- {b ≥ 0 } add* { 𝒛 == 𝑿 * 𝒀 } 
+  add* : Program
+  add* =  
+       𝒙 := 𝑣𝑎𝑙 𝑿 ;
+       𝒚 := 𝑣𝑎𝑙 𝒀 ;
+       𝒛 := 𝑐𝑜𝑛𝑠𝑡 ⓪ ;
+      (𝔴𝔥𝔦𝔩𝔢
+        (   ( 𝑣𝑎𝑙 𝒚 > 𝑐𝑜𝑛𝑠𝑡 ⓪ ∧ 𝑒𝑣𝑒𝑛〈 𝑣𝑎𝑙 𝒚 〉 )
+          ∨ ( 𝑜𝑑𝑑〈 𝑣𝑎𝑙 𝒚 〉 )
+        )
+       𝒹ℴ (𝔦𝔣 ( 𝑒𝑣𝑒𝑛〈 𝑣𝑎𝑙 𝒚 〉 )
+          𝔱𝔥𝔢𝔫                           
+           ( 𝒚 := 𝑣𝑎𝑙 𝒚 / 𝑐𝑜𝑛𝑠𝑡 ② ;
+             𝒙 := 𝑣𝑎𝑙 𝒙 + 𝑣𝑎𝑙 𝒙    ;)
+          𝔢𝔩𝔰𝔢                           
+           ( 𝒚 := 𝑣𝑎𝑙 𝒚 - 𝑐𝑜𝑛𝑠𝑡 ① ;
+             𝒛 := 𝑣𝑎𝑙 𝒛 + 𝑣𝑎𝑙 𝒙    ;)    ); );
 
 

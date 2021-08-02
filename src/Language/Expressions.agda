@@ -5,7 +5,7 @@ import Relation.Binary.PropositionalEquality as Eq
 open Eq using ( _≡_ )
 open import Data.Sum
 open import Data.Empty
-open import Data.Bool hiding (_∧_)
+open import Data.Bool hiding (_∧_ ; _∨_ )
 open import Relation.Binary
 open import Relation.Nullary using ( yes ; no )
 open import Relation.Nullary.Decidable using ( map′)
@@ -107,6 +107,9 @@ module Language.Expressions ( 𝔡 : Data-Implementation )
   _∧_ : Exp → Exp → Exp
   P ∧ Q = op₂ P &&ₒ Q
 
+  _∨_ : Exp → Exp → Exp
+  P ∨ Q = op₂ P ||ₒ Q
+  
   𝑛𝑜𝑡 : Exp → Exp
   𝑛𝑜𝑡 = op₁ ¬ₒ
   infix 40 𝑛𝑜𝑡
@@ -123,6 +126,14 @@ module Language.Expressions ( 𝔡 : Data-Implementation )
   _-_ l r = op₂ l -ₒ r
   infix 36 _-_
 
+  _+_ : Exp → Exp → Exp
+  _+_ l r = op₂ l +ₒ r
+  infix 36 _+_
+
+  _/_ : Exp → Exp → Exp
+  _/_ l r = op₂ l /ₒ r
+  infix 37 _/_
+
   ── : Exp → Exp
   ── = op₁ ──ₒ
 
@@ -130,6 +141,12 @@ module Language.Expressions ( 𝔡 : Data-Implementation )
   _==_ l r = op₂ l ==ₒ r
   infix 36 _==_
 
+
+  𝑒𝑣𝑒𝑛〈_〉 : Exp → Exp
+  𝑒𝑣𝑒𝑛〈 P 〉 = op₂ (op₂ P %ₒ (𝑐𝑜𝑛𝑠𝑡 ②)) ==ₒ (𝑐𝑜𝑛𝑠𝑡 ⓪)
+
+  𝑜𝑑𝑑〈_〉 : Exp → Exp
+  𝑜𝑑𝑑〈 P 〉 = op₂ (op₂ P %ₒ (𝑐𝑜𝑛𝑠𝑡 ②)) ==ₒ (𝑐𝑜𝑛𝑠𝑡 ①)
 
   getOp₁ : UnOp → Maybe Val → Maybe Val
   getOp₁ ¬ₒ  = ¬𝓿
