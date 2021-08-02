@@ -9,7 +9,7 @@ open import Relation.Nullary using ( yes ;  no )
 open import Data.Sum
 open import Data.Unit using ( ⊤ ; tt )
 open import Data.Empty using ( ⊥ ; ⊥-elim )
-open import Data.Bool
+open import Data.Bool hiding ( _∧_ )
 open import Data.Product using (Σ ; Σ-syntax ; _×_  ; _,_  ; proj₁ ; proj₂ )
 open import Function using ( _∋_ ; _∘_ ; _$_ )
 
@@ -38,7 +38,7 @@ module Language.Assertions
   -- languages with implicit casting from Ints
   -- to truth values / booleans: (2 + 1),
   -- rendered as an exp as:
-  --    (op₂ (𝑐𝑜𝑛𝑠𝑡 ➋) (+𝓿 :𝕍) (𝑐𝑜𝑛𝑠𝑡 ➊)),
+  --    (op₂ (𝑐𝑜𝑛𝑠𝑡 ②) (+𝓿 :𝕍) (𝑐𝑜𝑛𝑠𝑡 ①)),
   -- is a perfectly valid truth value and could
   -- be used as a conditional (one that always
   -- evaluates to true)
@@ -50,10 +50,10 @@ module Language.Assertions
   -- A predicate is an assertion 𝐴 for which there exists
   -- some state S s.t. 𝐴 is a WFF. In other words it
   -- is a subset of states.
-  -- e.g. (op₂ (𝑣𝑎𝑟 𝔁) (/𝓿 :𝕍) (𝑐𝑜𝑛𝑠𝑡 0)) is not a valid
+  -- e.g. (op₂ (𝑣𝑎𝑙 𝒙) (/𝓿 :𝕍) (𝑐𝑜𝑛𝑠𝑡 0)) is not a valid
   -- predicate as no state exists in which that is a WFF,
-  -- but (op₂ (𝑣𝑎𝑟 𝔁) (/𝓿 :𝕍) (𝑣𝑎𝑟 𝔂)) is a predicate even
-  -- it will not be a WFF in any state in which 𝔂 := 0 
+  -- but (op₂ (𝑣𝑎𝑙 𝒙) (/𝓿 :𝕍) (𝑣𝑎𝑙 𝒚)) is a predicate even
+  -- it will not be a WFF in any state in which 𝒚 := 0 
   𝑃𝑟𝑒𝑑𝑖𝑐𝑎𝑡𝑒 : 𝐴 → Set
   𝑃𝑟𝑒𝑑𝑖𝑐𝑎𝑡𝑒 p = Σ S (WFF ∘ evalExp p)
   -- Useless
@@ -144,17 +144,16 @@ module Language.Assertions
 
   -- x == 2 ^ y == 1
   a₁ : 𝐴
-  a₁ = (op₂
-       (op₂ (𝑣𝑎𝑟 𝔁) ==  (𝑐𝑜𝑛𝑠𝑡 ➋))
-                    &&
-       (op₂ (𝑣𝑎𝑟 𝔂) == (𝑐𝑜𝑛𝑠𝑡 ➊)))
+  a₁ = ((𝑣𝑎𝑙 𝒙) == (𝑐𝑜𝑛𝑠𝑡 ②))
+       ∧
+       ((𝑣𝑎𝑙 𝒚) == (𝑐𝑜𝑛𝑠𝑡 ①))
 
   -- x == 2
   a₂ : 𝐴
-  a₂ = (op₂ (𝑣𝑎𝑟 𝔁) == (𝑐𝑜𝑛𝑠𝑡 ➋))
+  a₂ = (𝑣𝑎𝑙 𝒙) == (𝑐𝑜𝑛𝑠𝑡 ②)
 
   --𝒫 : 𝑃 e1
-  --𝒫 = (updateState 𝔁 _ ●) , subst (λ a → WFF (( a ==𝓿 just ➋) &&𝓿 (just ➊ ==𝓿 just ➊)) ) (sym (updateGet 𝔁 ➊ ●)) {!!}
+  --𝒫 = (updateState 𝒙 _ ●) , subst (λ a → WFF (( a ==𝓿 just ②) &&𝓿 (just ① ==𝓿 just ①)) ) (sym (updateGet 𝒙 ① ●)) {!!}
 
 
   --𝒬 : 𝑃 e2
@@ -162,21 +161,21 @@ module Language.Assertions
 
 
   test : a₁ ⇒ a₂
-  test  s ⊢x&y = let x = getVarVal 𝔁 s ==𝓿 (just ➋) in
-                 let y = getVarVal 𝔂 s ==𝓿 (just ➊)  in
+  test  s ⊢x&y = let x = getVarVal 𝒙 s ==𝓿 (just ②) in
+                 let y = getVarVal 𝒚 s ==𝓿 (just ①)  in
                  ConjunctionElim₁ x y ⊢x&y
 
 {-
-λ P=T → let lhs = getVarVal 𝔁 s ==𝓿 (just ➋) in
-               let rhs = just ➊ ==𝓿 just ➊  in
+λ P=T → let lhs = getVarVal 𝒙 s ==𝓿 (just ②) in
+               let rhs = just ① ==𝓿 just ①  in
                {!!}
                -- proj₂ (ConjunctionElim₁ lhs rhs ? )
 -}
-  {-   getVarVal 𝔁 (updateState 𝔁 _52 ●)
+  {-   getVarVal 𝒙 (updateState 𝒙 _52 ●)
   test : 𝒫 ⇒ 𝒬
   test s (wffe1 , isT) =
-    let lhs = getVarVal 𝔁 s ==𝓿 (just ➋) in
-    let rhs = just ➊ ==𝓿 just ➊  in
+    let lhs = getVarVal 𝒙 s ==𝓿 (just ②) in
+    let rhs = just ① ==𝓿 just ①  in
     let wffe2 = (proj₁ (wffₒᵤₜ⇒wffᵢₙ  lhs &&𝓿₂ rhs wffe1))
     in ( wffe2 , ConjunctionElim₁ lhs rhs wffe1 isT wffe2 )
   -}

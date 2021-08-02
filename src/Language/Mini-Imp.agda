@@ -55,7 +55,7 @@ module Language.Mini-Imp
   infix  30 𝔴𝔥𝔦𝔩𝔢_𝒹ℴ_
   infix  32 _:=_
   infixr 18 _;_
-  infix  31 _; 
+  infix  22 _; 
   infixl 16 _𝔱𝔥𝔢𝔫_ 
 
   -- Computation is a block of

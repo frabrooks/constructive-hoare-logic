@@ -136,7 +136,7 @@ module Hoare-Logic.Axioms
       ------------------------------------------------------------
       -- Using mutually recursive functions go and go-true      
       go : ∀ {s} ℱ → Σ⊢ s P → (⌊ᵗCᵗ⌋ : ⌊ᵗ ℱ ⸴ (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⸴ s ᵗ⌋)
-           → Σ⊢ (″ ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₑ B) && P )
+           → Σ⊢ (″ ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₒ B) &&ₒ P )
       -- ℱ needs to be an argument by itself outside the Sigma type
       -- so we can recurse on it as Agda can't see it always decrements
       -- with each call if it is inside the product.
@@ -145,14 +145,14 @@ module Hoare-Logic.Axioms
       go-true : ∀ {s} {ℱ} {v} → Σ⊢ s P → (evalExp B s ≡ just v)
               → (toTruthValue {just v} (just tt) ≡ true)
               → (⌊ᵗCᵗ⌋ : ⌊ᵗ ℱ ⸴ (C 𝔱𝔥𝔢𝔫 𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⸴ s ᵗ⌋)
-              → Σ⊢ (to-witness ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₑ B) && P)
+              → Σ⊢ (to-witness ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₒ B) &&ₒ P)
       go-true {s} {ℱ} Σ⊢P p₁ p₂ ⌊ᵗCᵗ⌋
           with ⌊ᵗ⌋-split ℱ s C (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⌊ᵗCᵗ⌋
       ... | record { Lᵗ = Lᵗ ; ℱ' = ℱ' ; Rᵗ = Rᵗ ; lt = lt ; Δ = Δ } = Λ
          where
          Σ⊢B : Σ⊢ s B
          Σ⊢B rewrite p₁ = (just tt , subst T (sym p₂) tt)
-         Σ⊢P&B : Σ⊢ s (op₂ P && B)
+         Σ⊢P&B : Σ⊢ s (op₂ P &&ₒ B)
          Σ⊢P&B = ConjunctionIntro _ _ Σ⊢P Σ⊢B  
          Σ⊢P' : Σ⊢ (″ Lᵗ) P
          Σ⊢P' = PBCP s Σ⊢P&B (ℱ , Lᵗ)
@@ -172,22 +172,22 @@ module Hoare-Logic.Axioms
          Δ' : ″ Rᵗℱ ≡ ″ ⌊ᵗCᵗ⌋
          Δ' rewrite isDet = Δ         
          -- which we can now use in a recursive call: (suc ℱ) ⇒ ℱ
-         GO  : Σ⊢ (″ Rᵗℱ) (op₂ (op₁ ¬ₑ B) && P)
+         GO  : Σ⊢ (″ Rᵗℱ) (op₂ (op₁ ¬ₒ B) &&ₒ P)
          GO  = go {″ Lᵗ} ℱ Σ⊢P' Rᵗℱ
          
          -- and finally get the type we need via substitution with Δ'
-         Λ : Σ⊢ (″ ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₑ B) && P) 
-         Λ = subst (λ s → Σ⊢ s (op₂ (op₁ ¬ₑ B) && P)) Δ' GO
+         Λ : Σ⊢ (″ ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₒ B) &&ₒ P) 
+         Λ = subst (λ s → Σ⊢ s (op₂ (op₁ ¬ₒ B) &&ₒ P)) Δ' GO
       ---------------------------------------------------------------
       -- case where B is false
       go-false : ∀ {s} {v} → Σ⊢ s P → (evalExp B s ≡ just v)
                  → (toTruthValue {just v} (just tt) ≡ false)
-                 → Σ⊢ s (op₂ (op₁ ¬ₑ B) && P)            
+                 → Σ⊢ s (op₂ (op₁ ¬ₒ B) &&ₒ P)            
       go-false {s} {v} Σ⊢P p₁ p₂ = ConjunctionIntro _ _ Σ⊢¬B Σ⊢P
         where
         ⊭B : ⊭ (just v)
         ⊭B rewrite p₁ = (just tt) , subst (T ∘ not) (sym p₂) tt
-        Σ⊢¬B : Σ⊢ s (op₁ ¬ₑ B)
+        Σ⊢¬B : Σ⊢ s (op₁ ¬ₒ B)
         Σ⊢¬B rewrite p₁ = (NegationIntro (just v) (⊭B))
       ---------------------------------------------------------------
       go {s} (suc ℱ) Σ⊢P ⌊ᵗCᵗ⌋ with
@@ -228,7 +228,7 @@ module Hoare-Logic.Axioms
       ... | v , C▵v , inj₁ (⊢v , Σ[ᵗA] , Δ) rewrite Δ = Ω₂ 
         where
           -- C & P is true in state s
-          Ω₁ : Σ⊢ s (op₂ C && P)
+          Ω₁ : Σ⊢ s (op₂ C &&ₒ P)
           Ω₁ rewrite C▵v = ConjunctionIntro _ _ 
             ((any tt) , subst T (sym ⊢v) tt) (Pis𝑃 , ⊢P)
  
@@ -238,8 +238,8 @@ module Hoare-Logic.Axioms
       
       ... | v , C▵v , inj₂ (¬⊢v , Σ[ᵗB] , Δ)  rewrite Δ = Ω₂ 
         where
-          -- ¬C && P is true in state s
-          Ω₁ : Σ⊢ s (op₂ (op₁ ¬ₑ C) && P) 
+          -- ¬C &&ₒ P is true in state s
+          Ω₁ : Σ⊢ s (op₂ (op₁ ¬ₒ C) &&ₒ P) 
           Ω₁ rewrite C▵v = ConjunctionIntro _ _
             μ₂ (Pis𝑃 , ⊢P)
               where
