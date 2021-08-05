@@ -16,6 +16,21 @@ open import Level using (Level )
 module Misc where
 
   WFF = Is-just
+  
+  record New² {A : Set} (𝒙 𝒚 : A) : Set where
+      field
+        ᵍᵉᵗ  : A
+        ≠₂  : ᵍᵉᵗ ≡ 𝒙 → ⊥
+        ≠₃  : ᵍᵉᵗ ≡ 𝒚 → ⊥
+  open New² public
+
+  record New³ {A : Set} (𝒘 𝒙 𝒚 : A) : Set where
+      field
+        ᵍᵉᵗ  : A
+        ≠₁  : ᵍᵉᵗ ≡ 𝒘 → ⊥
+        ≠₂  : ᵍᵉᵗ ≡ 𝒙 → ⊥
+        ≠₃  : ᵍᵉᵗ ≡ 𝒚 → ⊥
+  open New³ public
 
   pattern any tt = Any.just tt
 

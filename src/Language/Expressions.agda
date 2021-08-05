@@ -141,6 +141,13 @@ module Language.Expressions ( 𝔡 : Data-Implementation )
   _==_ l r = op₂ l ==ₒ r
   infix 36 _==_
 
+  _=̌=̌_ : Id → Id → Exp
+  _=̌=̌_ l r = op₂ (𝑣𝑎𝑙 l) ==ₒ (𝑣𝑎𝑙 r)
+  infix 36 _=̌=̌_
+
+  _=̌=_ : Id → Exp → Exp
+  _=̌=_ l r = op₂ (𝑣𝑎𝑙 l) ==ₒ r
+  infix 36 _=̌=_
 
   𝑒𝑣𝑒𝑛〈_〉 : Exp → Exp
   𝑒𝑣𝑒𝑛〈 P 〉 = op₂ (op₂ P %ₒ (𝑐𝑜𝑛𝑠𝑡 ②)) ==ₒ (𝑐𝑜𝑛𝑠𝑡 ⓪)

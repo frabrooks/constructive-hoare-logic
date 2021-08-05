@@ -24,6 +24,37 @@ module Language.ExampleProgs
          𝒙 := 𝑣𝑎𝑙 𝒚 ;
          𝒚 := 𝑣𝑎𝑙 𝒛 ;
 
+{-
+  Distinct, obviously works
+
+  swap : Id → Id → Program
+  swap 𝒙 𝒚 =
+         𝒛 := 𝑣𝑎𝑙 𝒙 ;
+         𝒙 := 𝑣𝑎𝑙 𝒚 ;
+         𝒚 := 𝑣𝑎𝑙 𝒛 ;
+
+  𝒛 == 𝒙 ∨ 𝒛 == 𝒚 obviously doesn't work
+
+  swap : Id → Id → Program
+  swap 𝒙 𝒚 =
+         𝒛 := 𝑣𝑎𝑙 𝒙 ;
+         𝒙 := 𝑣𝑎𝑙 𝒚 ;
+         𝒚 := 𝑣𝑎𝑙 𝒛 ;
+
+
+  𝒙 == 𝒚 then nothing happens but nothing needs
+         to happen
+
+  swap : Id → Id → Program
+  swap 𝒙 𝒚 =
+         𝒛 := 𝑣𝑎𝑙 𝒙 ;
+         𝒙 := 𝑣𝑎𝑙 𝒙 ;
+         𝒙 := 𝑣𝑎𝑙 𝒛 ;
+  
+
+
+-}
+
 
   -- Store absolute value of 𝒙 in 𝒛
   abs : Program
@@ -35,25 +66,26 @@ module Language.ExampleProgs
 
 
   -- Euclids Algorithm for GCD
-  gcd : Program
-  gcd =  𝒙 := 𝑣𝑎𝑙 𝑿 ;
-         𝒚 := 𝑣𝑎𝑙 𝒀 ;
-        (𝔴𝔥𝔦𝔩𝔢 (𝑛𝑜𝑡 ( 𝑣𝑎𝑙 𝒙 == 𝑣𝑎𝑙 𝒚 ))
-         𝒹ℴ (𝔦𝔣 ( 𝑣𝑎𝑙 𝒙 > 𝑣𝑎𝑙 𝒚  )          
-            𝔱𝔥𝔢𝔫 (
-              𝒙 := 𝑣𝑎𝑙 𝒙 - 𝑣𝑎𝑙 𝒚 ;)
-            𝔢𝔩𝔰𝔢 (
-              𝒚 := 𝑣𝑎𝑙 𝒚 - 𝑣𝑎𝑙 𝒙 ;)  ;) );
+  gcd : (𝑿 𝒀 : Exp) → Program
+  gcd 𝑿 𝒀 =
+      𝒙 := 𝑿 ;
+      𝒚 := 𝒀 ;
+     (𝔴𝔥𝔦𝔩𝔢 (𝑛𝑜𝑡 ( 𝑣𝑎𝑙 𝒙 == 𝑣𝑎𝑙 𝒚 ))
+      𝒹ℴ (𝔦𝔣 ( 𝑣𝑎𝑙 𝒙 > 𝑣𝑎𝑙 𝒚  )          
+         𝔱𝔥𝔢𝔫 (
+           𝒙 := 𝑣𝑎𝑙 𝒙 - 𝑣𝑎𝑙 𝒚 ;)
+         𝔢𝔩𝔰𝔢 (
+           𝒚 := 𝑣𝑎𝑙 𝒚 - 𝑣𝑎𝑙 𝒙 ;)  ;) );
 
 
   -- Multiply 𝑿 and 𝒀, and store in 𝒛, but
   -- without using multiplication operator
   -- ((11.4) in TSOP,Gries)
   -- {b ≥ 0 } add* { 𝒛 == 𝑿 * 𝒀 } 
-  add* : Program
-  add* =  
-       𝒙 := 𝑣𝑎𝑙 𝑿 ;
-       𝒚 := 𝑣𝑎𝑙 𝒀 ;
+  add* : (𝑿 𝒀 : Exp) → Program
+  add* 𝑿 𝒀 =  
+       𝒙 := 𝑿 ;
+       𝒚 := 𝒀 ;
        𝒛 := 𝑐𝑜𝑛𝑠𝑡 ⓪ ;
       (𝔴𝔥𝔦𝔩𝔢
         (   ( 𝑣𝑎𝑙 𝒚 > 𝑐𝑜𝑛𝑠𝑡 ⓪ ∧ 𝑒𝑣𝑒𝑛〈 𝑣𝑎𝑙 𝒚 〉 )

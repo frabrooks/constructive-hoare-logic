@@ -3,7 +3,7 @@
 
 -- Lib imports
 import Relation.Binary.PropositionalEquality as Eq
-open Eq using ( _≡_  ; inspect ; Reveal_·_is_ ; refl ; subst ; sym )
+open Eq using ( _≡_  ; _≢_ ; inspect ; Reveal_·_is_ ; refl ; subst ; sym )
 open import Data.Maybe using ( Maybe ; just ; nothing ; Is-just )
 open import Relation.Nullary using ( yes ;  no )
 open import Data.Sum
@@ -29,7 +29,8 @@ module Language.Assertions
   -- Mini-Imp language
   open import Language.Expressions 𝔡 𝔖 
 
-  -- Assertions (𝐴) are a synonym for expressions.
+  -- Assertions/𝐴 are a synonym for expressions.
+  Assertion = Exp
   𝐴 = Exp
   -- This does allow for some assertions that we
   -- would not normally perhaps consider as
@@ -143,13 +144,13 @@ module Language.Assertions
   -- P ⇒ Q = (s : S) → Assert P s → Assert Q s
 
   -- x == 2 ^ y == 1
-  a₁ : 𝐴
+  private a₁ : 𝐴
   a₁ = ((𝑣𝑎𝑙 𝒙) == (𝑐𝑜𝑛𝑠𝑡 ②))
        ∧
        ((𝑣𝑎𝑙 𝒚) == (𝑐𝑜𝑛𝑠𝑡 ①))
 
   -- x == 2
-  a₂ : 𝐴
+  private a₂ : 𝐴
   a₂ = (𝑣𝑎𝑙 𝒙) == (𝑐𝑜𝑛𝑠𝑡 ②)
 
   --𝒫 : 𝑃 e1
@@ -192,6 +193,35 @@ module Language.Assertions
   sub e' id e@(term (Var id')) with id ?id= id'
   ... | yes _ = e'
   ... | no  _ = e
+
+
+  -- :(  Need to figure out what is going on with sub
+  --     and start writing report!!!!
+  --     Ought to have had Exp as an record interface as
+  --     well, then Exp → Free Variable would be possible
+  --     Forget, this now though, just write report
+
+  -- old-sub⁻¹ : ∀ 𝒙 𝒚 → 𝒙 ≢ 𝒚 → (𝑬 : Exp) → sub (𝑣𝑎𝑙 𝒙) 𝒚 (sub (𝑣𝑎𝑙 𝒚) 𝒙 𝑬) ≡ 𝑬
+
+  sub⁻¹ : ∀ 𝒙 𝒚 P → sub (𝑣𝑎𝑙 𝒚) 𝒙 (sub (𝑣𝑎𝑙 𝒙) 𝒚 P) ≡ sub (𝑣𝑎𝑙 𝒚) 𝒙 P
+  sub⁻¹ x y (op₂ l o r) rewrite sub⁻¹ x y l | sub⁻¹ x y r = refl
+  sub⁻¹ x y (op₁ o P)   rewrite sub⁻¹ x y P = refl
+  sub⁻¹ x y (𝑐𝑜𝑛𝑠𝑡 _) = refl
+  sub⁻¹ x y (term 𝒕)  = refl
+  sub⁻¹ x y (term 𝒇)  = refl
+  sub⁻¹ x y (𝑣𝑎𝑙 v)   with y ?id= v
+  ---------------------------------------
+  sub⁻¹ x y (𝑣𝑎𝑙 v) | no ¬p with x ?id= v
+  sub⁻¹ x y (𝑣𝑎𝑙 v) | no ¬p | yes q = refl
+  sub⁻¹ x y (𝑣𝑎𝑙 v) | no ¬p | no ¬q = refl
+  ---------------------------------------
+  sub⁻¹ x y (𝑣𝑎𝑙 v) | yes p with x ?id= v | x ?id= x
+  sub⁻¹ x y (𝑣𝑎𝑙 v) | yes _ | yes _ | yes _ = refl
+  sub⁻¹ x y (𝑣𝑎𝑙 v) | yes _ | yes _ | no ¬w = ⊥-elim (¬w refl)  
+  sub⁻¹ x y (𝑣𝑎𝑙 v) | yes p | no  _ | yes _ rewrite p = refl
+  sub⁻¹ x y (𝑣𝑎𝑙 v) | yes _ | no  _ | no ¬w = ⊥-elim (¬w refl)  
+
+
 
 
 

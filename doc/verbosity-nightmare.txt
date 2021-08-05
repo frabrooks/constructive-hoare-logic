@@ -1,0 +1,52 @@
+?0
+  : (s : S) →
+    Σ
+    (Data.Maybe.Relation.Unary.Any.Any (λ _ → Agda.Builtin.Unit.⊤)
+     ((getVarVal 𝒙 s ==𝓿 evalExp (sub (term (Var 𝒛)) 𝒚 𝒀) s) &&𝓿
+      (getVarVal 𝒛 s ==𝓿 evalExp (sub (term (Var 𝒛)) 𝒚 𝑿) s)))
+    (λ x → Data.Bool.Base.T (toTruthValue x)) →
+    (ϕ
+     : Σ Agda.Builtin.Nat.Nat
+       (λ ℱ →
+          Data.Maybe.Relation.Unary.Any.Any (λ _ → Agda.Builtin.Unit.⊤)
+          (Evaluation.Evaluation.ssEvalwithFuel 𝔡 𝔖 ℱ (𝒚 := term (Var 𝒛) ;)
+           s))) →
+    Σ
+    (Data.Maybe.Relation.Unary.Any.Any (λ _ → Agda.Builtin.Unit.⊤)
+     ((getVarVal 𝒙 (Data.Maybe.to-witness (proj₂ ϕ)) ==𝓿
+       evalExp 𝒀 (Data.Maybe.to-witness (proj₂ ϕ)))
+      &&𝓿
+      (getVarVal 𝒚 (Data.Maybe.to-witness (proj₂ ϕ)) ==𝓿
+       evalExp 𝑿 (Data.Maybe.to-witness (proj₂ ϕ)))))
+    (λ x → Data.Bool.Base.T (toTruthValue x))
+?1
+  : (s : S) →
+    Σ
+    (Data.Maybe.Relation.Unary.Any.Any (λ _ → Agda.Builtin.Unit.⊤)
+     ((getVarVal 𝒙 s ==𝓿 evalExp (sub (term (Var 𝒛)) 𝒚 𝒀) s) &&𝓿
+      (getVarVal 𝒛 s ==𝓿 evalExp (sub (term (Var 𝒛)) 𝒚 𝑿) s)))
+    (λ x → Data.Bool.Base.T (toTruthValue x)) →
+    (ϕ
+     : Σ Agda.Builtin.Nat.Nat
+       (λ ℱ →
+          Data.Maybe.Relation.Unary.Any.Any (λ _ → Agda.Builtin.Unit.⊤)
+          (Evaluation.Evaluation.ssEvalwithFuel 𝔡 𝔖 ℱ (𝒚 := term (Var 𝒛) ;)
+           s))) →
+    Σ
+    (Data.Maybe.Relation.Unary.Any.Any (λ _ → Agda.Builtin.Unit.⊤)
+     ((getVarVal 𝒙 (Data.Maybe.to-witness (proj₂ ϕ)) ==𝓿
+       evalExp 𝒀 (Data.Maybe.to-witness (proj₂ ϕ)))
+      &&𝓿
+      (getVarVal 𝒚 (Data.Maybe.to-witness (proj₂ ϕ)) ==𝓿
+       evalExp 𝑿 (Data.Maybe.to-witness (proj₂ ϕ)))))
+    (λ x → Data.Bool.Base.T (toTruthValue x))
+?2
+  : ⟪ (_ Language.Expressions.∧ _) (𝒚 =̌= 𝒀) (𝒛 =̌= 𝑿) ⟫
+    𝒙 := term (Var 𝒚) ; ⟪
+    (_ Language.Expressions.∧ _) (𝒙 =̌= 𝒀) (𝒛 =̌= 𝑿) ⟫
+?3
+  : ⟪ (_ Language.Expressions.∧ _) (𝒚 =̌= 𝒀) (𝒙 =̌= 𝑿) ⟫
+    𝒛 := term (Var 𝒙) ; ⟪
+    (_ Language.Expressions.∧ _) (𝒙 =̌= 𝒀) (𝒛 =̌= 𝑿) ⟫
+?4 : 𝑃 ((_ Language.Expressions.∧ _) (𝒙 =̌= 𝒀) (𝒚 =̌= 𝑿)) (‵ ϕ)
+?5 : Data.Bool.Base.T (toTruthValue ?4)

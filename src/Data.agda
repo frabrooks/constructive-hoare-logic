@@ -24,20 +24,24 @@ module Data where
   open import Data.Bool.Base as Bool using (true; false)
   
   record Value-Implementation : Set₁ where
-
-
+  
     field
       Id        : Set
       Val       : Set
-
+      
       -- Identifiers for use in the
       -- specification of programs
       𝒙         : Id
       𝒚         : Id
       𝒛         : Id
-      𝑿         : Id
-      𝒀         : Id
-      𝒁         : Id
+
+      -- Get new / free identifier
+      freshId²   : ∀ {𝒙 𝒚} → New² {Id} 𝒙 𝒚
+      freshId³   : ∀ {𝒘 𝒙 𝒚} → New³ {Id} 𝒘 𝒙 𝒚
+
+--      𝑿         : Id
+--      𝒀         : Id
+--      𝒁         : Id
       
       -- Truth constants
       𝑻         : Maybe Val
@@ -58,18 +62,20 @@ module Data where
       ⓪        : Val
       ①        : Val
       ②        : Val
-      ③        : Val
-      ④        : Val
-      ⑤        : Val
-      ⑥        : Val
-      ⑦        : Val
-      ⑧        : Val
-      ⑨        : Val
- 
-      -- maybe not needed?
-      𝔁≢𝔂       : 𝒙 ≡ 𝒚 → ⊥
-      𝔁≢𝔃       : 𝒙 ≡ 𝒛 → ⊥
-      𝔂≢𝔃       : 𝒚 ≡ 𝒛 → ⊥
+--      ③        : Val
+--      ④        : Val
+--      ⑤        : Val
+--      ⑥        : Val
+--      ⑦        : Val
+--      ⑧        : Val
+--      ⑨        : Val
+--      ⑩        : Val
+
+      -- Vars are distinct
+      -- Maybe not needed
+      -- PROBS remove this one: 𝔁≢𝔂       : 𝒙 ≡ 𝒚 → ⊥
+      𝒙≢𝒛       : 𝒙 ≡ 𝒛 → ⊥
+      𝒚≢𝒛       : 𝒚 ≡ 𝒛 → ⊥
 
       {-
       is𝑻 : Maybe Val → Set -- (As a proposition)
@@ -100,6 +106,10 @@ module Data where
   
       _?id=_    : Decidable {A = Id} _≡_
       --_?val=_   : Val → Val → Bool
+
+      -- ∀ Id _≡
+--      var≡      : (i : Id) → i ?id= i
+--      var¬≢     : (i : Id) → ¬ (i ?id= i) → ⊥
     
     ⊨ : Maybe Val → Set
     ⊨ x = Σ (WFF x) (T ∘ toTruthValue)
@@ -200,6 +210,8 @@ module Data where
       ConjunctionElim₂ : ∀ x y → ⊨ (x &&𝓿 y) → ⊨ y
 
       ConjunctionIntro : ∀ x y → ⊨ x → ⊨ y → ⊨ (x &&𝓿 y)
+
+      ConjunctionComm  : ∀ x y → (x &&𝓿 y) ≡ (y &&𝓿 x)
 
       NegationIntro : ∀ v → ⊭ v → ⊨ (¬𝓿 v)
       NegationElim  : ∀ v → ⊭ (¬𝓿 v) → ⊨ v

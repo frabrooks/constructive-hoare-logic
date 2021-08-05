@@ -60,7 +60,7 @@ module Hoare-Logic.Axioms
            → ⟪ S ⟫ Q ⟪ R ⟫
 
 
-  D2-Rule-of-Composition : ∀ {Q₁} {Q₂} {P} {R₁} {R}
+  D2-Rule-of-Composition : ∀ {P} {R₁} {R} {Q₁} {Q₂}
 
         → ⟪ P ⟫ Q₁ ⟪ R₁ ⟫ → ⟪ R₁ ⟫ Q₂ ⟪ R ⟫
   -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --
@@ -122,7 +122,7 @@ module Hoare-Logic.Axioms
 
 -- ═══════════════════════════════════════════════════════════════════════════════ --
 
-  D2-Rule-of-Composition {Q₁} {Q₂} PQR₁ PQR₂ s ⊢P (ℱ , t₁₂)
+  D2-Rule-of-Composition {_} {_} {_} {Q₁} {Q₂} PQR₁ PQR₂ s ⊢P (ℱ , t₁₂)
     with ⌊ᵗ⌋-split ℱ s Q₁ Q₂ t₁₂
   ... | ϕ rewrite sym (Δ ϕ)
       = let ⊢R₁ = PQR₁ s ⊢P (ℱ , (Lᵗ ϕ))
