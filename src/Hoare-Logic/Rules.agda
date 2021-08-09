@@ -16,8 +16,8 @@ open import Function using ( _∘_ )
 open import Data.Sum using (_⊎_ ; inj₁ ; inj₂)
 open import Data.Unit using ( ⊤ ; tt )
 
-open import Data using (Data-Implementation)
-open import State using (State-Implementation)
+open import Data-Interface using (Data-Implementation)
+open import State-Interface using (State-Implementation)
 open import Misc
 
 
@@ -109,7 +109,7 @@ module Hoare-Logic.Rules
       ... | no  q rewrite evalExp-Var x (updateState i v s)
                           | ignoreTop i x v q s = refl
 
-      go : Σ⊢ (updateState i v s) P
+      go : ⊨ (updateState i v s) P
       go rewrite evalExp-updState P e i v s eq = 𝑤𝑓𝑓 , ⊢sub
 
 
@@ -131,31 +131,31 @@ module Hoare-Logic.Rules
 
 -- ═══════════════════════════════════════════════════════════════════════════════ --
 
-  D3-While-Rule {P} {B} {C} PBCP s Σ⊢P (suc ℱ , ⌊ᵗCᵗ⌋) = go (suc ℱ) Σ⊢P ⌊ᵗCᵗ⌋ 
+  D3-While-Rule {P} {B} {C} PBCP s ⊨P (suc ℱ , ⌊ᵗCᵗ⌋) = go (suc ℱ) ⊨P ⌊ᵗCᵗ⌋ 
       where
       ------------------------------------------------------------
       -- Using mutually recursive functions go and go-true      
-      go : ∀ {s} ℱ → Σ⊢ s P → (⌊ᵗCᵗ⌋ : ⌊ᵗ ℱ ⸴ (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⸴ s ᵗ⌋)
-           → Σ⊢ (″ ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₒ B) &&ₒ P )
+      go : ∀ {s} ℱ → ⊨ s P → (⌊ᵗCᵗ⌋ : ⌊ᵗ ℱ ⸴ (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⸴ s ᵗ⌋)
+           → ⊨ (″ ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₒ B) &&ₒ P )
       -- ℱ needs to be an argument by itself outside the Sigma type
       -- so we can recurse on it as Agda can't see it always decrements
       -- with each call if it is inside the product.
       ---------------------------------------------------------------
       -- case where B is true
-      go-true : ∀ {s} {ℱ} {v} → Σ⊢ s P → (evalExp B s ≡ just v)
+      go-true : ∀ {s} {ℱ} {v} → ⊨ s P → (evalExp B s ≡ just v)
               → (toTruthValue {just v} (just tt) ≡ true)
               → (⌊ᵗCᵗ⌋ : ⌊ᵗ ℱ ⸴ (C 𝔱𝔥𝔢𝔫 𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⸴ s ᵗ⌋)
-              → Σ⊢ (to-witness ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₒ B) &&ₒ P)
-      go-true {s} {ℱ} Σ⊢P p₁ p₂ ⌊ᵗCᵗ⌋
+              → ⊨ (to-witness ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₒ B) &&ₒ P)
+      go-true {s} {ℱ} ⊨P p₁ p₂ ⌊ᵗCᵗ⌋
           with ⌊ᵗ⌋-split ℱ s C (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⌊ᵗCᵗ⌋
       ... | record { Lᵗ = Lᵗ ; ℱ' = ℱ' ; Rᵗ = Rᵗ ; lt = lt ; Δ = Δ } = Λ
          where
-         Σ⊢B : Σ⊢ s B
-         Σ⊢B rewrite p₁ = (just tt , subst T (sym p₂) tt)
-         Σ⊢P&B : Σ⊢ s (op₂ P &&ₒ B)
-         Σ⊢P&B = ConjunctionIntro _ _ Σ⊢P Σ⊢B  
-         Σ⊢P' : Σ⊢ (″ Lᵗ) P
-         Σ⊢P' = PBCP s Σ⊢P&B (ℱ , Lᵗ)
+         ⊨B : ⊨ s B
+         ⊨B rewrite p₁ = (just tt , subst T (sym p₂) tt)
+         ⊨P&B : ⊨ s (op₂ P &&ₒ B)
+         ⊨P&B = ConjunctionIntro _ _ ⊨P ⊨B  
+         ⊨P' : ⊨ (″ Lᵗ) P
+         ⊨P' = PBCP s ⊨P&B (ℱ , Lᵗ)
          
          -- Proof of termination of rhs of split with ℱ'
          Rᵗ+ : ⌊ᵗ ℱ' +ᴺ (k lt) ⸴ (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⸴ (″ Lᵗ) ᵗ⌋
@@ -172,30 +172,30 @@ module Hoare-Logic.Rules
          Δ' : ″ Rᵗℱ ≡ ″ ⌊ᵗCᵗ⌋
          Δ' rewrite isDet = Δ         
          -- which we can now use in a recursive call: (suc ℱ) ⇒ ℱ
-         GO  : Σ⊢ (″ Rᵗℱ) (op₂ (op₁ ¬ₒ B) &&ₒ P)
-         GO  = go {″ Lᵗ} ℱ Σ⊢P' Rᵗℱ
+         GO  : ⊨ (″ Rᵗℱ) (op₂ (op₁ ¬ₒ B) &&ₒ P)
+         GO  = go {″ Lᵗ} ℱ ⊨P' Rᵗℱ
          
          -- and finally get the type we need via substitution with Δ'
-         Λ : Σ⊢ (″ ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₒ B) &&ₒ P) 
-         Λ = subst (λ s → Σ⊢ s (op₂ (op₁ ¬ₒ B) &&ₒ P)) Δ' GO
+         Λ : ⊨ (″ ⌊ᵗCᵗ⌋) (op₂ (op₁ ¬ₒ B) &&ₒ P) 
+         Λ = subst (λ s → ⊨ s (op₂ (op₁ ¬ₒ B) &&ₒ P)) Δ' GO
       ---------------------------------------------------------------
       -- case where B is false
-      go-false : ∀ {s} {v} → Σ⊢ s P → (evalExp B s ≡ just v)
+      go-false : ∀ {s} {v} → ⊨ s P → (evalExp B s ≡ just v)
                  → (toTruthValue {just v} (just tt) ≡ false)
-                 → Σ⊢ s (op₂ (op₁ ¬ₒ B) &&ₒ P)            
-      go-false {s} {v} Σ⊢P p₁ p₂ = ConjunctionIntro _ _ Σ⊢¬B Σ⊢P
+                 → ⊨ s (op₂ (op₁ ¬ₒ B) &&ₒ P)            
+      go-false {s} {v} ⊨P p₁ p₂ = ConjunctionIntro _ _ ⊨¬B ⊨P
         where
-        ⊭B : ⊭ (just v)
+        ⊭B : ⊬ (just v)
         ⊭B rewrite p₁ = (just tt) , subst (T ∘ not) (sym p₂) tt
-        Σ⊢¬B : Σ⊢ s (op₁ ¬ₒ B)
-        Σ⊢¬B rewrite p₁ = (NegationIntro (just v) (⊭B))
+        ⊨¬B : ⊨ s (op₁ ¬ₒ B)
+        ⊨¬B rewrite p₁ = (NegationIntro (just v) (⊭B))
       ---------------------------------------------------------------
-      go {s} (suc ℱ) Σ⊢P ⌊ᵗCᵗ⌋ with
+      go {s} (suc ℱ) ⊨P ⌊ᵗCᵗ⌋ with
           evalExp B s  | inspect (evalExp B) s
       ... | f@(just v) | [ p₁ ] with
           toTruthValue {f} (any tt) | inspect (toTruthValue {f}) (any tt)
-      ... | true  | [ p₂ ] = go-true {s} {ℱ} Σ⊢P p₁ p₂ ⌊ᵗCᵗ⌋
-      ... | false | [ p₂ ] rewrite Is-just-just ⌊ᵗCᵗ⌋ = go-false Σ⊢P p₁ p₂
+      ... | true  | [ p₂ ] = go-true {s} {ℱ} ⊨P p₁ p₂ ⌊ᵗCᵗ⌋
+      ... | false | [ p₂ ] rewrite Is-just-just ⌊ᵗCᵗ⌋ = go-false ⊨P p₁ p₂
       ---------------------------------------------------------------
       -- ════════════════════════════════════════════════════════════
 
@@ -223,34 +223,34 @@ module Hoare-Logic.Rules
         ... | true = inj₁ (refl , (n , h) , refl)
         ... | false = inj₂ (refl , (n , h) , refl)
 
-      go : Σ⊢ (‵ t) Q
+      go : ⊨ (‵ t) Q
       go with if-then-else-term t
       ... | v , C▵v , inj₁ (⊢v , Σ[ᵗA] , Δ) rewrite Δ = Ω₂ 
         where
           -- C &&ₒ P is true in state s
-          Ω₁ : Σ⊢ s (op₂ C &&ₒ P)
+          Ω₁ : ⊨ s (op₂ C &&ₒ P)
           Ω₁ rewrite C▵v = ConjunctionIntro _ _ 
             ((any tt) , subst T (sym ⊢v) tt) (Pis𝑃 , ⊢P)
  
           -- ∴ Q is true in result of A
-          Ω₂ : Σ⊢ (‵ Σ[ᵗA]) Q 
+          Ω₂ : ⊨ (‵ Σ[ᵗA]) Q 
           Ω₂ = triple₁ s Ω₁ Σ[ᵗA]
       
       ... | v , C▵v , inj₂ (¬⊢v , Σ[ᵗB] , Δ)  rewrite Δ = Ω₂ 
         where
           -- ¬C &&ₒ P is true in state s
-          Ω₁ : Σ⊢ s (op₂ (op₁ ¬ₒ C) &&ₒ P) 
+          Ω₁ : ⊨ s (op₂ (op₁ ¬ₒ C) &&ₒ P) 
           Ω₁ rewrite C▵v = ConjunctionIntro _ _
             μ₂ (Pis𝑃 , ⊢P)
               where
-              μ₁ : ⊭ (just v)
+              μ₁ : ⊬ (just v)
               μ₁ = (any tt) , subst (T ∘ not) (sym ¬⊢v) tt 
 
-              μ₂ : ⊨ ((¬𝓿 (just v)))
+              μ₂ : ⊢ ((¬𝓿 (just v)))
               μ₂ = NegationIntro (just v) μ₁
               
           -- ∴ Q is true in result of B
-          Ω₂ : Σ⊢ (‵ Σ[ᵗB] ) Q
+          Ω₂ : ⊨ (‵ Σ[ᵗB] ) Q
           Ω₂ = triple₂ s Ω₁ Σ[ᵗB]
 
 
