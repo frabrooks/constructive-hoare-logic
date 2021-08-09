@@ -120,7 +120,7 @@ module Representations.Data-Val-as-Int-Rep where
     𝔡 : Value-Implementation
     𝔡 = record { ℤ-Value-Imp }
 
-    open Value-Implementation 𝔡 using (⊨ ; ⊭)
+    open Value-Implementation 𝔡 using (⊢ ; ⊭)
 
     ----------------------------------------------------------
     -- Basic lemmas / operations
@@ -421,7 +421,7 @@ module Representations.Data-Val-as-Int-Rep where
     DeMorgan₂ (just (inj₂ true)) (just (inj₂ true)) = refl
 
 
-    ConjunctionElim₁ : ∀ x y → ⊨ (x &&𝓿 y) → ⊨ x
+    ConjunctionElim₁ : ∀ x y → ⊢ (x &&𝓿 y) → ⊢ x
     ConjunctionElim₁ (just (inj₁ +[1+ _ ])) (just (inj₁ +[1+ _ ])) T = (any-just tt) , tt
     ConjunctionElim₁ (just (inj₁ +[1+ _ ])) (just (inj₁ (ns _))) T = (any-just tt) , tt
     ConjunctionElim₁ (just (inj₁ (ns _))) (just (inj₁ _)) T = (any-just tt) , tt
@@ -431,7 +431,7 @@ module Representations.Data-Val-as-Int-Rep where
     ConjunctionElim₁ (just (inj₂ true)) (just (inj₂ _)) T = (any-just tt) , tt
 
 
-    ConjunctionElim₂ : ∀ x y → ⊨ (x &&𝓿 y) → ⊨ y
+    ConjunctionElim₂ : ∀ x y → ⊢ (x &&𝓿 y) → ⊢ y
     ConjunctionElim₂ (just (inj₁ +[1+ _ ])) (just (inj₁ +[1+ _ ])) T = (any-just tt) , tt
     ConjunctionElim₂ (just (inj₁ (ns _))) (just (inj₁ +[1+ _ ])) T = (any-just tt) , tt
     ConjunctionElim₂ (just (inj₁ +[1+ _ ])) (just (inj₁ (ns _))) T = (any-just tt) , tt
@@ -442,7 +442,7 @@ module Representations.Data-Val-as-Int-Rep where
     ConjunctionElim₂ (just (inj₂ true)) (just (inj₁ (ns _))) T = (any-just tt) , tt
     ConjunctionElim₂ (just (inj₂ true)) (just (inj₂ true)) T = any-just tt , tt
 
-    ConjunctionIntro : ∀ x y → ⊨ x → ⊨ y → ⊨ (x &&𝓿 y)
+    ConjunctionIntro : ∀ x y → ⊢ x → ⊢ y → ⊢ (x &&𝓿 y)
     ConjunctionIntro (just (inj₁ +[1+ _ ])) (just (inj₁ +[1+ _ ])) _ _ = any-just tt , tt
     ConjunctionIntro (just (inj₁ +[1+ _ ])) (just (inj₁ (ns Nat.zero))) _ _ = any-just tt , tt
     ConjunctionIntro (just (inj₁ +[1+ _ ])) (just (inj₁ (ns (s _)))) _ _ = any-just tt , tt
@@ -454,11 +454,11 @@ module Representations.Data-Val-as-Int-Rep where
     ConjunctionIntro (just (inj₂ true)) (just (inj₁ (ns _))) _ _ = any-just tt , tt
     ConjunctionIntro (just (inj₂ true)) (just (inj₂ true)) _ _ = any-just tt , tt
 
-    NegationIntro : ∀ v → ⊭ v → ⊨ (¬𝓿 v)
+    NegationIntro : ∀ v → ⊭ v → ⊢ (¬𝓿 v)
     NegationIntro (just (inj₁ (𝑝 Nat.zero))) ⊭v = (any-just tt) , tt
     NegationIntro (just (inj₂ false)) ⊭v = (any-just tt) , tt
 
-    NegationElim  : ∀ v → ⊭ (¬𝓿 v) → ⊨ v
+    NegationElim  : ∀ v → ⊭ (¬𝓿 v) → ⊢ v
     NegationElim (just (inj₁ +[1+ _ ])) ⊭¬v = (any-just tt) , tt
     NegationElim (just (inj₁ (ns _))) ⊭¬v = (any-just tt) , tt
     NegationElim (just (inj₂ true)) ⊭¬v = (any-just tt) , tt

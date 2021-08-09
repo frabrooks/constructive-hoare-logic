@@ -18,8 +18,8 @@ open import Function.Equivalence hiding (sym ; _∘_ ; map ; id )
 open import Data.Sum using (_⊎_ ; inj₁ ; inj₂)
 
 -- Project imports
-open import Data using (Data-Implementation )
-open import State using (State-Implementation)
+open import Data-Interface using (Data-Implementation )
+open import State-Interface using (State-Implementation)
 open import Misc
 
 

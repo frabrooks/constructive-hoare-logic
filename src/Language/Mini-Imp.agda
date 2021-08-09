@@ -9,8 +9,8 @@ open import Data.Empty
 open import Data.Unit using ( ⊤ )
 open import Data.Product
 
-open import Data using (Data-Implementation)
-open import State using (State-Implementation)
+open import Data-Interface using (Data-Implementation)
+open import State-Interface using (State-Implementation)
 
 module Language.Mini-Imp
   (𝔡 : Data-Implementation )

@@ -19,7 +19,7 @@ open import Data.Empty
 
 
 -- Local imports
-open import Data using (Data-Implementation)
+open import Data-Interface using (Data-Implementation)
 open import List-Patterns
 
 

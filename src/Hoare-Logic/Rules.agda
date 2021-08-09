@@ -21,7 +21,7 @@ open import State using (State-Implementation)
 open import Misc
 
 
-module Hoare-Logic.Axioms
+module Hoare-Logic.Rules
   (𝔡 : Data-Implementation )
   (𝔖 : State-Implementation 𝔡 ) where
 
@@ -227,7 +227,7 @@ module Hoare-Logic.Axioms
       go with if-then-else-term t
       ... | v , C▵v , inj₁ (⊢v , Σ[ᵗA] , Δ) rewrite Δ = Ω₂ 
         where
-          -- C & P is true in state s
+          -- C &&ₒ P is true in state s
           Ω₁ : Σ⊢ s (op₂ C &&ₒ P)
           Ω₁ rewrite C▵v = ConjunctionIntro _ _ 
             ((any tt) , subst T (sym ⊢v) tt) (Pis𝑃 , ⊢P)

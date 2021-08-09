@@ -1,22 +1,11 @@
-{-# OPTIONS --allow-unsolved-metas #-}
 
 -- Lib Imports
-open import Relation.Binary.PropositionalEquality using ( _≡_ ; refl ; subst ; sym ; cong ; inspect ; [_] )
-open import Data.Maybe.Relation.Unary.Any renaming ( just to any-just )
-open import Data.Product using (Σ ; Σ-syntax ; _×_  ; _,_  ; proj₁ ; proj₂ )
-open import Data.Maybe using ( Maybe ; just ; nothing ; _>>=_ ; Is-just ; to-witness )
-import Data.Maybe.Relation.Unary.Any 
-open Data.Maybe.Relation.Unary.Any.Any renaming ( just to any-just )
-open import Data.Unit using (⊤ ; tt)
-open import Data.Empty using ( ⊥ ; ⊥-elim )
-open import Data.Bool hiding (_∧_)
-open import Function using (_$_ ; _∘_)
-open import Function.Equivalence hiding (sym)
-
+open import Relation.Binary.PropositionalEquality as Eq using (_≡_ ; refl ; sym)
+open import Data.Product using (Σ)
 
 -- Project Imports
-open import Data using (Data-Implementation)
-open import State using (State-Implementation)
+open import Data-Interface using (Data-Implementation)
+open import State-Interface using (State-Implementation)
 
 open import Misc
 
@@ -33,188 +22,173 @@ module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
 
   open import Evaluation.Termination 𝔡 𝔖
 
-  -- Hoare's Notation: {P}C{Q}   P → wp C P   ( Partial Correctness )
-  ⟪_⟫_⟪_⟫ :  𝐴 → C → 𝐴 → Set
-  ⟪ P ⟫ C ⟪ Q ⟫ = ( s : S ) → Σ⊢ s P → (ϕ : ⌊ᵗ C ⸴ s ᵗ⌋) → Σ⊢ (‵ ϕ) Q
-  
-  -- This is wrong, as it would suggest that 𝑭 is a precondition of
-  -- all programs that guarantees termination in all states
-  -- No, it is write, as 𝑭 IS a precondition of all programs
-  -- I.e. if you have a state satisfying 𝑭 then... (bluff!)
-  -- 
-
-  -- Total Correctness 
-  ⟦_⟧_⟦_⟧ :  𝐴 → C → 𝐴 → Set
-  ⟦ P ⟧ C ⟦ Q ⟧ = (s : S) → ⌊ᵗ C ⸴ s ᵗ⌋ × ⟪ P ⟫ C ⟪ Q ⟫
-
-
-{-
-  '⟪_⟫_⟪_⟫ :  𝐴 → C → 𝐴 → Set
-  '⟪ P ⟫ C ⟪ Q ⟫ = Σ S (λ s → Σ⊢ s P × (ϕ : ⌊ᵗ C ⸴ s ᵗ⌋) → Σ⊢ (‵ ϕ) Q)
--}
-
-  -- Fixing a P is the same as fixing an S, this is what we want
-  -- as P, as the precondition, defines the acceptable starting states.
-
-  -- the type ℕ is supposed to capture all possible natural numbers
-  -- the type ⟪_⟫_⟪_⟫ :  𝐴 → C → 𝐴 → Set is supposed to caputer
-  -- the set of all Hoare triples. What is a Hoare triple?
-  -- Well, it is a Predicate P, that guarantees termination
-  -- of.... IT IS THE SET OF ALL P THAT GUARANTEE TERMINATION OF S IN Q
-  -- So the definitions above more or less capture the notion of the WP
-
-
-  ------- THIS PAR MIGHT NEED RETHINK
-  -- * NO DUHHHH, triple = P ⇒ 𝑤𝑝(S,R)
-  -- Syntacticly this is not quite the WP * as outlined in Dijkstra as
-  -- Dijkstra identifies the WP as the singular predicate that
-  -- identifies the possible starting states (with two predicates
-  -- that both identify the same starting state being taken
-  -- as identical, a luxury not given for free in Agda where
-  -- the equivalence of 'x == 1 ^ y == 1' and 'y == 1 ^ x == 1'
-  -- with respect to the state spaces they both capture would
-  -- have to be proved; fortunately there is no need within the
-  -- current scope of the project for us to do so.
-
-  -- So the P in ⟪ P ⟫ x := y / x ⟪ Q ⟫ could be 'x != 0' the true
-  -- WP, but it could also be 'x == 7', which only implies the WP.
-
-  -- Nonetheless we can see that semantically the notion of WP is
-  -- captured within our definition of hoare triples if we look
-  -- at '( s : S ) → Σ⊢ s P' as one semantic unit that defines
-  -- a subset of S.
-  
-  -- * n.b. that 'Σ⊢ s P' unpacks to 'P is a proposition (all variables
-  -- are defined and no div by zero error, i.e. P is WFF) and that
-  -- proposition is true'
-
-  -- And, P ⇒ wp(S,Q) when seen as predicates specifying
-  -- sets of states, is equivalent to P ⊆ wp(C,Q)
-  -- e.g. if S = 'x ≔ 2/x'
-  -- then wp(S,Q) = `Σ x. x != 0` (i.e. all S where that is the case)
-  -- P might be `Σ x. x = 7` which of course implies wp(S,Q)
-  -- The set of all states that satisfy P, will of course be a subset
-  -- of the states that satisfy wp(C,Q)
-
-
-
-  -- THIS ISN'T AN IMPORTANT QUESTION. THIS IS WAY OFF SCOPE
-  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-{- NOT SURE WHERE TO PLACE THIS
-  THE POINT OF THE 𝑤𝑝 PROPERTIES, OVER ALL S (mechanism), IS TO
-  KEEP US HONEST AND MAKE SURE THAT OUR PREDICATE TRANSFORMERS
-  THAT MAKE UP OUR LANGUAGE ALWAYS SATISFY PROPERTIES 1-4 IN
-  DIJKSTRA, IF THEY DID NOT THEN WE WOULD SIMPLY BE 'MASSAGING
-  PREDICATES' IN A WAY THAT DIDN'T PRESERVE THE NOTION OF 
-  PRE/POST-CONDITION-NESS
--}
-
-  -- !!!!!
-  -- We might want to ask if we can also formalise the properties of the 𝑤𝑝
-  -- as outlined in Dijkstra and Gries, but doing so will prove difficult
-  -- as while ⟦ P ⟧ S ⟦ Q ⟧ is semantically equivalent to P ⇒ 𝑤𝑝(S,Q), we
-  -- have not actually formalised the notion of 𝑤𝑝 for all possible S.
-  
-  -- In fact we only have it formalised for the assignment mechanism in
-  -- the form of the sub function. 𝑤𝑝( i := e ； , R ) = sub e i R.
-  -- For the rest of the mechanisms we have skipped formalising
-  -- 𝒘𝑝 for them and gone straight to formalising the theorems/rules that
-  -- make reasoning about the mechanisms easier.
-  
-  -- Formalising --- read, explicitly constructing --- 𝑤𝑝(S,R) for all S,R
-  -- would likely, as Dijkstra puts it, 'defy the size of our
-  -- sheet of paper, our patience, or our (analytical) ingenuity' with our
-  -- 'sheet of paper' in this case being agda; this is not to say that it
-  -- could not be done, but it would be exceedingly cumbersome.
-  -- !!!!!
-
-  -- As an example of this difficulty we could examine the first
-  -- propert, the so called, law of the excluded miracle:
-
-  -------------------------------------------------------
-  -- Law of the Excluded Miracle
-
-  -- A first attempt to formalise this may result in
-  -- the following signature:
-
-  P1 : ∀ M P → ⟦ P ⟧ M ⟦ 𝐹 ⟧ → P ≡ 𝐹
-  P1 s P h = {!!}
-
-  -- This isn't quite right however and wouldn't be
-  -- provable as 𝐹 in [Dijkstra] is shorthand for
-  -- both 'the predicate that is always 𝐹' and
-  -- therefore the ∅ when considered as a state space.
-
-  -- This handwaving isn't available to us
-  -- with our deep embedding however as 𝐹 isn't the
-  -- only 𝐴 that fails to capture any states.
-  -- Any 𝐴 that is an ill-formed formula
-  -- also corresponds to the ∅. This is a
-  -- consequence of not including domain(P) etc.
-  -- in our embedding.
+  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  -- Hoare Triples
   --
-  -- So we need a mechanism to relate all P
-  -- that define ∅.
-  -- i.e. 'x == 1/0' ≃ 𝐹 ≃ 'x ≤ y ^ x ∉ S'
+  -- Partial Correctness:
+  ⟪_⟫_⟪_⟫ :  𝐴 → C → 𝐴 → Set
+  ⟪ P ⟫ C ⟪ Q ⟫ = ( s : S ) → ⊨ s P → (ϕ : ⌊ᵗ C ⸴ s ᵗ⌋) → ⊨ (‵ ϕ) Q
+  -- For all states s, if s satisfies P, and if we have a constructive proof of
+  -- termination of C in state s, then Q will be true for the resultant state.
+  
+  -- n.b.  This type signature admits 𝐹 as a valid precondition of all programs
+  --       and postconditions a la the absurd function.
+  
+  -- n.b.  `Σ⊢ s 𝐴' unpacks to `Σ (𝑃 𝐴 s) (T ∘ toTruthValue)', or in prose:   
+  --       `The assertion 𝐴 at s denotes a valid proposition/𝑊𝐹𝐹 (i.e. all
+  --       variables are defined in s and no there is no divide by zero error)
+  --       and the truth value of that proposition/𝑊𝐹𝐹 is True'
 
-  -- We can do this with the following:
-  record _=𝐹 (P : 𝐴) : Set where
-    field
-      is𝐹  : (s : S) → Σ⊢ s P → ⊥
-  open _=𝐹 public
 
-  record _=𝑇 (P : 𝐴) : Set where
-    field
-      is𝑇  : (s : S) → Σ⊢ s P
-  open _=𝑇 public
+  -- Total Correctness which is partial correctness + a proof of termination.
+  ⟦_⟧_⟦_⟧ :  𝐴 → C → 𝐴 → Set
+  ⟦ P ⟧ C ⟦ Q ⟧ = ( s : S ) → ⊨ s P → Σ ⌊ᵗ C ⸴ s ᵗ⌋ (λ ϕ → ( ⊨ (‵ ϕ) Q))
 
-  -- And now we can fairly tivially formalise the
-  -- law of the excluded miracle like so:
-  P1' : ∀ C P Q → (Q =𝐹) → ⟦ P ⟧ C ⟦ Q ⟧ → (P =𝐹)
-  P1' C P Q Q=𝐹 tc = record { is𝐹 = λ s ⊢P  →
-     let t = proj₁ (tc s)  in
-     let pc = proj₂ (tc s) in
-     let ⊢Q = pc s ⊢P t    in
-     is𝐹 Q=𝐹 (‵ (proj₁ (tc s))) ⊢Q }
+  -- n.b. that the above definitions relate to the notions of the Weakest
+  --      Precondition and the Weakest Liberal Precondtion of a program 𝐶
+  --      for postcondition 𝑄, as described in [1] and [2]*, as follows:
+  --
+  --                  ⟦ 𝑃 ⟧ 𝐶 ⟦ 𝑄 ⟧   ⇔   𝑃 ⇒ 𝑤𝑝(𝐶,𝑄)
+  --                  ⟪ 𝑃 ⟫ 𝐶 ⟪ 𝑄 ⟫   ⇔   𝑃 ⇒ 𝑤𝑙𝑝(𝐶,𝑄)
+  --                                                                *(see below)
 
-  -- Monotonicity
-  -- The difficulties continue however as there's no
-  -- discernable way to prove the following.
-  P2 : ∀ {C} {P} {P'} {Q} {R}
-  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --  
-     → Q ⇒ R → ⟦ P ⟧ C ⟦ Q ⟧ → ⟦ P' ⟧ C ⟦ R ⟧
+  -- A note on notation:
+    -- Hoare's original notation was 𝑃 { 𝐶 } 𝑄 to denote partial correctness but
+    -- { 𝑃 } 𝐶 { 𝑄 } is now more common; however, no standard notation exits.
+    -- The notation in Gries[2] actually reserves { 𝑃 } 𝐶 { 𝑄 } to denote 𝑡𝑜𝑡𝑎𝑙
+    -- correctness and 𝑃 {𝐶} 𝑄 to denote partial correctness. Here then, as '{}'
+    -- is reserved for Agda's syntax, I introduce the use of ⟪⟫ and ⟦⟧ bracketed
+    -- triples for partial and total correctness respectively.
+    
+  -- ════════════════════════════════════════════════════════════════════════════    
+  -- Relation to Weakest Precondition / Weakest Liberal Precondition
+
+  -- In Dijkstra[1], the notion of a 𝑤𝑒𝑎𝑘𝑒𝑠𝑡 𝑝𝑟𝑒𝑐𝑜𝑛𝑑𝑖𝑡𝑖𝑜𝑛 (𝑤𝑝) and a weakest
+  -- 𝑙𝑖𝑏𝑒𝑟𝑎𝑙 precondition (𝑤𝑙𝑝) are defined as a means of giving semantics to
+  -- programming language constructs. Each is characterised as a predicate
+  -- transformer that, for a given construct, transforms a desired postcondition
+  -- into the corresponding precondition that in the case of:
+  --
+  --         𝑤𝑝: is the condition that captures all states from which we can
+  --             guarantee termination of the mechanism 𝑎𝑛𝑑 that the resultant
+  --             state satisfies the postcondition.
+  --
+  --        𝑤𝑙𝑝: alternatively, is the condition the input state must satisfy
+  --             to guarantee that the resultant state satisfies the
+  --             postcondition, but only 𝑖𝑓 the mechanism terminates.
+  --             
+  -- Hoare triples 'under the hood' can be seen as statements in the underlying
+  -- predicate calculus. A precondition for a mechanism 𝐶 and postcondition 𝑄
+  -- is actually a predicate 𝑃 s.t. 𝑃 ⇒ 𝑤𝑝(𝐶,𝑄) , or 𝑃 ⇒ 𝑤𝑙𝑝(𝐶,𝑄) depending
+  -- on whether or not the precondition is a partial-precondition (⟪⟫) or a
+  -- total-precondition (⟦⟧).
+  --
+  -- Speaking of the 'underlying predicate calculus', predicates/assertions can
+  -- be viewed in two ways; as predicates or as the subset of the state space
+  -- that they capture: e.g `𝑃 ⇒ 𝑤𝑝(𝐶,𝑄) ⇒ 𝑇' ⇔ `𝑃 ⊆ 𝑤𝑝(𝐶,𝑄) ⊆ S'.
+  --
+  -- Normally there would be no need to distinguish between the two different
+  -- views and both could be kept in mind and used interchangeably a la [1].
+  -- However, in a syntax driven, constructive formalisation, this absence of
+  -- specificity is not an option nor desirable.
+  -- 
+  -- This means that, as far as pre and post conditions are concerned, the
+  -- predicates `𝓍 && 𝓎' and `𝓎 && 𝓍' are distinguishable from one another.
+  -- Their equivalence with respect to the states spaces they describe is
+  -- something we would need to prove; which in this case would ammount to
+  -- proving the commutativity of the && operator as it has been defined.
+  
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- Properties of 𝑤𝑝 and 𝑤𝑙𝑝
+  --
+  -- In [1] Dijkstra outlines some properties that the notion of 𝑤𝑝 and 𝑤𝑙𝑝
+  -- must satisfy for them to make sense as a means of giving semantics to a
+  -- mechanism and or programming construct. Failure to satisfy these properties
+  -- would mean we were no longer manipulating pre/post-conditions but
+  -- instead were just 'massaging predicates' as Dijkstra puts it.
+  --
+  -- These properties are proved classically in [1] but given the scope of this
+  -- project, it seemed natural to consider including these properties in the
+  -- formalisation as well. Attempting to do so however was met with a number
+  -- of challenges.
+  --
+  -- First of all, a subtlety that I did not fully appreciate at first, these
+  -- properties pertain to the 𝑛𝑜𝑡𝑖𝑜𝑛 of using 𝑤𝑝 or 𝑤𝑙𝑝 to 𝑑𝑒𝑓𝑖𝑛𝑒 mechanisms,
+  -- not any particular mechanism that ℎ𝑎𝑠 been defined. Remembering that
+  -- one of the central tenets of constructive mathematics is to constrain our
+  -- thinking to objects that ℎ𝑎𝑣𝑒 been defined, and indeed the proofs in [1]
+  -- make use of classical not constructive reasoning, this leaves two options
+  -- if these properties are to be formalised in this project:
+  --
+  --     - Abandon constructive reasoning and formalise these properties in a
+  --     classical sense, either by making use of postulates in Agda or by
+  --     switching to an alternative proof assistant, such as 𝐼𝑠𝑎𝑏𝑒𝑙𝑙𝑒, with
+  --     built in support for classical reasoning principles such as the Law of
+  --     the Excluded Middle and the Axiom of Choice.
+  --
+  --     - Or, as that first approach would be a substantial deviation from the
+  --     current project's scope, merely formalise that each of the mechanisms
+  --     that ℎ𝑎𝑣𝑒 been defined do indeed satisfy each one of these properties;
+  --     both for completeness sake and as a means of sanity checking the
+  --     formalisations of the mechanisms that have been formalised.
+  --
+  -- That second option, however, leads to further complications. Firstly, the
+  -- constructs/mechanisms that have been formalised in this work (:=,
+  -- 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_, 𝔴𝔥𝔦𝔩𝔢_𝔡𝔬 ⋯) have been formalised in terms of how they are to
+  -- be executed, which is precisely the approach to defining programming
+  -- constructs that the notion of 𝑤𝑝  and 𝑤𝑙𝑝 were trying to avoid by instead
+  -- defining them in terms of their 𝑤𝑝/𝑤𝑙𝑝. So there is an incongruency there.
+  -- 
+  -- The only mechanism for which the 𝑤𝑝/𝑤𝑙𝑝 has been formalised is the
+  -- assignment (`:=') mechanism via the `sub' function in 𝐴𝑠𝑠𝑒𝑟𝑡𝑖𝑜𝑛𝑠.𝑎𝑔𝑑𝑎.
+  -- e.g.
+  --                 𝑤𝑝( 𝑖 := 𝑒 , 𝑅 ) = sub 𝑒 𝑖 𝑅
+  --
+  -- n.b. the equality above has not been formalised itself but the weaker fact
+  -- that 𝑠𝑢𝑏 𝑒 𝑖 𝑅 ⇒ 𝑤𝑝( 𝑖 := 𝑒 , 𝑅 ) ℎ𝑎𝑠 been formalised in the form of
+  -- D0-Axiom-of-Assignment in 𝑅𝑢𝑙𝑒𝑠.𝑎𝑔𝑑𝑎 and after some thought we can convince
+  -- ourselves that 𝑠𝑢𝑏 𝑒 𝑖 𝑅 doesn't just 𝑖𝑚𝑝𝑙𝑦, but actually 𝑖𝑠 the 𝑤𝑝.
+  -- One step towards this conviction comes from inspecting the type signature
+  -- of D0 where it is clear that the definition depends on nothing other than
+  -- the mechanism itself (𝑒, 𝑖), and the postcondition (𝑅):
+  --
+  --         D0-Axiom-of-assignment : ∀ 𝑖 𝑒 𝑅 → ⟪ 𝑠𝑢𝑏 𝑒 𝑖 𝑅 ⟫ 𝑖 := 𝑒 ⟪ 𝑅 ⟫
+  --
+  -- For the rest of the mechanisms, however, no attempt has been made to
+  -- formalise their corresponding 𝑤𝑝/𝑤𝑙𝑝 as defined in [1]. The reason
+  -- being that formalising --- read, explicitly constructing --- 𝑤𝑝(S,R)
+  -- for all S,R would likely, as Dijkstra puts it, 'defy the size of our
+  -- sheet of paper, our patience, or our (analytical) ingenuity' with our
+  -- 'sheet of paper' in this case being Agda; this is not to say that it
+  -- could not be done, but it would be exceedingly cumbersome.
+
+  -- Nonetheless, it may be within reach to formalise the 𝑤𝑝-properties for
+  -- just the 𝑤𝑝 that has been defined, viz the sub function. This turns out
+  -- to be pretty trivial, taking property 1, the so called `Law of the
+  -- Excluded Miracle' as a start:
+
+  LawOfExcludedMiracle-𝑤𝑝⦅:=,-⦆ : ∀ {i e} → sub e i 𝐹 ≡ 𝐹
+  LawOfExcludedMiracle-𝑤𝑝⦅:=,-⦆ = refl
+
+  -- And for Property 2, Monotonicity:
+  Monotonicity-𝑤𝑝⦅:=,-⦆ : ∀ P P' Q R i e
+  
+     → Q ⇒ R → sub i e R ≡ P → sub i e R ≡ P'
   -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --
                                      → P ⇒ P'
-  P2 Q⇒R h₁ h₂ = {!!}
-  -- Again we find that our first attempt at a formulation
-  -- isn't quite right as if we take `P' == 𝐹` and P and Q
-  -- to be such that P captures any non-empty statespace
-  -- then we have a contradiction in P ⇒ P' (P ⇒ 𝐹)
+                                     
+  Monotonicity-𝑤𝑝⦅:=,-⦆ P P' Q R i e Q⇒R eq₁ eq₂  s x = go
+    where
+    go : ⊨ s P'
+    go rewrite (sym eq₂) | (sym eq₁) = x
 
-  -- The problem is that at the type level, P in
-  -- ⟦ P ⟧ S ⟦ Q ⟧ doesn't represent 𝑤𝑝(S,Q) but
-  -- rather all P s.t. P ⊆ 𝑤𝑝(S,Q).
-  
-  -- Under the current formalisation, we have no way
-  -- of grapling with 𝑤𝑝 as an object in and
-  -- of itself except in the case of the single assignment
-  -- operator. 
+  -- The further properties may or may not be within reach of our formalisation
+  -- but by this point it is clear that what is being formalised here is very
+  -- far off scope for the project and not adding value to the project, so
+  -- the exploration of formalising facets of weakest preconditions ends here.
 
-  -- Formalising all 𝑤𝑝 in an even more comprehensive deep embedding
-  -- of propositional logic  would take us one step removed from the
-  -- scope of the project
-  -- as we would then be formalising the consistency of the 𝑤𝑝 as a means
-  -- by which to describe programming constructs, rather than formalising
-  -- the rules/theorems by which pre and post conditions are manipulated
-  -- within the Hoare Logic proof calculus.
+  -- Refs
+    -- [1] - E. W. Dijkstra, A Discipline of Programming, 1976
+    -- [2] - D. Gries, The Science of Programming, 1981
+  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  -- The further properties may or may not be within reach of our
-  -- formalisation but are left alone for now for future work.
-
-  -- property 3:
-
-  P3 : ∀ {C} {P} {P'} {Q} {R}
-         →  ( ⟦ P ⟧ C ⟦ Q ⟧ × ⟦ P' ⟧ C ⟦ R ⟧ )
-         ⇔  ⟦ P ∧ P' ⟧ C ⟦ Q ∧ R ⟧
-  P3 {C} {P} {P'} {Q} {R} = {!!}

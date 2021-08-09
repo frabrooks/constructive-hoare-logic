@@ -17,8 +17,8 @@ open import Data.Unit using ( ⊤ ; tt )
 
 
 -- Project imports
-open import Data using (Data-Implementation )
-open import State using (State-Implementation)
+open import Data-Interface using (Data-Implementation )
+open import State-Interface using (State-Implementation)
 open import Misc
 
 
