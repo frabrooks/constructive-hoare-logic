@@ -28,7 +28,7 @@ module Language.Assertions
   -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   -- Assertions(𝐴)/Conditions are just expressions from our Mini-Imp language.
   
-  𝐴 = Exp
+  Assertion = Exp
 
   -- These assertions are to be manipulated using the deeply embedded logical
   -- rules defined in the 𝐷𝑎𝑡𝑎-𝐼𝑛𝑡𝑒𝑟𝑓𝑎𝑐𝑒.𝑎𝑔𝑑𝑎 and potentially implemented in 𝔡.
@@ -177,7 +177,7 @@ module Language.Assertions
   -- and are therefore propositions that can direct the flow of computation.
 
   
-  𝑊𝐹𝐹 : 𝐴 → S → Set
+  𝑊𝐹𝐹 : Assertion → S → Set
   𝑊𝐹𝐹 a s = Is-just (evalExp a s)
 
 
@@ -189,8 +189,8 @@ module Language.Assertions
   Assert s A = Σ (𝑊𝐹𝐹 A s) (T ∘ toTruthValue)
 
   -- Alternative, condensed syntax*
-  ⊨ : ∀ s A → Set
-  ⊨ = Assert
+  _⊨_ : ∀ s A → Set
+  _⊨_ = Assert
 
   -- The use of `⊨' to represent here and `⊢' in 𝐷𝑎𝑡𝑎-𝐼𝑛𝑡𝑒𝑟𝑓𝑎𝑐𝑒.𝑎𝑔𝑑𝑎 may be a
   -- little different to standard practice, semantic and syntactic entailment :
@@ -199,20 +199,20 @@ module Language.Assertions
 
   -- We can now encode what it means for one Assertion to imply another like so:
   
-  _⇒_ : 𝐴 → 𝐴 → Set
-  P ⇒ Q = (s : S) → ⊨ s P → ⊨ s Q
+  _⇒_ : Assertion → Assertion → Set
+  P ⇒ Q = (s : S) → s ⊨ P → s ⊨ Q
 
 
   -- Allowing reasoning/manipulation of assertions like so:
 
   -- 𝑥 == 2 ∧ 𝑦 == 1
-  private a₁ : 𝐴
+  private a₁ : Assertion
   a₁ = ((𝑣𝑎𝑙 𝒙) == (𝑐𝑜𝑛𝑠𝑡 ②))
        ∧
        ((𝑣𝑎𝑙 𝒚) == (𝑐𝑜𝑛𝑠𝑡 ①))
 
   -- x == 2
-  private a₂ : 𝐴
+  private a₂ : Assertion
   a₂ = (𝑣𝑎𝑙 𝒙) == (𝑐𝑜𝑛𝑠𝑡 ②)
 
   inferenceExample : a₁ ⇒ a₂

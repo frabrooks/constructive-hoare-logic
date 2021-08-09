@@ -3,8 +3,8 @@
 
 
 -- Project Imports
-open import Data using (Data-Implementation)
-open import State using (State-Implementation)
+open import Data-Interface using (Data-Implementation)
+open import State-Interface using (State-Implementation)
 
 module Language.ExampleProgs
   (𝔡 : Data-Implementation )
@@ -15,7 +15,6 @@ module Language.ExampleProgs
   open import Language.Expressions 𝔡 𝔖
   open import Language.Mini-Imp 𝔡 𝔖
 
-  
   Program = C
 
   -- Swap values of 𝒙 and 𝒚
@@ -23,37 +22,6 @@ module Language.ExampleProgs
   swap = 𝒛 := 𝑣𝑎𝑙 𝒙 ;
          𝒙 := 𝑣𝑎𝑙 𝒚 ;
          𝒚 := 𝑣𝑎𝑙 𝒛 ;
-
-{-
-  Distinct, obviously works
-
-  swap : Id → Id → Program
-  swap 𝒙 𝒚 =
-         𝒛 := 𝑣𝑎𝑙 𝒙 ;
-         𝒙 := 𝑣𝑎𝑙 𝒚 ;
-         𝒚 := 𝑣𝑎𝑙 𝒛 ;
-
-  𝒛 == 𝒙 ∨ 𝒛 == 𝒚 obviously doesn't work
-
-  swap : Id → Id → Program
-  swap 𝒙 𝒚 =
-         𝒛 := 𝑣𝑎𝑙 𝒙 ;
-         𝒙 := 𝑣𝑎𝑙 𝒚 ;
-         𝒚 := 𝑣𝑎𝑙 𝒛 ;
-
-
-  𝒙 == 𝒚 then nothing happens but nothing needs
-         to happen
-
-  swap : Id → Id → Program
-  swap 𝒙 𝒚 =
-         𝒛 := 𝑣𝑎𝑙 𝒙 ;
-         𝒙 := 𝑣𝑎𝑙 𝒙 ;
-         𝒙 := 𝑣𝑎𝑙 𝒛 ;
-  
-
-
--}
 
 
   -- Store absolute value of 𝒙 in 𝒛
@@ -98,5 +66,4 @@ module Language.ExampleProgs
           𝔢𝔩𝔰𝔢 (
              𝒚 := 𝑣𝑎𝑙 𝒚 - 𝑐𝑜𝑛𝑠𝑡 ① ;
              𝒛 := 𝑣𝑎𝑙 𝒛 + 𝑣𝑎𝑙 𝒙    ;)    ;) );
-
 

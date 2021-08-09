@@ -5,8 +5,8 @@ open import Relation.Nullary using ( yes ;  no )
 open import Data.Empty using ( ⊥ ; ⊥-elim )
 
 -- Project Imports
-open import Data using (Data-Implementation)
-open import State using (State-Implementation)
+open import Data-Interface using (Data-Implementation)
+open import State-Interface using (State-Implementation)
 
 open import Misc
 
@@ -124,6 +124,6 @@ module Hoare-Logic.SwapExample ( 𝔡 : Data-Implementation )
           go s x rewrite ConjunctionComm
                            (evalExp (𝒙 =̌= 𝑐𝑜𝑛𝑠𝑡 𝑿) s )
                            (evalExp (𝒚 =̌= 𝑐𝑜𝑛𝑠𝑡 𝒀) s )
-                 = subst (λ p → Σ⊢ s p ) (sym s₄) x
+                 = subst (λ p → s ⊨ p ) (sym s₄) x
 
 

@@ -26,8 +26,8 @@ module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
   -- Hoare Triples
   --
   -- Partial Correctness:
-  ⟪_⟫_⟪_⟫ :  𝐴 → C → 𝐴 → Set
-  ⟪ P ⟫ C ⟪ Q ⟫ = ( s : S ) → ⊨ s P → (ϕ : ⌊ᵗ C ⸴ s ᵗ⌋) → ⊨ (‵ ϕ) Q
+  ⟪_⟫_⟪_⟫ :  Assertion → C → Assertion → Set
+  ⟪ P ⟫ C ⟪ Q ⟫ = ( s : S ) → s ⊨ P → (ϕ : ⌊ᵗ C ⸴ s ᵗ⌋) → (‵ ϕ) ⊨ Q
   -- For all states s, if s satisfies P, and if we have a constructive proof of
   -- termination of C in state s, then Q will be true for the resultant state.
   
@@ -41,8 +41,8 @@ module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
 
 
   -- Total Correctness which is partial correctness + a proof of termination.
-  ⟦_⟧_⟦_⟧ :  𝐴 → C → 𝐴 → Set
-  ⟦ P ⟧ C ⟦ Q ⟧ = ( s : S ) → ⊨ s P → Σ ⌊ᵗ C ⸴ s ᵗ⌋ (λ ϕ → ( ⊨ (‵ ϕ) Q))
+  ⟦_⟧_⟦_⟧ :  Assertion → C → Assertion → Set
+  ⟦ P ⟧ C ⟦ Q ⟧ = ( s : S ) → s ⊨ P → Σ ⌊ᵗ C ⸴ s ᵗ⌋ (λ ϕ → (‵ ϕ) ⊨ Q)
 
   -- n.b. that the above definitions relate to the notions of the Weakest
   --      Precondition and the Weakest Liberal Precondtion of a program 𝐶
@@ -179,7 +179,7 @@ module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
                                      
   Monotonicity-𝑤𝑝⦅:=,-⦆ P P' Q R i e Q⇒R eq₁ eq₂  s x = go
     where
-    go : ⊨ s P'
+    go : s ⊨ P'
     go rewrite (sym eq₂) | (sym eq₁) = x
 
   -- The further properties may or may not be within reach of our formalisation
