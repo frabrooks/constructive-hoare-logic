@@ -19,14 +19,17 @@ open import Data.Bool
 open Nat using ( ℕ ) renaming ( suc to sucn ; _≟_ to _≟ⁿ_ ) 
 open import Data.Bool.Base as Bool using (true; false)
 
-
--- Abstract out the representation of data (i.e. the Values and Variables)
-
+-- Project Imports
 open import Misc
 
 module Data-Interface where
 
+  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  -- Abstract out the representation of data and expression language (i.e. the
+  -- Values and Variables and operations upon them)
 
+
+  -- ════════════════════════════════════════════════════════════════════════════
   record Value-Implementation : Set₁ where
   
     field
@@ -36,6 +39,7 @@ module Data-Interface where
     -- Type synonym for values. Not all expressions/operations in a expression
     -- language implementation need to be well-defined (i.e. div by zero error)
     𝕍 = Maybe Val
+    WFF = Is-just
 
     field
       -- Identifiers for use in the formalisation of programs. The fact that
@@ -76,21 +80,19 @@ module Data-Interface where
     ⊢ : 𝕍 → Set
     ⊢ x = Σ (WFF x) (T ∘ toTruthValue)
 
-    ⊭ : 𝕍 → Set
-    ⊭ x = Σ (WFF x) (T ∘ not ∘ toTruthValue)
+    ⊬ : 𝕍 → Set
+    ⊬ x = Σ (WFF x) (T ∘ not ∘ toTruthValue)
 
   
-
+  -- ════════════════════════════════════════════════════════════════════════════
   record Operation-Implementation (𝔡 : Value-Implementation) : Set₁ where
       
     open Value-Implementation 𝔡
 
-
-    field 
-      --------------------------------------------------------
-      -- Operations
-      
-      -- binary 𝔹 ops
+    ---------------------------------------------------------------------------
+    field -- Operations
+    
+      -- Binary ops that semantically have type Bool
       _||𝓿_     : 𝕍 → 𝕍 → 𝕍
       _&&𝓿_     : 𝕍 → 𝕍 → 𝕍
       _==𝓿_     : 𝕍 → 𝕍 → 𝕍
@@ -99,22 +101,24 @@ module Data-Interface where
       _≥𝓿_      : 𝕍 → 𝕍 → 𝕍
       _>𝓿_      : 𝕍 → 𝕍 → 𝕍
 
-      -- binary 𝕍 ops
+      -- Binary ops that semantically have type Integer
       _+𝓿_      : 𝕍 → 𝕍 → 𝕍
       _-𝓿_      : 𝕍 → 𝕍 → 𝕍
       _*𝓿_      : 𝕍 → 𝕍 → 𝕍
       _%𝓿_      : 𝕍 → 𝕍 → 𝕍
       _/𝓿_      : 𝕍 → 𝕍 → 𝕍
 
-      -- unary operations
-      ¬𝓿        : 𝕍 → 𝕍
-      ++𝓿       : 𝕍 → 𝕍
-      ─-𝓿       : 𝕍 → 𝕍
-      ──𝓿       : 𝕍 → 𝕍
-      --------------------------------------------------------
-      -- Operation predicates
+      -- Unary operations
+      ¬𝓿        : 𝕍 → 𝕍 -- Negate truth value
+      ++𝓿       : 𝕍 → 𝕍 -- Increment
+      ─-𝓿       : 𝕍 → 𝕍 -- Decrement
+      ──𝓿       : 𝕍 → 𝕍 -- (* - 1)
+    
+    ---------------------------------------------------------------------------
+    field -- Operation Predicates
       
-      -- All binary operations
+      -- All binary operations. Use this type to add logical rules that will
+      -- pertain to all binary predicates.
       OP₂ : (𝕍 → 𝕍 → 𝕍) → Set
       ||𝓿₂  : OP₂ (_||𝓿_) 
       &&𝓿₂  : OP₂ (_&&𝓿_)    
@@ -129,7 +133,8 @@ module Data-Interface where
       %𝓿₂   : OP₂ (_%𝓿_ )     
       /𝓿₂   : OP₂ (_/𝓿_ )     
 
-      -- All unary operations
+      -- All unary operations. Use this type to add logical rules that will
+      -- pertain to all binary predicates.
       OP₁ : (𝕍 → 𝕍) → Set
       ¬𝓿₁  :  OP₁ (¬𝓿)
       ++𝓿₁ :  OP₁ (++𝓿)
@@ -159,6 +164,11 @@ module Data-Interface where
 
       :𝑤𝑓𝑓₁ : ∀ {∙} {x} (α : OP₁ ∙) → WFF x → WFF (∙ x)
 
+
+    ---------------------------------------------------------------------------
+    field -- Expression Manipulations
+
+
       DeMorgan₁ : ∀ x y → ¬𝓿 (x ||𝓿 y) ≡ (¬𝓿 x) &&𝓿 (¬𝓿 y)
 
       DeMorgan₂ : ∀ x y → ¬𝓿 (x &&𝓿 y) ≡ (¬𝓿 x) ||𝓿 (¬𝓿 y)
@@ -170,8 +180,8 @@ module Data-Interface where
 
       ConjunctionComm  : ∀ x y → (x &&𝓿 y) ≡ (y &&𝓿 x)
 
-      NegationIntro : ∀ v → ⊭ v → ⊢ (¬𝓿 v)
-      NegationElim  : ∀ v → ⊭ (¬𝓿 v) → ⊢ v
+      NegationIntro : ∀ v → ⊬ v → ⊢ (¬𝓿 v)
+      NegationElim  : ∀ v → ⊬ (¬𝓿 v) → ⊢ v
 
 
   record Data-Implementation : Set₁ where
