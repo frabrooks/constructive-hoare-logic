@@ -15,7 +15,7 @@ open import Level using (Level )
 
 module Misc where
 
-  WFF = Is-just
+  -- WFF = Is-just
   
   record New² {A : Set} (𝒙 𝒚 : A) : Set where
       field

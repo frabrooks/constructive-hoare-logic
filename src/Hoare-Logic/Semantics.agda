@@ -34,7 +34,7 @@ module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
   -- n.b.  This type signature admits 𝐹 as a valid precondition of all programs
   --       and postconditions a la the absurd function.
   
-  -- n.b.  `Σ⊢ s 𝐴' unpacks to `Σ (𝑃 𝐴 s) (T ∘ toTruthValue)', or in prose:   
+  -- n.b.  `⊨ s 𝐴' unpacks to `Σ (𝑃 𝐴 s) (T ∘ toTruthValue)', or in prose:   
   --       `The assertion 𝐴 at s denotes a valid proposition/𝑊𝐹𝐹 (i.e. all
   --       variables are defined in s and no there is no divide by zero error)
   --       and the truth value of that proposition/𝑊𝐹𝐹 is True'

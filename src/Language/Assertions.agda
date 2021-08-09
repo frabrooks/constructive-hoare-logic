@@ -72,9 +72,8 @@ module Language.Assertions
   -- we have lost this understanding as each assertion/expression is only
   -- a partial function of the state space.
   --
-  --
-  -- This is a problem often brushed
-  -- aside casually - if mentioned at all - in typical expositions of the subject
+  -- This is a problem often brushed aside casually - if mentioned at all - in
+  -- typical expositions of the subject. 
   --
   -- One can see why --- any sensible programmer will avoid writing code where     
   -- the non-zero-ness of a divisor is not obvious. Indeed, it is non-trivial       
@@ -84,17 +83,17 @@ module Language.Assertions
   -- sweaping things under the table is not an option nor desirable so the
   -- complication must be addressed.
   --
-  -- The source
-  -- of this complication is that not all the assertions we can form 𝑠𝑦𝑛𝑡𝑎𝑐𝑡𝑖𝑐𝑎𝑙𝑙𝑦
-  -- make sense 𝑠𝑒𝑚𝑎𝑛𝑡𝑖𝑐𝑎𝑙𝑙𝑦 - that is, not all expressions are 𝑊𝑒𝑙𝑙-𝐹𝑜𝑟𝑚𝑒𝑑-𝐹𝑜𝑟𝑚𝑢𝑙𝑎;
-  -- (1 / 0) is an assertion we can write that has no meaning, even with implicit
-  -- casting to boolean values, it is `stuck' - just as the C expression `𝑥++;'
-  -- is a valid C expression 𝑠𝑦𝑛𝑡𝑎𝑐𝑡𝑖𝑐𝑎𝑙𝑙𝑦, but has no meaning 𝑠𝑒𝑚𝑎𝑛𝑡𝑖𝑐𝑎𝑙𝑙𝑦 if 𝑥 is a float.
+  -- The source of this complication is that not all the assertions we can form
+  -- 𝑠𝑦𝑛𝑡𝑎𝑐𝑡𝑖𝑐𝑎𝑙𝑙𝑦 make sense 𝑠𝑒𝑚𝑎𝑛𝑡𝑖𝑐𝑎𝑙𝑙𝑦 - that is, not all expressions are
+  -- 𝑊𝑒𝑙𝑙-𝐹𝑜𝑟𝑚𝑒𝑑-𝐹𝑜𝑟𝑚𝑢𝑙𝑎; (1 / 0) is an assertion we can write that has no
+  -- meaning, even with implicit casting to boolean values, it is `stuck' - just
+  -- as the C expression `𝑥++;' is a valid C expression 𝑠𝑦𝑛𝑡𝑎𝑐𝑡𝑖𝑐𝑎𝑙𝑙𝑦, but has
+  -- no meaning 𝑠𝑒𝑚𝑎𝑛𝑡𝑖𝑐𝑎𝑙𝑙𝑦 if 𝑥 is a float.
   --
-  -- Semantically, this problem is resolved in [1] by introducing a predicate into the
-  -- expression/assertion language of the form 𝐷(𝐸) which returns true when the
-  -- given state lies within the domain of the expression/assertion 𝐸. The
-  -- weakest precondition of the assignment mechanism is then written as:
+  -- Semantically, this problem is resolved in [1] by introducing a predicate
+  -- into the expression/assertion language of the form 𝐷(𝐸) which returns true
+  -- when the given state lies within the domain of the expression/assertion 𝐸.
+  -- The weakest precondition of the assignment mechanism is then written as:
   --
   --             𝑤𝑝( 𝑥 := 𝐸 , 𝑅 ) = { 𝐷(𝐸) 𝒄𝒂𝒏𝒅* (sub 𝐸 𝑥 𝑅) } 
   --
@@ -144,7 +143,7 @@ module Language.Assertions
   -- in the specification for the Mini-Imp language to closely mirror C**.
 
 
-  -- * what on earth would it evaluate to?
+  -- * what on earth would it even evaluate to?
   -- ** C has no ability to to check if a variable has been defined as 𝐷(𝐸) does
 
   -- So we want a system that looks something like the following:
@@ -193,8 +192,8 @@ module Language.Assertions
   ⊨ : ∀ s A → Set
   ⊨ = Assert
 
-  -- The use of `⊨' to represent here and `⊢' in 𝐷𝑎𝑡𝑎-𝐼𝑛𝑡𝑒𝑟𝑓𝑎𝑐𝑒.𝑎𝑔𝑑𝑎 may be a little
-  -- different to standard practice, ????  semantic and syntactic entailment :
+  -- The use of `⊨' to represent here and `⊢' in 𝐷𝑎𝑡𝑎-𝐼𝑛𝑡𝑒𝑟𝑓𝑎𝑐𝑒.𝑎𝑔𝑑𝑎 may be a
+  -- little different to standard practice, semantic and syntactic entailment :
   -- distinction between WFF and 𝑊𝐹𝐹
 
 
