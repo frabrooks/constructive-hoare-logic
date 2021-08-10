@@ -90,7 +90,7 @@ module Language.Expressions ( 𝔡 : Data-Implementation )
 
 
   -- Const and var below are to simplify hard coding expressions within agda
-  -- e.g.    (op₂ (𝑣𝑎𝑟 𝔁) ( == :𝔹 ) (𝑐𝑜𝑛𝑠𝑡 ➋)) : Exp
+  -- e.g.    (op₂ (𝑣𝑎𝑟 𝔁) ( == :𝔹 ) (𝑐𝑜𝑛𝑠𝑡 ②)) : Exp
   pattern 𝑐𝑜𝑛𝑠𝑡 n = term (Const n)
   -- pattern 𝑣𝑎𝑟 i = term (Var i)
   pattern 𝑣𝑎𝑙 i = term (Var i)
@@ -208,8 +208,8 @@ module Language.Expressions ( 𝔡 : Data-Implementation )
                             
   evalTerm (Const x) _ = just x
   evalTerm (Var x) s = getVarVal x s
-  evalTerm  𝒕 _ = 𝑻
-  evalTerm  𝒇 _ = 𝑭
+  evalTerm  𝒕 _ = just 𝑻
+  evalTerm  𝒇 _ = just 𝑭
 
 
 
