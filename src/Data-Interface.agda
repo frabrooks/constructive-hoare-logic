@@ -1,23 +1,13 @@
 
 
 -- Lib Imports
-open import Relation.Binary.PropositionalEquality using ( _≡_ ; refl ; sym ; cong ; inspect ; [_] ; subst )
+open import Relation.Binary.PropositionalEquality using ( _≡_ )
 open import Relation.Binary using (Decidable)
-open import Relation.Nullary using ( yes ; no ; ¬_ )
-open import Relation.Nullary.Decidable using (False ; True ; isYes ; isNo ; ⌊_⌋ )
-open import Data.Product as Pr using ( Σ ; Σ-syntax ; _×_ ; _,_ ; proj₁ ; proj₂) 
-open import Data.Sum using ( _⊎_ ; inj₁ ; inj₂ ; fromInj₁ ; fromInj₂ ) renaming ( [_,_] to [_⸴_] )
+open import Data.Product as Pr using ( Σ ; _×_ ) 
 open import Data.Maybe
-import Data.Maybe.Relation.Unary.Any 
-open Data.Maybe.Relation.Unary.Any.Any renaming ( just to any-just )
-open import Level
-open import Data.Empty using ( ⊥ ; ⊥-elim )
-open import Function using ( _∘_ ; _$_ ; id  ) renaming ( flip to ′ )
-import Data.Integer as Int
-import Data.Nat as Nat
-open import Data.Bool
-open Nat using ( ℕ ) renaming ( suc to sucn ; _≟_ to _≟ⁿ_ ) 
-open import Data.Bool.Base as Bool using (true; false)
+open import Data.Empty using ( ⊥ )
+open import Function using ( _∘_ )
+open import Data.Bool.Base using (Bool ; T ; not ; true ; false)
 
 -- Project Imports
 open import Misc
