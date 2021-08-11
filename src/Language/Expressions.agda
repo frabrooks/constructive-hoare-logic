@@ -20,6 +20,7 @@ module Language.Expressions ( 𝔡 : Data-Implementation )
   open State-Implementation 𝔖
 
   -- ════════════════════════════════════════════════════════════════════════════
+  -- Language.Expressions:
 
   -- Definition of the Expression Language used in both the Mini-Imp programming
   -- language and the assertions manipulated within the Hoare-Logic calculus.
