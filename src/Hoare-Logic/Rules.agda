@@ -53,8 +53,8 @@ module Hoare-Logic.Rules
   -- Another deviation in this formalisation of note is that typically, or
   -- at least in [1] and [2], the 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_ and the 𝔴𝔥𝔦𝔩𝔢_𝑑𝑜_
   -- commands/mechanisms - referred to as the alternative/iterative commands
-  -- in [2] - are defined with non-determinism built in.
-  -- They take the form:
+  -- in [2] - are given in their most general form with non-determinism
+  -- built in. They take the form:
   --
   --         𝔴𝔥𝔦𝔩𝔢/𝔦𝔣 (BB) 𝑑𝑜
   --                          B₁ → S₁
