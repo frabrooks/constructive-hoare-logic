@@ -39,7 +39,7 @@ module Hoare-Logic.SwapExample ( 𝔡 : Data-Implementation )
   SWAP 𝑿 𝒀 = ∎
      where
      
-     -- Precondition P ← Reasoning backwards ← Postcondition Q
+     -- Reasoning backwards from Postcondition Q to Precondition P
      
      PRE : Assertion
      PRE = 𝒙 =̌= (𝑐𝑜𝑛𝑠𝑡 𝑿) ∧ 𝒚 =̌= (𝑐𝑜𝑛𝑠𝑡 𝒀)

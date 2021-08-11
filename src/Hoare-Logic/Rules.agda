@@ -1,6 +1,6 @@
 
 
--- Lib imports
+-- Lib Imports
 open import Data.Maybe using (Maybe ; just ; nothing ; Is-just ; to-witness ; maybe )
 open import Relation.Binary.PropositionalEquality as Eq using (_≡_ ; refl ; sym ; inspect ; Reveal_·_is_ ; cong ; subst ; [_] )
 open import Data.Maybe.Relation.Unary.Any
@@ -16,29 +16,68 @@ open import Function using ( _∘_ )
 open import Data.Sum using (_⊎_ ; inj₁ ; inj₂)
 open import Data.Unit using ( ⊤ ; tt )
 
+-- Local Imports
 open import Data-Interface using (Data-Implementation)
 open import State-Interface using (State-Implementation)
 open import Misc
 
-
+-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module Hoare-Logic.Rules
   (𝔡 : Data-Implementation )
   (𝔖 : State-Implementation 𝔡 ) where
 
+  -- Local Dependent Imports
   open Data-Implementation 𝔡
   open State-Implementation 𝔖
-
   open import Language.Expressions 𝔡 𝔖
   open import Language.Assertions  𝔡 𝔖
-
   open import Language.Mini-Imp 𝔡 𝔖
   open import Evaluation.Evaluation 𝔡 𝔖
   open import Evaluation.Termination 𝔡 𝔖
-
   open import Hoare-Logic.Semantics 𝔡 𝔖
 
--- ═══════════════════════════════════════════════════════════════════════════════ --
--- Axioms / Rules
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- Axioms / Rules :
+  --
+  -- Implementation/Proof of Axiom of Assignment and the core rules used in
+  -- Hoare Logic, viz, the rules of consequence, the rule of composition,
+  -- the while rule, and a conditional rule. Typically in Hoare-Logic, the
+  -- conditional rule is actually unnecessary as an 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_ construct
+  -- can be simulated via the 𝔴𝔥𝔦𝔩𝔢_𝑑𝑜_ construct - i.e. any program that can
+  -- be written with an 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_ can be rewritten with 𝔴𝔥𝔦𝔩𝔢_𝑑𝑜_. However
+  -- it is included in this formalisation as a result of the inclusion of
+  -- 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_ in the Mini-Imp language in which programs to be reasoned
+  -- about are to be encoded.
+  --
+  -- Another deviation in this formalisation of note is that typically, or
+  -- at least in [1] and [2], the 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_ and the 𝔴𝔥𝔦𝔩𝔢_𝑑𝑜_
+  -- commands/mechanisms - referred to as the alternative/iterative commands
+  -- in [2] - are defined with non-determinism built in.
+  -- They take the form:
+  --
+  --         𝔴𝔥𝔦𝔩𝔢/𝔦𝔣 (BB) 𝑑𝑜
+  --                          B₁ → S₁
+  --                        ▯ B₂ → S₂
+  --                          ...
+  --                        ▯ Bₙ → Sₙ
+  --                       𝑜𝑑
+  --
+  --         where BB = B₁ ∨ B₂ ∨ ... ∨ Bₙ
+  --
+  -- The non-determinism happens in the case that more than one guard Bᵢ is
+  -- true, in which case the corresponding Sᵢ that gets chosen for execution
+  -- is left unspecified. This non-deterministic interpretation of these
+  -- commands is not present in this formalisation, however, for the sake
+  -- of both simplicity/expediency and so as to more closely mirror real
+  -- world imperative languages, viz C, a la the project specification.
+  --
+  -- n.b. The most crucial lemma/proof used in proving the rules below is the 
+  -- ⌊ᵗ⌋-split function defined in 𝑇𝑒𝑟𝑚𝑖𝑛𝑎𝑡𝑖𝑜𝑛.𝑎𝑔𝑑𝑎 that allows for splitting a
+  -- constructive proof of termination of a program composed of two parts into
+  -- two corresponding proofs of termination of the constituent parts.
+  --
+  -- ════════════════════════════════════════════════════════════════════════════
+
 
   D0-Axiom-of-Assignment : ∀ i e P
 
@@ -81,8 +120,8 @@ module Hoare-Logic.Rules
               → ⟪ P ⟫  𝔦𝔣 C 𝔱𝔥𝔢𝔫 A 𝔢𝔩𝔰𝔢 B ; ⟪ Q ⟫
               
 
--- ⇩ Implementations / Proofs
--- ═══════════════════════════════════════════════════════════════════════════════ --
+  -- ⇩ Implementations / Proofs
+  -- ════════════════════════════════════════════════════════════════════════════
 
   D0-Axiom-of-Assignment i e P s (𝑤𝑓𝑓 , ⊢sub) (suc n , p)
       with evalExp e s | inspect (evalExp e) s
@@ -113,14 +152,14 @@ module Hoare-Logic.Rules
       go rewrite evalExp-updState P e i v s eq = 𝑤𝑓𝑓 , ⊢sub
 
 
--- ═══════════════════════════════════════════════════════════════════════════════ --
+  -- ════════════════════════════════════════════════════════════════════════════
 
   D1-Rule-of-Consequence-post x x₁ s x₂ ϕ = x₁ (to-witness (proj₂ ϕ)) (x s x₂ ϕ)
 
   D1-Rule-of-Consequence-pre {P} {Q} {R} {S} x x₁ s x₂ ϕ = x s (x₁ s x₂) ϕ
 
 
--- ═══════════════════════════════════════════════════════════════════════════════ --
+  -- ════════════════════════════════════════════════════════════════════════════
 
   D2-Rule-of-Composition {_} {_} {_} {Q₁} {Q₂} PQR₁ PQR₂ s ⊢P (ℱ , t₁₂)
     with ⌊ᵗ⌋-split ℱ s Q₁ Q₂ t₁₂
@@ -129,7 +168,7 @@ module Hoare-Logic.Rules
         in  PQR₂ (″ (Lᵗ ϕ)) ⊢R₁ ((ℱ' ϕ) , (Rᵗ ϕ))
 
 
--- ═══════════════════════════════════════════════════════════════════════════════ --
+  -- ════════════════════════════════════════════════════════════════════════════
 
   D3-While-Rule {P} {B} {C} PBCP s ⊨P (suc ℱ , ⌊ᵗCᵗ⌋) = go (suc ℱ) ⊨P ⌊ᵗCᵗ⌋ 
       where
@@ -200,7 +239,7 @@ module Hoare-Logic.Rules
       -- ════════════════════════════════════════════════════════════
 
 
--- ═══════════════════════════════════════════════════════════════════════════════ --
+  -- ════════════════════════════════════════════════════════════════════════════
 
   D4-Conditional-Rule {A} {B} {C} {P} {Q} triple₁ triple₂ s (Pis𝑃 , ⊢P) t = go
       where
@@ -246,7 +285,7 @@ module Hoare-Logic.Rules
               μ₁ : ⊬ (just v)
               μ₁ = (any tt) , subst (T ∘ not) (sym ¬⊢v) tt 
 
-              μ₂ : ⊢ ((¬𝓿 (just v)))
+              μ₂ : ⊢ ((¬ᵥ (just v)))
               μ₂ = NegationIntro (just v) μ₁
               
           -- ∴ Q is true in result of B
@@ -254,5 +293,6 @@ module Hoare-Logic.Rules
           Ω₂ = triple₂ s Ω₁ Σ[ᵗB]
 
 
--- ═══════════════════════════════════════════════════════════════════════════════ --
+  -- ════════════════════════════════════════════════════════════════════════════
+
 
