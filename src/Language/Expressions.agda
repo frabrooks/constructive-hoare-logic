@@ -7,21 +7,19 @@ open import Data.Empty using ( ⊥-elim )
 open import Relation.Nullary using ( yes ; no )
 open import Data.Maybe using (Maybe ; nothing ; just )
 
-
-
 -- Local Imports
 open import Data-Interface using (Data-Implementation)
 open import State-Interface using (State-Implementation)
 
+-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module Language.Expressions ( 𝔡 : Data-Implementation )
   (𝔖 : State-Implementation 𝔡 ) where
 
-  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   -- Local Dependent Imports
   open Data-Implementation 𝔡
   open State-Implementation 𝔖
 
-
+  -- ════════════════════════════════════════════════════════════════════════════
 
   -- Definition of the Expression Language used in both the Mini-Imp programming
   -- language and the assertions manipulated within the Hoare-Logic calculus.
