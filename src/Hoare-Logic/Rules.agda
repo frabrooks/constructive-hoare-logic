@@ -1,19 +1,20 @@
 
 
 -- Lib Imports
-open import Data.Maybe using (Maybe ; just ; nothing ; Is-just ; to-witness ; maybe )
-open import Relation.Binary.PropositionalEquality as Eq using (_≡_ ; refl ; sym ; inspect ; Reveal_·_is_ ; cong ; subst ; [_] )
+import Data.Maybe as MB
+open MB using (Maybe ; just ; nothing ; Is-just ; to-witness ; maybe )
+import Relation.Binary.PropositionalEquality as Eq 
+open Eq using (_≡_ ; refl ; sym ; inspect ; subst ; [_] )
 open import Data.Maybe.Relation.Unary.Any
-open import Data.Product using (Σ ; Σ-syntax ; _×_  ; _,_  ; proj₁ ; proj₂ )
+open import Data.Product using (Σ ; _×_  ; _,_  ; proj₂ )
 open import Data.Bool using (true ; false ; T ; not )
-open import Relation.Nullary using ( ¬_  ; yes ; no )
-open import Data.Empty using ( ⊥ ; ⊥-elim )
-open import Data.Nat using (ℕ ; suc ; zero ; _≤″_  ) renaming (_+_ to _+ᴺ_ ; less-than-or-equal to ≤with )
+open import Relation.Nullary using ( yes ; no )
+open import Data.Empty using ( ⊥ )
+open import Data.Nat as ℕat using (suc ; zero ; _≤″_ )
+     renaming (_+_ to _+ᴺ_ ; less-than-or-equal to ≤with )
 open _≤″_
-open import Data.Nat.Properties using ( +-comm ; +-suc )
-open import Agda.Builtin.Nat using ( _-_ )
 open import Function using ( _∘_ )
-open import Data.Sum using (_⊎_ ; inj₁ ; inj₂)
+open import Data.Sum using (_⊎_ ; inj₁ ; inj₂ )
 open import Data.Unit using ( ⊤ ; tt )
 
 -- Local Imports
