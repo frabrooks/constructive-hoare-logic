@@ -1,23 +1,28 @@
 
 -- Lib imports
 open import Relation.Binary.PropositionalEquality using ( _≡_ ; refl )
-open import Data.Maybe using ( Maybe ; just ; nothing )
-open import Data.Bool using ( true )
-import Data.Integer using ( ℤ )
-import Data.Nat using (ℕ)
-open import Data.Empty
-open import Data.Unit using ( ⊤ )
-open import Data.Product
 
+-- Local Imports
 open import Data-Interface using (Data-Implementation)
 open import State-Interface using (State-Implementation)
 
+-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module Language.Mini-Imp
   (𝔡 : Data-Implementation )
   (𝔖 : State-Implementation 𝔡 ) where
 
+  -- Local Dependent Imports
   open Data-Implementation 𝔡
   open import Language.Expressions 𝔡 𝔖
+
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- Language.Mini-Imp :
+  --
+  -- A deep embedding of an imperative programming language. Programs can then
+  -- be encoded as in 𝐸𝑥𝑎𝑚𝑝𝑙𝑒𝑃𝑟𝑜𝑔𝑠.𝑎𝑔𝑑𝑎 for later reasoning and construction of
+  -- correctness proofs in the Hoare-Logic calculus.
+  --
+  -- ════════════════════════════════════════════════════════════════════════════
 
   data Block : Set
 
