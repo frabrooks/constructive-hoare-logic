@@ -12,7 +12,7 @@ open import Data.Empty using ( ⊥ )
 open import Function using ( _∘_ )
 open import Data.Bool.Base using (Bool ; T ; not ; true ; false)
 
--- Project Imports
+-- Local Imports
 open import Misc
 
 module Data-Interface where
@@ -188,60 +188,6 @@ module Data-Interface where
 
       NegationIntro : ∀ v → ⊬ v → ⊢ (¬ᵥ v)
       NegationElim  : ∀ v → ⊬ (¬ᵥ v) → ⊢ v
-
-   ---------------------------------------------------------------------------
-    field -- Operation Predicates
-      
-      -- All binary operations. Use this type to add logical rules that will
-      -- pertain to all binary predicates.
-      OP₂ : (𝕍 → 𝕍 → 𝕍) → Set
-      ||ᵥ₂  : OP₂ (_||ᵥ_) 
-      &&ᵥ₂  : OP₂ (_&&ᵥ_)    
-      ==ᵥ₂  : OP₂ (_==ᵥ_) 
-      ≤ᵥ₂   : OP₂ (_≤ᵥ_ )     
-      <ᵥ₂   : OP₂ (_<ᵥ_ )     
-      ≥ᵥ₂   : OP₂ (_≥ᵥ_ )     
-      >ᵥ₂   : OP₂ (_>ᵥ_ )     
-      +ᵥ₂   : OP₂ (_+ᵥ_ )     
-      -ᵥ₂   : OP₂ (_-ᵥ_ )     
-      *ᵥ₂   : OP₂ (_*ᵥ_ )     
-      %ᵥ₂   : OP₂ (_%ᵥ_ )     
-      /ᵥ₂   : OP₂ (_/ᵥ_ )     
-
-      -- All unary operations. Use this type to add logical rules that will
-      -- pertain to all binary predicates.
-      OP₁ : (𝕍 → 𝕍) → Set
-      ¬ᵥ₁  :  OP₁ (¬ᵥ)
-      ++ᵥ₁ :  OP₁ (++ᵥ)
-      ─-ᵥ₁ :  OP₁ (─-ᵥ)
-      ──ᵥ₁ :  OP₁ (──ᵥ)
-
-
-      wffₒᵤₜ⇒wffᵢₙ : ∀ {∙} x (α : OP₂ ∙ ) y → WFF (∙ x y)
-               → WFF x × WFF y 
-
-      -- WFF-preserving (if inputs are WFF then outputs are WFF)
-      -- All binary operations are WFF-preserving except arithmetic ops
-      -- in the case of a strict overflow strategy.
-      OP₂:𝑤𝑓𝑓    : ∀ {∙} → OP₂ ∙ → Set
-      ||ᵥ:𝑤𝑓𝑓    : OP₂:𝑤𝑓𝑓 ||ᵥ₂
-      &&ᵥ:𝑤𝑓𝑓    : OP₂:𝑤𝑓𝑓 &&ᵥ₂
-      ==ᵥ:𝑤𝑓𝑓    : OP₂:𝑤𝑓𝑓 ==ᵥ₂
-      ≤ᵥ:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 ≤ᵥ₂
-      <ᵥ:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 <ᵥ₂
-      ≥ᵥ:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 ≥ᵥ₂
-      >ᵥ:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 >ᵥ₂
-
-
-      -- Only negation as the only boolean operation is WFF-preserving
-      OP₁:𝑤𝑓𝑓    : ∀ {∙} → OP₁ ∙ → Set
-      ¬ᵥ:𝑤𝑓𝑓     : OP₁:𝑤𝑓𝑓 ¬ᵥ₁
-  
-
-      :𝑤𝑓𝑓₂ : ∀ {∙} {x} {y} {α : OP₂ ∙} → (𝑤𝑓𝑓 : OP₂:𝑤𝑓𝑓 α)
-              → WFF x → WFF y → WFF (∙ x y)
-
-      :𝑤𝑓𝑓₁ : ∀ {∙} {x} (α : OP₁ ∙) → WFF x → WFF (∙ x)
 
   -- ════════════════════════════════════════════════════════════════════════════
   
