@@ -31,16 +31,23 @@ module Data-Interface where
   --        in our embedded expression/assertion language such as
   --        `(𝑥 ∧ 𝑦) ⇒ 𝑦' or `(𝑧 == 0 ∧ 𝑥 == 𝑦 * 𝑧) ⇒ 𝑥 == 0'.
   --
-  --     2) To make explicit the differences in programming language
+  --     2) To abstract away the differences in expression language
   --        implementation that may affect execution, and therefore 
   --        should be considered while constructing a proof, viz
   --        finite vs. infinite arithmetic, and in the case of finite
-  --        arithmetic the choice of overflow strategy. The phrase
-  --        `considered in a proof', really just means that if the
-  --        proof depends on a certain overflow strategy - say modulo -
-  --        this should be made clear in the formalisation and this
-  --        interface defines a way to do so; in practice however,
-  --        such a proof would be rare.
+  --        arithmetic the choice of overflow strategy. Here, 
+  --        `considered while constructing a proof', really just means
+  --        that if the correctness of a program depends on a certain
+  --        overflow strategy - say modulo - this should be made clear
+  --        in the proof/formalisation and this interface provides a way
+  --        to do so while simultaneously preventing - assuming the
+  --        interface is being instantiated somewhere - a heedless
+  --        application of an expression lemma that depends on a
+  --        particular implementation detail. In practice however, most
+  --        programs that this library would likely be used to reason
+  --        about - if designed by a sensible program - will avoid
+  --        dependence on say, a certain overflow strategy, and therefore
+  --        this second justification can largely be ignored.
   --
   --
 
@@ -104,26 +111,26 @@ module Data-Interface where
     field -- Operations
     
       -- Binary ops that semantically have type Bool
-      _||𝓿_     : 𝕍 → 𝕍 → 𝕍
-      _&&𝓿_     : 𝕍 → 𝕍 → 𝕍
-      _==𝓿_     : 𝕍 → 𝕍 → 𝕍
-      _≤𝓿_      : 𝕍 → 𝕍 → 𝕍
-      _<𝓿_      : 𝕍 → 𝕍 → 𝕍
-      _≥𝓿_      : 𝕍 → 𝕍 → 𝕍
-      _>𝓿_      : 𝕍 → 𝕍 → 𝕍
+      _||ᵥ_     : 𝕍 → 𝕍 → 𝕍
+      _&&ᵥ_     : 𝕍 → 𝕍 → 𝕍
+      _==ᵥ_     : 𝕍 → 𝕍 → 𝕍
+      _≤ᵥ_      : 𝕍 → 𝕍 → 𝕍
+      _<ᵥ_      : 𝕍 → 𝕍 → 𝕍
+      _≥ᵥ_      : 𝕍 → 𝕍 → 𝕍
+      _>ᵥ_      : 𝕍 → 𝕍 → 𝕍
 
       -- Binary ops that semantically have type Integer
-      _+𝓿_      : 𝕍 → 𝕍 → 𝕍
-      _-𝓿_      : 𝕍 → 𝕍 → 𝕍
-      _*𝓿_      : 𝕍 → 𝕍 → 𝕍
-      _%𝓿_      : 𝕍 → 𝕍 → 𝕍
-      _/𝓿_      : 𝕍 → 𝕍 → 𝕍
+      _+ᵥ_      : 𝕍 → 𝕍 → 𝕍
+      _-ᵥ_      : 𝕍 → 𝕍 → 𝕍
+      _*ᵥ_      : 𝕍 → 𝕍 → 𝕍
+      _%ᵥ_      : 𝕍 → 𝕍 → 𝕍
+      _/ᵥ_      : 𝕍 → 𝕍 → 𝕍
 
       -- Unary operations
-      ¬𝓿        : 𝕍 → 𝕍 -- Negate truth value
-      ++𝓿       : 𝕍 → 𝕍 -- Increment
-      ─-𝓿       : 𝕍 → 𝕍 -- Decrement
-      ──𝓿       : 𝕍 → 𝕍 -- (* - 1)   
+      ¬ᵥ        : 𝕍 → 𝕍 -- Negate truth value
+      ++ᵥ       : 𝕍 → 𝕍 -- Increment
+      ─-ᵥ       : 𝕍 → 𝕍 -- Decrement
+      ──ᵥ       : 𝕍 → 𝕍 -- (* - 1)   
 
     _̇ : ∀ {ℓ} {A : Set ℓ} → (x : A) → Maybe A
     _̇ = just
@@ -134,53 +141,53 @@ module Data-Interface where
       -------------------------------------------------------------------------
       -- Table 1 taken straight from [1]
       -------------------------------------------------------------------------
-      A1    : ∀ x y → x +𝓿 y ≡ y +𝓿 x                -- addition is commutative
-      A2    : ∀ x y → x *𝓿 y ≡ y *𝓿 x          -- multiplication is commutative
-      A3    : ∀ x y z → x +𝓿 (y +𝓿 z) ≡ (x +𝓿 y) +𝓿 z     -- associativity of +
-      A4    : ∀ x y z → x *𝓿 (y *𝓿 z) ≡ (x *𝓿 y) *𝓿 z     -- associativity of *
-      A5    : ∀ x y z → x *𝓿 (y +𝓿 z) ≡ (x *𝓿 y) +𝓿 (x *𝓿 z)   -- * distributes
-      A6    : ∀ x y → ⊢ (y ≤𝓿 x) → (x -𝓿 y) +𝓿 y ≡ x   -- + cancels subtraction
+      A1    : ∀ x y → x +ᵥ y ≡ y +ᵥ x                -- addition is commutative
+      A2    : ∀ x y → x *ᵥ y ≡ y *ᵥ x          -- multiplication is commutative
+      A3    : ∀ x y z → x +ᵥ (y +ᵥ z) ≡ (x +ᵥ y) +ᵥ z     -- associativity of +
+      A4    : ∀ x y z → x *ᵥ (y *ᵥ z) ≡ (x *ᵥ y) *ᵥ z     -- associativity of *
+      A5    : ∀ x y z → x *ᵥ (y +ᵥ z) ≡ (x *ᵥ y) +ᵥ (x *ᵥ z)   -- * distributes
+      A6    : ∀ x y → ⊢ (y ≤ᵥ x) → (x -ᵥ y) +ᵥ y ≡ x   -- + cancels subtraction
       
-      A7    : ∀ x → (x +𝓿  ⓪ ̇) ≡ x
-      A8    : ∀ x → (x *𝓿  ⓪ ̇) ≡ ⓪ ̇
-      A9    : ∀ x → (x *𝓿  ① ̇) ≡ x
+      A7    : ∀ x → (x +ᵥ  ⓪ ̇) ≡ x
+      A8    : ∀ x → (x *ᵥ  ⓪ ̇) ≡ ⓪ ̇
+      A9    : ∀ x → (x *ᵥ  ① ̇) ≡ x
       -------------------------------------------------------------------------
 
       -- An implementations arithmetic strategey (are integers bounded) must be
       -- identified by choosing one of the following, mutually exclusive axioms
       ARITHMETIC-STRATEGY  :  
-                              (Σ[ x ∈ 𝕍 ] (∀ y → ⊢ (y ≤𝓿 x)) → ⊥)   -- Infinite
+                              (Σ[ x ∈ 𝕍 ] (∀ y → ⊢ (y ≤ᵥ x)) → ⊥)   -- Infinite
                               ⊎ 
-                              (Σ[ max ∈ 𝕍 ] (∀ x → ⊢ (x ≤𝓿 max)))     -- Finite
+                              (Σ[ max ∈ 𝕍 ] (∀ x → ⊢ (x ≤ᵥ max)))     -- Finite
 
       -- In the case that the ARITHMETIC-STRATEGY is finite, there are different
       -- ways in which the value of max + 1 can be handled
-      OVERFLOW-STRATEGY    : (Σ[ max ∈ 𝕍 ] (∀ x → ⊢ (x ≤𝓿 max)))
+      OVERFLOW-STRATEGY    : (Σ[ max ∈ 𝕍 ] (∀ x → ⊢ (x ≤ᵥ max)))
                            →                           -- Strict Interpretation
-                           (   ( max : 𝕍 ) → (∀ x → ⊢ (x ≤𝓿 max))
-                             → ( max +𝓿 ① ̇ ) ≡ nothing )
+                           (   ( max : 𝕍 ) → (∀ x → ⊢ (x ≤ᵥ max))
+                             → ( max +ᵥ ① ̇ ) ≡ nothing )
                            ⊎                                   -- Firm Boundary
-                           (   ( max : 𝕍 ) → (∀ x → ⊢ (x ≤𝓿 max))
-                             → ( max +𝓿 ① ̇ ) ≡ max )  
+                           (   ( max : 𝕍 ) → (∀ x → ⊢ (x ≤ᵥ max))
+                             → ( max +ᵥ ① ̇ ) ≡ max )  
                            ⊎                               -- Modulo Arithmetic
-                           (( max : 𝕍 ) → (∀ x → ⊢ (x ≤𝓿 max))
-                             → ( max +𝓿 ① ̇ ) ≡ ⓪ ̇ )        
+                           (( max : 𝕍 ) → (∀ x → ⊢ (x ≤ᵥ max))
+                             → ( max +ᵥ ① ̇ ) ≡ ⓪ ̇ )        
       
 
 
-      DeMorgan₁ : ∀ x y → ¬𝓿 (x ||𝓿 y) ≡ (¬𝓿 x) &&𝓿 (¬𝓿 y)
+      DeMorgan₁ : ∀ x y → ¬ᵥ (x ||ᵥ y) ≡ (¬ᵥ x) &&ᵥ (¬ᵥ y)
 
-      DeMorgan₂ : ∀ x y → ¬𝓿 (x &&𝓿 y) ≡ (¬𝓿 x) ||𝓿 (¬𝓿 y)
+      DeMorgan₂ : ∀ x y → ¬ᵥ (x &&ᵥ y) ≡ (¬ᵥ x) ||ᵥ (¬ᵥ y)
       
-      ConjunctionElim₁ : ∀ x y → ⊢ (x &&𝓿 y) → ⊢ x
-      ConjunctionElim₂ : ∀ x y → ⊢ (x &&𝓿 y) → ⊢ y
+      ConjunctionElim₁ : ∀ x y → ⊢ (x &&ᵥ y) → ⊢ x
+      ConjunctionElim₂ : ∀ x y → ⊢ (x &&ᵥ y) → ⊢ y
 
-      ConjunctionIntro : ∀ x y → ⊢ x → ⊢ y → ⊢ (x &&𝓿 y)
+      ConjunctionIntro : ∀ x y → ⊢ x → ⊢ y → ⊢ (x &&ᵥ y)
 
-      ConjunctionComm  : ∀ x y → (x &&𝓿 y) ≡ (y &&𝓿 x)
+      ConjunctionComm  : ∀ x y → (x &&ᵥ y) ≡ (y &&ᵥ x)
 
-      NegationIntro : ∀ v → ⊬ v → ⊢ (¬𝓿 v)
-      NegationElim  : ∀ v → ⊬ (¬𝓿 v) → ⊢ v
+      NegationIntro : ∀ v → ⊬ v → ⊢ (¬ᵥ v)
+      NegationElim  : ∀ v → ⊬ (¬ᵥ v) → ⊢ v
 
    ---------------------------------------------------------------------------
     field -- Operation Predicates
@@ -188,26 +195,26 @@ module Data-Interface where
       -- All binary operations. Use this type to add logical rules that will
       -- pertain to all binary predicates.
       OP₂ : (𝕍 → 𝕍 → 𝕍) → Set
-      ||𝓿₂  : OP₂ (_||𝓿_) 
-      &&𝓿₂  : OP₂ (_&&𝓿_)    
-      ==𝓿₂  : OP₂ (_==𝓿_) 
-      ≤𝓿₂   : OP₂ (_≤𝓿_ )     
-      <𝓿₂   : OP₂ (_<𝓿_ )     
-      ≥𝓿₂   : OP₂ (_≥𝓿_ )     
-      >𝓿₂   : OP₂ (_>𝓿_ )     
-      +𝓿₂   : OP₂ (_+𝓿_ )     
-      -𝓿₂   : OP₂ (_-𝓿_ )     
-      *𝓿₂   : OP₂ (_*𝓿_ )     
-      %𝓿₂   : OP₂ (_%𝓿_ )     
-      /𝓿₂   : OP₂ (_/𝓿_ )     
+      ||ᵥ₂  : OP₂ (_||ᵥ_) 
+      &&ᵥ₂  : OP₂ (_&&ᵥ_)    
+      ==ᵥ₂  : OP₂ (_==ᵥ_) 
+      ≤ᵥ₂   : OP₂ (_≤ᵥ_ )     
+      <ᵥ₂   : OP₂ (_<ᵥ_ )     
+      ≥ᵥ₂   : OP₂ (_≥ᵥ_ )     
+      >ᵥ₂   : OP₂ (_>ᵥ_ )     
+      +ᵥ₂   : OP₂ (_+ᵥ_ )     
+      -ᵥ₂   : OP₂ (_-ᵥ_ )     
+      *ᵥ₂   : OP₂ (_*ᵥ_ )     
+      %ᵥ₂   : OP₂ (_%ᵥ_ )     
+      /ᵥ₂   : OP₂ (_/ᵥ_ )     
 
       -- All unary operations. Use this type to add logical rules that will
       -- pertain to all binary predicates.
       OP₁ : (𝕍 → 𝕍) → Set
-      ¬𝓿₁  :  OP₁ (¬𝓿)
-      ++𝓿₁ :  OP₁ (++𝓿)
-      ─-𝓿₁ :  OP₁ (─-𝓿)
-      ──𝓿₁ :  OP₁ (──𝓿)
+      ¬ᵥ₁  :  OP₁ (¬ᵥ)
+      ++ᵥ₁ :  OP₁ (++ᵥ)
+      ─-ᵥ₁ :  OP₁ (─-ᵥ)
+      ──ᵥ₁ :  OP₁ (──ᵥ)
 
 
       wffₒᵤₜ⇒wffᵢₙ : ∀ {∙} x (α : OP₂ ∙ ) y → WFF (∙ x y)
@@ -217,18 +224,18 @@ module Data-Interface where
       -- All binary operations are WFF-preserving except arithmetic ops
       -- in the case of a strict overflow strategy.
       OP₂:𝑤𝑓𝑓    : ∀ {∙} → OP₂ ∙ → Set
-      ||𝓿:𝑤𝑓𝑓    : OP₂:𝑤𝑓𝑓 ||𝓿₂
-      &&𝓿:𝑤𝑓𝑓    : OP₂:𝑤𝑓𝑓 &&𝓿₂
-      ==𝓿:𝑤𝑓𝑓    : OP₂:𝑤𝑓𝑓 ==𝓿₂
-      ≤𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 ≤𝓿₂
-      <𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 <𝓿₂
-      ≥𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 ≥𝓿₂
-      >𝓿:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 >𝓿₂
+      ||ᵥ:𝑤𝑓𝑓    : OP₂:𝑤𝑓𝑓 ||ᵥ₂
+      &&ᵥ:𝑤𝑓𝑓    : OP₂:𝑤𝑓𝑓 &&ᵥ₂
+      ==ᵥ:𝑤𝑓𝑓    : OP₂:𝑤𝑓𝑓 ==ᵥ₂
+      ≤ᵥ:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 ≤ᵥ₂
+      <ᵥ:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 <ᵥ₂
+      ≥ᵥ:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 ≥ᵥ₂
+      >ᵥ:𝑤𝑓𝑓     : OP₂:𝑤𝑓𝑓 >ᵥ₂
 
 
       -- Only negation as the only boolean operation is WFF-preserving
       OP₁:𝑤𝑓𝑓    : ∀ {∙} → OP₁ ∙ → Set
-      ¬𝓿:𝑤𝑓𝑓     : OP₁:𝑤𝑓𝑓 ¬𝓿₁
+      ¬ᵥ:𝑤𝑓𝑓     : OP₁:𝑤𝑓𝑓 ¬ᵥ₁
   
 
       :𝑤𝑓𝑓₂ : ∀ {∙} {x} {y} {α : OP₂ ∙} → (𝑤𝑓𝑓 : OP₂:𝑤𝑓𝑓 α)

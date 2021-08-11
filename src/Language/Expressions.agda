@@ -156,44 +156,44 @@ module Language.Expressions ( 𝔡 : Data-Implementation )
   𝑜𝑑𝑑〈 P 〉 = op₂ (op₂ P %ₒ (𝑐𝑜𝑛𝑠𝑡 ②)) ==ₒ (𝑐𝑜𝑛𝑠𝑡 ①)
 
   getOp₁ : UnOp → Maybe Val → Maybe Val
-  getOp₁ ¬ₒ  = ¬𝓿
-  getOp₁ ++ₒ  = ++𝓿
-  getOp₁ ─-ₒ  = ─-𝓿
-  getOp₁ ──ₒ  = ──𝓿
+  getOp₁ ¬ₒ  = ¬ᵥ
+  getOp₁ ++ₒ  = ++ᵥ
+  getOp₁ ─-ₒ  = ─-ᵥ
+  getOp₁ ──ₒ  = ──ᵥ
 
   getOp₂ : BinOp → Maybe Val → Maybe Val → Maybe Val
-  getOp₂ +ₒ   = _+𝓿_
-  getOp₂ -ₒ   = _-𝓿_
-  getOp₂ *ₒ   = _*𝓿_
-  getOp₂ /ₒ   = _/𝓿_
-  getOp₂ %ₒ   = _%𝓿_
-  getOp₂ ≤ₒ   = _≤𝓿_
-  getOp₂ <ₒ   = _<𝓿_
-  getOp₂ ≥ₒ   = _≥𝓿_
-  getOp₂ >ₒ   = _>𝓿_
-  getOp₂ ==ₒ  = _==𝓿_
-  getOp₂ &&ₒ  = _&&𝓿_
-  getOp₂ ||ₒ  = _||𝓿_
+  getOp₂ +ₒ   = _+ᵥ_
+  getOp₂ -ₒ   = _-ᵥ_
+  getOp₂ *ₒ   = _*ᵥ_
+  getOp₂ /ₒ   = _/ᵥ_
+  getOp₂ %ₒ   = _%ᵥ_
+  getOp₂ ≤ₒ   = _≤ᵥ_
+  getOp₂ <ₒ   = _<ᵥ_
+  getOp₂ ≥ₒ   = _≥ᵥ_
+  getOp₂ >ₒ   = _>ᵥ_
+  getOp₂ ==ₒ  = _==ᵥ_
+  getOp₂ &&ₒ  = _&&ᵥ_
+  getOp₂ ||ₒ  = _||ᵥ_
 
   _isAry₁ : ∀ ∙ → (OP₁ (getOp₁ ∙))
-  ¬ₒ  isAry₁ = ¬𝓿₁
-  ++ₒ  isAry₁ = ++𝓿₁
-  ─-ₒ  isAry₁ = ─-𝓿₁
-  ──ₒ isAry₁ = ──𝓿₁
+  ¬ₒ  isAry₁ = ¬ᵥ₁
+  ++ₒ  isAry₁ = ++ᵥ₁
+  ─-ₒ  isAry₁ = ─-ᵥ₁
+  ──ₒ isAry₁ = ──ᵥ₁
 
   _isAry₂ : ∀ ∙ → (OP₂ (getOp₂ ∙))
-  +ₒ  isAry₂ = +𝓿₂
-  -ₒ  isAry₂ = -𝓿₂
-  *ₒ  isAry₂ = *𝓿₂
-  /ₒ  isAry₂ = /𝓿₂
-  %ₒ  isAry₂ = %𝓿₂
-  &&ₒ isAry₂ = &&𝓿₂
-  ||ₒ isAry₂ = ||𝓿₂
-  ==ₒ isAry₂ = ==𝓿₂
-  ≤ₒ  isAry₂ = ≤𝓿₂
-  <ₒ  isAry₂ = <𝓿₂
-  ≥ₒ  isAry₂ = ≥𝓿₂
-  >ₒ  isAry₂ = >𝓿₂
+  +ₒ  isAry₂ = +ᵥ₂
+  -ₒ  isAry₂ = -ᵥ₂
+  *ₒ  isAry₂ = *ᵥ₂
+  /ₒ  isAry₂ = /ᵥ₂
+  %ₒ  isAry₂ = %ᵥ₂
+  &&ₒ isAry₂ = &&ᵥ₂
+  ||ₒ isAry₂ = ||ᵥ₂
+  ==ₒ isAry₂ = ==ᵥ₂
+  ≤ₒ  isAry₂ = ≤ᵥ₂
+  <ₒ  isAry₂ = <ᵥ₂
+  ≥ₒ  isAry₂ = ≥ᵥ₂
+  >ₒ  isAry₂ = >ᵥ₂
 
   -------------------------------------------------
   -- Evaluation of Expressions (Decidable)
