@@ -3,28 +3,23 @@
 -- Lib imports
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using ( _≡_ ; refl )
-open import Data.Sum
-open import Data.Empty
-open import Data.Bool hiding (_∧_ ; _∨_ )
-open import Relation.Binary
+open import Data.Empty using ( ⊥-elim )
 open import Relation.Nullary using ( yes ; no )
-open import Relation.Nullary.Decidable using ( map′)
+open import Data.Maybe using (Maybe ; nothing ; just )
+
+
 
 -- Local Imports
 open import Data-Interface using (Data-Implementation)
 open import State-Interface using (State-Implementation)
 
 module Language.Expressions ( 𝔡 : Data-Implementation )
-  (sRep : State-Implementation 𝔡 ) where
+  (𝔖 : State-Implementation 𝔡 ) where
 
   -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
+  -- Local Dependent Imports
   open Data-Implementation 𝔡
-  open State-Implementation sRep
-
-  open import List-Patterns
-  open import Data.Maybe using (Maybe ; nothing ; just )
-  open import Data.List as List using (List; _∷_; []  )
+  open State-Implementation 𝔖
 
 
 
