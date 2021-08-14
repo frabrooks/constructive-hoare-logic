@@ -1,56 +1,50 @@
 
-
-
--- Lib imports
-open import Relation.Binary.PropositionalEquality using ( _≡_ ; refl ; sym ; inspect ; [_] )
-open import Data.Maybe using ( Maybe ; just ; nothing ; map ; _>>=_ ; Is-just ; to-witness )
+-- Lib Imports
+open import Relation.Binary.PropositionalEquality using ( _≡_ ; refl )
+open import Data.Maybe using ( Maybe ; just ; nothing ; map )
 open import Data.Maybe.Relation.Unary.Any using (Any)
 open import Data.Bool using ( true ; false )
-open import Relation.Nullary using (  yes ; no ; ¬_ ) 
-open import Data.Product using (Σ ; Σ-syntax ; _×_  ; _,_  ; proj₁ ; proj₂ )
-open import Data.Sum using (_⊎_ ; inj₁ ; inj₂)
 open import Data.Nat using (ℕ ; suc ; zero)
-open import Data.Integer using (ℤ)
-open ℤ
-open import Data.Empty
-open import Data.Unit using ( ⊤ ; tt )
+open import Data.Unit using ( tt )
 
-
--- Project imports
+-- Local Imports
 open import Data-Interface using (Data-Implementation )
 open import State-Interface using (State-Implementation)
 open import Misc
 
-
+-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module Evaluation.Evaluation (𝔡 : Data-Implementation )
   (𝔖 : State-Implementation 𝔡 ) where
 
+  -- Local Dependent Imports
   open Data-Implementation 𝔡
   open State-Implementation 𝔖
-
   open import Language.Expressions 𝔡 𝔖
   open import Language.Mini-Imp 𝔡 𝔖
 
-  evalAssi : Id → Exp → S → Maybe S
-  evalAssi id exp s =  map (λ v → updateState id v s) (evalExp exp s) 
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- Evaluation.Evaluation :
+  --
+  -- Small-step evaluation of a program with a given natural number ℕ as `fuel'.
+  -- If fuel runs out, or a computation gets stuck, nothing is returned. A
+  -- program can be said to terminate so long as Σn∈ℕ s.t. evaluation with that
+  -- amount of fuel succeeds.
   
-  is-JustExp→is-JustAssi : ∀ {i e s}
-                         → WFF (evalExp e s) → WFF (evalAssi i e s)
-  is-JustExp→is-JustAssi {i} {e} {s} p with (evalExp e s)
-  ... | just _ = Any.just tt
-  
-  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  ssEvalwithFuel :  ℕ → C → S → Maybe S
+
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- Definition of Small=Step Evaluation:
+
   -----------------------------------------------------------------
+  ssEvalwithFuel :  ℕ → C → S → Maybe S
+  -----------------------------------------------------------------  
   -- Skip ⇒ eval finished successfully
   -- Computation Successful 
   ssEvalwithFuel zero (𝑠𝑘𝑖𝑝 ;) s = just s
   ssEvalwithFuel (suc n) ( 𝑠𝑘𝑖𝑝 ;) s = just s
   -----------------------------------------------------------------
   -- Out of fuel
-  -- Need to explicitly give all four cases here so
-  -- Agda can see `eval zero C = c , nothing` is always
-  -- definitionally true.
+  -- Need to explicitly give all four cases here so Agda can see
+  -- `eval zero C = nothing` is definitionally true when C≠skip
   ssEvalwithFuel zero ( 𝔴𝔥𝔦𝔩𝔢 _ 𝒹ℴ _ ;) _ = nothing
   ssEvalwithFuel zero ( 𝔦𝔣 _ 𝔱𝔥𝔢𝔫 _ 𝔢𝔩𝔰𝔢 _ ;) _ = nothing
   ssEvalwithFuel zero ( _ := _ ; ) _ = nothing
@@ -102,16 +96,18 @@ module Evaluation.Evaluation (𝔡 : Data-Implementation )
   ... | nothing = nothing -- Computation failed i.e. div by 0
   ... | (just v) = ssEvalwithFuel n c (updateState id v s)
   -----------------------------------------------------------------
-  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- Some lemmas
+
+  -----------------------------------------------------------------  
   𝑠𝑘𝑖𝑝Elimₗ : ∀ n b s
     → ssEvalwithFuel n ((𝑠𝑘𝑖𝑝 ;) 𝔱𝔥𝔢𝔫 b) s ≡ ssEvalwithFuel n b s
   𝑠𝑘𝑖𝑝Elimₗ zero _ _ = refl
   𝑠𝑘𝑖𝑝Elimₗ (suc _) _ _ = refl
   -----------------------------------------------------------------  
 
-  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  -----------------------------------------------------------------  
   𝑠𝑘𝑖𝑝Elimᵣ : ∀ n b s
     → ssEvalwithFuel n (b 𝔱𝔥𝔢𝔫 𝑠𝑘𝑖𝑝 ; ) s ≡ ssEvalwithFuel n b s
   𝑠𝑘𝑖𝑝Elimᵣ zero (𝑠𝑘𝑖𝑝 ;) _ = refl
@@ -175,5 +171,5 @@ module Evaluation.Evaluation (𝔡 : Data-Implementation )
     with evalExp exp s
   ... | nothing = refl
   ... | (just v) = 𝑠𝑘𝑖𝑝Elimᵣ n c (updateState id v s)
-  -----------------------------------------------------------------
 
+  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
