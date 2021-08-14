@@ -192,7 +192,7 @@ module Language.Assertions
 
   -- Alternative, condensed syntax*
   _⊨_ : ∀ s A → Set
-  _⊨_ = Assert
+  s ⊨ A = Assert s A
 
   -- The use of `⊨' to represent here and `⊢' in 𝐷𝑎𝑡𝑎-𝐼𝑛𝑡𝑒𝑟𝑓𝑎𝑐𝑒.𝑎𝑔𝑑𝑎 may be a
   -- little different to standard practice, semantic and syntactic entailment :
