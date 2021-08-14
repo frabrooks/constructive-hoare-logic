@@ -80,8 +80,8 @@ module Evaluation.Termination (𝔡 : Data-Implementation  )
 
   -- Also trivially, if exp 𝑒 is a well formed formula then assignment
   -- of 𝑒 to a variable always terminates.
-  𝑊𝐹𝐹⦅e⦆→⌊ᵗi:=e;⌋ᵗ : ∀ s i e → 𝑊𝐹𝐹 e s → ⌊ᵗ i := e ; ⸴ s ᵗ⌋
-  𝑊𝐹𝐹⦅e⦆→⌊ᵗi:=e;⌋ᵗ  s i e _ = 1 , go
+  𝑊𝐹𝐹⦅e⦆→⌊ᵗi:=e;ᵗ⌋ : ∀ s i e → 𝑊𝐹𝐹 e s → ⌊ᵗ i := e ; ⸴ s ᵗ⌋
+  𝑊𝐹𝐹⦅e⦆→⌊ᵗi:=e;ᵗ⌋  s i e _ = 1 , go
     where
     go : Is-just (map (λ v → updateState i v s) (evalExp e s))
     go with evalExp e s
