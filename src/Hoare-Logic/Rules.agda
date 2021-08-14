@@ -1,8 +1,7 @@
 
-
 -- Lib Imports
 import Data.Maybe as MB
-open MB using (Maybe ; just ; nothing ; Is-just ; to-witness ; maybe )
+open MB using (Maybe ; just ; nothing ; Is-just ; to-witness)
 import Relation.Binary.PropositionalEquality as Eq 
 open Eq using (_≡_ ; refl ; sym ; inspect ; subst ; [_] )
 open import Data.Maybe.Relation.Unary.Any
@@ -38,16 +37,17 @@ module Hoare-Logic.Rules
   open import Hoare-Logic.Semantics 𝔡 𝔖
 
   -- ════════════════════════════════════════════════════════════════════════════
-  -- Axioms / Rules :
+  -- Hoare-Logic.Rules :
   --
   -- Implementation/Proof of Axiom of Assignment and the core rules used in
   -- Hoare Logic, viz, the rules of consequence, the rule of composition,
   -- the while rule, and a conditional rule. Typically in Hoare-Logic, the
   -- conditional rule is actually unnecessary as an 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_ construct
   -- can be simulated via the 𝔴𝔥𝔦𝔩𝔢_𝑑𝑜_ construct - i.e. any program that can
-  -- be written with an 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_ can be rewritten with 𝔴𝔥𝔦𝔩𝔢_𝑑𝑜_. However
-  -- it is included in this formalisation as a result of the inclusion of
-  -- 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_ in the Mini-Imp language in which programs to be reasoned
+  -- be written with an 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_ can be rewritten with 𝔴𝔥𝔦𝔩𝔢_𝑑𝑜_. This
+  -- explains the omission of an alternative rule in Hoare's original paper [3].
+  -- However it is included in this formalisation as a result of the inclusion
+  -- of 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_ in the Mini-Imp language in which programs to be reasoned
   -- about are to be encoded.
   --
   -- Another deviation in this formalisation of note is that typically, or
@@ -76,8 +76,10 @@ module Hoare-Logic.Rules
   -- ⌊ᵗ⌋-split function defined in 𝑇𝑒𝑟𝑚𝑖𝑛𝑎𝑡𝑖𝑜𝑛.𝑎𝑔𝑑𝑎 that allows for splitting a
   -- constructive proof of termination of a program composed of two parts into
   -- two corresponding proofs of termination of the constituent parts.
-  --
+
+
   -- ════════════════════════════════════════════════════════════════════════════
+  -- Type Signatures
 
 
   D0-Axiom-of-Assignment : ∀ i e P
@@ -121,8 +123,10 @@ module Hoare-Logic.Rules
               → ⟪ P ⟫  𝔦𝔣 C 𝔱𝔥𝔢𝔫 A 𝔢𝔩𝔰𝔢 B ; ⟪ Q ⟫
               
 
-  -- ⇩ Implementations / Proofs
+
+
   -- ════════════════════════════════════════════════════════════════════════════
+  -- Implementations / Proofs
 
   D0-Axiom-of-Assignment i e P s (𝑤𝑓𝑓 , ⊢sub) (suc n , p)
       with evalExp e s | inspect (evalExp e) s
@@ -147,7 +151,7 @@ module Hoare-Logic.Rules
       ... | yes q rewrite evalExp-Var x (updateState i v s)
                           | q | updateGet x v s = sym comp
       ... | no  q rewrite evalExp-Var x (updateState i v s)
-                          | ignoreTop i x v q s = refl
+                          | ignoreTop i v x q s = refl
 
       go : (updateState i v s) ⊨ P
       go rewrite evalExp-updState P e i v s eq = 𝑤𝑓𝑓 , ⊢sub
@@ -199,15 +203,14 @@ module Hoare-Logic.Rules
          
          -- Proof of termination of rhs of split with ℱ'
          Rᵗ+ : ⌊ᵗ ℱ' +ᴺ (k lt) ⸴ (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⸴ (″ Lᵗ) ᵗ⌋
-         Rᵗ+ = addFuel' {𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;} ℱ' (k lt) Rᵗ
+         Rᵗ+ = addFuel {𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;} ℱ' (k lt) Rᵗ
          -- ℱ' with (ℱ' ≤ ℱ) implies termination with ℱ fuel
          Rᵗℱ : ⌊ᵗ ℱ ⸴ (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) ⸴ (″ Lᵗ) ᵗ⌋
          Rᵗℱ = let 𝐶 = (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) in subst
                (λ ℱ → ⌊ᵗ ℱ ⸴ 𝐶 ⸴ (″ Lᵗ) ᵗ⌋) (proof lt) Rᵗ+      
          -- This new proof of termination Rᵗℱ has same output
          isDet : ″ Rᵗℱ ≡ ″ Rᵗ
-         isDet = EvaluationIsDeterministic (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;)
-                 (ℱ , Rᵗℱ) (ℱ' , Rᵗ) refl refl                 
+         isDet = EvalDet {_} {ℱ} {ℱ'} (𝔴𝔥𝔦𝔩𝔢 B 𝒹ℴ C ;) Rᵗℱ Rᵗ
          -- and said output is identical to the original output
          Δ' : ″ Rᵗℱ ≡ ″ ⌊ᵗCᵗ⌋
          Δ' rewrite isDet = Δ         
@@ -294,6 +297,11 @@ module Hoare-Logic.Rules
           Ω₂ = triple₂ s Ω₁ Σ[ᵗB]
 
 
-  -- ════════════════════════════════════════════════════════════════════════════
+
+  -- Refs
+     -- [1] - E. W. Dijkstra, A Discipline of Programming, 1976
+     -- [2] - D. Gries, The Science of Programming, 1981
+     -- [3] - C. A. R. Hoare, An Axiomatic Basis for Computer Programming 1969
+  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 

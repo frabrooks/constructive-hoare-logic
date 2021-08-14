@@ -3,26 +3,25 @@
 open import Relation.Binary.PropositionalEquality as Eq using (_≡_ ; refl ; sym)
 open import Data.Product using (Σ)
 
--- Project Imports
+-- Local Imports
 open import Data-Interface using (Data-Implementation)
 open import State-Interface using (State-Implementation)
 
 open import Misc
 
+-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
   (𝔖 : State-Implementation 𝔡 ) where
 
+  -- Local Dependent Imports
   open Data-Implementation 𝔡
   open State-Implementation 𝔖
-
   open import Language.Expressions 𝔡 𝔖
   open import Language.Assertions 𝔡 𝔖
-
   open import Language.Mini-Imp 𝔡 𝔖
-
   open import Evaluation.Termination 𝔡 𝔖
 
-  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  -- ════════════════════════════════════════════════════════════════════════════
   -- Hoare Triples
   --
   -- Partial Correctness:
@@ -59,9 +58,9 @@ module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
     -- correctness and 𝑃 {𝐶} 𝑄 to denote partial correctness. Here then, as '{}'
     -- is reserved for Agda's syntax, I introduce the use of ⟪⟫ and ⟦⟧ bracketed
     -- triples for partial and total correctness respectively.
-    
-  -- ════════════════════════════════════════════════════════════════════════════    
-  -- Relation to Weakest Precondition / Weakest Liberal Precondition
+
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- Relation to Weakest Precondition / Weakest Liberal Precondition:
 
   -- In Dijkstra[1], the notion of a 𝑤𝑒𝑎𝑘𝑒𝑠𝑡 𝑝𝑟𝑒𝑐𝑜𝑛𝑑𝑖𝑡𝑖𝑜𝑛 (𝑤𝑝) and a weakest
   -- 𝑙𝑖𝑏𝑒𝑟𝑎𝑙 precondition (𝑤𝑙𝑝) are defined as a means of giving semantics to
@@ -99,7 +98,7 @@ module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
   -- proving the commutativity of the && operator as it has been defined.
   
   -- ════════════════════════════════════════════════════════════════════════════
-  -- Properties of 𝑤𝑝 and 𝑤𝑙𝑝
+  -- Properties of 𝑤𝑝 and 𝑤𝑙𝑝:
   --
   -- In [1] Dijkstra outlines some properties that the notion of 𝑤𝑝 and 𝑤𝑙𝑝
   -- must satisfy for them to make sense as a means of giving semantics to a

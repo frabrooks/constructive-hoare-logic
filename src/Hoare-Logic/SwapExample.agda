@@ -4,38 +4,36 @@ open import Relation.Binary.PropositionalEquality as Eq using (_≡_ ; refl ; sy
 open import Relation.Nullary using ( yes ;  no )
 open import Data.Empty using ( ⊥ ; ⊥-elim )
 
--- Project Imports
+-- Local Imports
 open import Data-Interface using (Data-Implementation)
 open import State-Interface using (State-Implementation)
 
-open import Misc
-
+-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module Hoare-Logic.SwapExample ( 𝔡 : Data-Implementation )
   (𝔖 : State-Implementation 𝔡 ) where
 
+  -- Local Dependent Imports
   open Data-Implementation 𝔡
   open State-Implementation 𝔖
-
   open import Language.Expressions 𝔡 𝔖
   open import Language.Assertions 𝔡 𝔖
   open import Language.ExampleProgs 𝔡 𝔖
-
   open import Language.Mini-Imp 𝔡 𝔖
-
   open import Evaluation.Termination 𝔡 𝔖
-  
   open import Hoare-Logic.Semantics 𝔡 𝔖
   open import Hoare-Logic.Rules 𝔡 𝔖
 
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- Example of using this library to prove the correctness of the swap program:
 
   SWAP : ∀ 𝑿 𝒀 →
-                 ⟪ 𝒙 =̌= (𝑐𝑜𝑛𝑠𝑡 𝑿) ∧ 𝒚 =̌= (𝑐𝑜𝑛𝑠𝑡 𝒀) ⟫
+                 ⟪ 𝒙 =̌= (𝑐𝑜𝑛𝑠𝑡 𝑿) ∧ 𝒚 =̌= (𝑐𝑜𝑛𝑠𝑡 𝒀) ⟫            -- Precondition
     
                             𝒛 := 𝑣𝑎𝑙 𝒙 ;
                             𝒙 := 𝑣𝑎𝑙 𝒚 ;
                             𝒚 := 𝑣𝑎𝑙 𝒛 ;
 
-                 ⟪ 𝒙 =̌= (𝑐𝑜𝑛𝑠𝑡 𝒀) ∧ 𝒚 =̌= (𝑐𝑜𝑛𝑠𝑡 𝑿) ⟫
+                 ⟪ 𝒙 =̌= (𝑐𝑜𝑛𝑠𝑡 𝒀) ∧ 𝒚 =̌= (𝑐𝑜𝑛𝑠𝑡 𝑿) ⟫           -- Postcondition
   SWAP 𝑿 𝒀 = ∎
      where
      
@@ -127,3 +125,4 @@ module Hoare-Logic.SwapExample ( 𝔡 : Data-Implementation )
                  = subst (λ p → s ⊨ p ) (sym s₄) x
 
 
+-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
