@@ -4,20 +4,21 @@
 open import Relation.Binary.PropositionalEquality using ( _≡_ )
 open import Relation.Binary using (Decidable)
 open import Data.Maybe.Relation.Unary.Any using (Any)
-open import Data.Product as Pr using ( Σ ; Σ-syntax ; _×_ )
+open import Data.Product as Pr using ( Σ ; Σ-syntax ; _×_ ; _,_ )
 open import Data.Sum using (_⊎_ ; inj₁ ; inj₂)
 open import Data.Maybe
 open import Data.Unit using ( ⊤ ; tt)
 open import Data.Empty using ( ⊥ )
 open import Function using ( _∘_ )
 open import Data.Bool.Base using (Bool ; T ; not ; true ; false)
+open import Data.Integer using ( ℤ ; _≤_ )
 
 -- Local Imports
-open import Misc
+open import Misc using ( any ; _≃_ )
 
+-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module Data-Interface where
 
-  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   -- Abstract out the representation of data and expression language (i.e. the
   -- Values and Variables and operations upon them). This interface exists for
   -- two main reasons:
@@ -45,11 +46,12 @@ module Data-Interface where
   --        application of an expression lemma that depends on a
   --        particular implementation detail. In practice however, most
   --        programs that this library would likely be used to reason
-  --        about - if designed by a sensible program - will avoid
+  --        about - if designed by a sensible programmer - will avoid
   --        dependence on say, a certain overflow strategy, and therefore
   --        this second justification can largely be ignored.
   --
-  --
+  -- n.b. That this entire interface has been implemented/proven in all its
+  --      verbosity in 𝐷𝑎𝑡𝑎-𝐼𝑛𝑓𝑖𝑛𝑖𝑡𝑒-𝐴𝑟𝑖𝑡ℎ𝑚𝑒𝑡𝑖𝑐.𝑎𝑔𝑑𝑎 in ./src/Representations/
 
 
   -- ════════════════════════════════════════════════════════════════════════════
@@ -88,8 +90,12 @@ module Data-Interface where
       ①        : Val
       ②        : Val
 
-      -- All WFF (well-formed expressions) have an associated truth value
-      toTruthValue  : {v : 𝕍} → WFF v → Bool
+      -- TODO : Change to Val → Bool
+      -- All WFF (well-formed expressions) have an associated Boolean value
+      toTruthValue : {v : 𝕍} → WFF v → Bool
+
+      -- All WFF (i.e. all Vals) have an associated Integer value
+      toIntValue : Val → ℤ
 
       𝑻is𝑻 : toTruthValue {just 𝑻} (any tt) ≡ true
       𝑭is𝑭 : toTruthValue {just 𝑭} (any tt) ≡ false
@@ -101,7 +107,10 @@ module Data-Interface where
     ⊬ : 𝕍 → Set
     ⊬ x = Σ (WFF x) (T ∘ not ∘ toTruthValue)
 
-  
+    Int∶ : Val → ℤ
+    Int∶ = toIntValue
+
+
   -- ════════════════════════════════════════════════════════════════════════════
   record Operation-Implementation (𝔡 : Value-Implementation) : Set₁ where
       
@@ -136,7 +145,7 @@ module Data-Interface where
     _̇ = just
     infix 50 _̇
     ---------------------------------------------------------------------------
-    field -- Expression Manipulations
+    field -- Expression Lemmas
 
       -------------------------------------------------------------------------
       -- Table 1 taken straight from [1]
@@ -146,33 +155,34 @@ module Data-Interface where
       A3    : ∀ x y z → x +ᵥ (y +ᵥ z) ≡ (x +ᵥ y) +ᵥ z     -- associativity of +
       A4    : ∀ x y z → x *ᵥ (y *ᵥ z) ≡ (x *ᵥ y) *ᵥ z     -- associativity of *
       A5    : ∀ x y z → x *ᵥ (y +ᵥ z) ≡ (x *ᵥ y) +ᵥ (x *ᵥ z)   -- * distributes
-      A6    : ∀ x y → ⊢ (y ≤ᵥ x) → (x -ᵥ y) +ᵥ y ≡ x   -- + cancels subtraction
+      A6    : ∀ x y → ⊢ (y ≤ᵥ x) → ⊢ ((x -ᵥ y) +ᵥ y) ≃ ⊢ x      -- + cancels -
       
-      A7    : ∀ x → (x +ᵥ  ⓪ ̇) ≡ x
-      A8    : ∀ x → (x *ᵥ  ⓪ ̇) ≡ ⓪ ̇
-      A9    : ∀ x → (x *ᵥ  ① ̇) ≡ x
+      A7    : ∀ x → ⊢ (x +ᵥ  ⓪ ̇) ≃ ⊢ x
+      A8    : ∀ x → (x ̇ *ᵥ ⓪ ̇) ≡ ⓪ ̇
+      A9    : ∀ x → ⊢ (x *ᵥ  ① ̇) ≃ ⊢ x
       -------------------------------------------------------------------------
 
-      -- An implementations arithmetic strategey (are integers bounded) must be
-      -- identified by choosing one of the following, mutually exclusive axioms
-      ARITHMETIC-STRATEGY  :  
-                              (Σ[ x ∈ 𝕍 ] (∀ y → ⊢ (y ≤ᵥ x)) → ⊥)   -- Infinite
-                              ⊎ 
-                              (Σ[ max ∈ 𝕍 ] (∀ x → ⊢ (x ≤ᵥ max)))     -- Finite
+      -- An implementation's arithmetic strategey (whether the operations are
+      -- operating on a bounded or unbounded set of integers - i.e. true
+      -- Integers or 32/64-bit-words) must be identified by implementing one of
+      -- the following, mutually exclusive axioms
+      ARITHMETIC-STRATEGY :
+
+             -- There does 𝑛𝑜𝑡 exist a Value s.t. all other Values are lesser
+             ((Σ[ x ∈ Val ] ((y : Val) → (Int∶ y) ≤ (Int∶ x))) → ⊥) -- Infinite 
+             -- Or, there does exist such a max value.
+           ⊎ (Σ[ max ∈ Val ] ((x : Val) → (Int∶ x) ≤ (Int∶ max)))     -- Finite
+
 
       -- In the case that the ARITHMETIC-STRATEGY is finite, there are different
       -- ways in which the value of max + 1 can be handled
-      OVERFLOW-STRATEGY    : (Σ[ max ∈ 𝕍 ] (∀ x → ⊢ (x ≤ᵥ max)))
-                           →                           -- Strict Interpretation
-                           (   ( max : 𝕍 ) → (∀ x → ⊢ (x ≤ᵥ max))
-                             → ( max +ᵥ ① ̇ ) ≡ nothing )
-                           ⊎                                   -- Firm Boundary
-                           (   ( max : 𝕍 ) → (∀ x → ⊢ (x ≤ᵥ max))
-                             → ( max +ᵥ ① ̇ ) ≡ max )  
-                           ⊎                               -- Modulo Arithmetic
-                           (( max : 𝕍 ) → (∀ x → ⊢ (x ≤ᵥ max))
-                             → ( max +ᵥ ① ̇ ) ≡ ⓪ ̇ )        
-      
+      OVERFLOW-STRATEGY :  ( max : Val ) → ((x : Val) → (Int∶ x) ≤ (Int∶ max))
+                           →                            
+                           ( max ̇ +ᵥ ① ̇ ) ≡ nothing    -- Strict Interpretation
+                           ⊎
+                           ( max ̇ +ᵥ ① ̇ ) ≡ max ̇               -- Firm Boundary
+                           ⊎
+                           ( max ̇ +ᵥ ① ̇ ) ≡ ⓪ ̇            -- Modulo Arithmetic
 
 
       DeMorgan₁ : ∀ x y → ¬ᵥ (x ||ᵥ y) ≡ (¬ᵥ x) &&ᵥ (¬ᵥ y)
@@ -215,7 +225,7 @@ module Data-Interface where
 
   STRICT-OVERFLOW : (𝔡 : Data-Implementation) → FINITE-ARITHMETIC 𝔡 → Set
   STRICT-OVERFLOW 𝔡 _ with Data-Implementation.ARITHMETIC-STRATEGY 𝔡
-  ... | inj₂ μ with Data-Implementation.OVERFLOW-STRATEGY 𝔡 μ
+  ... | inj₂ (max , μ) with Data-Implementation.OVERFLOW-STRATEGY 𝔡 max μ
   ... | inj₁ _ = ⊤
   ... | inj₂ (inj₁ _) = ⊥
   ... | inj₂ (inj₂ _) = ⊥
@@ -223,7 +233,7 @@ module Data-Interface where
 
   FIRM-OVERFLOW : (𝔡 : Data-Implementation) → FINITE-ARITHMETIC 𝔡 → Set
   FIRM-OVERFLOW 𝔡 _ with Data-Implementation.ARITHMETIC-STRATEGY 𝔡
-  ... | inj₂ μ with Data-Implementation.OVERFLOW-STRATEGY 𝔡 μ
+  ... | inj₂ (max , μ) with Data-Implementation.OVERFLOW-STRATEGY 𝔡 max μ
   ... | inj₁ _ = ⊥
   ... | inj₂ (inj₁ _) = ⊤
   ... | inj₂ (inj₂ _) = ⊥
@@ -231,10 +241,13 @@ module Data-Interface where
 
   MODULO-OVERFLOW : (𝔡 : Data-Implementation) → FINITE-ARITHMETIC 𝔡 → Set
   MODULO-OVERFLOW 𝔡 _ with Data-Implementation.ARITHMETIC-STRATEGY 𝔡
-  ... | inj₂ μ with Data-Implementation.OVERFLOW-STRATEGY 𝔡 μ
+  ... | inj₂ (max , μ) with Data-Implementation.OVERFLOW-STRATEGY 𝔡 max μ
   ... | inj₁ _ = ⊥
   ... | inj₂ (inj₁ _) = ⊥
   ... | inj₂ (inj₂ _) = ⊤
 
 
+
+  -- Refs
+     -- [1] - C. A. R. Hoare, An Axiomatic Basis for Computer Programming 1969
   -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
