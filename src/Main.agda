@@ -1,13 +1,5 @@
 
 
-
--- Local Imports
-open import Representations.Data-Infinite-Arithmetic
-     renaming (Data-Infinite-Arith-Implementation to 𝔡-∞ )
-open import Representations.State-As-List
-     renaming (State-List-Implementation to 𝔖-List )
-
-
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module Main where
 
@@ -21,8 +13,18 @@ module Main where
   -- swap program.
 
 
-
+  -- ════════════════════════════════════════════════════════════════════════════  
   -- Import Everything to check it all compiles:
+
+
+
+  -- Data and State Formalisation/Representations
+  open import Representations.Data-Infinite-Arithmetic
+       renaming (Data-Infinite-Arith-Implementation to 𝔡-∞ )
+  open import Representations.State-As-List
+       renaming (State-List-Implementation to 𝔖-List )
+
+
 
   -- src/Language
   open import Language.Expressions 𝔡-∞ (𝔖-List 𝔡-∞)
