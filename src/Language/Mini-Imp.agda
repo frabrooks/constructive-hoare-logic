@@ -63,8 +63,10 @@ module Language.Mini-Imp
   infix  22 _; 
   infixl 16 _𝔱𝔥𝔢𝔫_ 
 
-  -- Computation is a block of
-  -- State transformers
+  -- Computation/Program is a block of State transformers
+  Program = Block
+  
+  -- Alternative short form syntax
   C : Set
   C = Block
 

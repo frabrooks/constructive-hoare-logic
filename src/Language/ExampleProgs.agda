@@ -15,8 +15,6 @@ module Language.ExampleProgs
   open import Language.Expressions 𝔡 𝔖
   open import Language.Mini-Imp 𝔡 𝔖
 
-  Program = C
-
   -- Swap values of 𝒙 and 𝒚
   swap : Program
   swap = 𝒛 := 𝑣𝑎𝑙 𝒙 ;
