@@ -1,62 +1,79 @@
 
--- Store and Heap module, abstracting away implementation details
-------------------------------------------------------------------
+
+-- Lib Imports
+open import Data.Maybe using (Maybe ; just ; nothing)
+open import Relation.Nullary using ( ¬_ )
+open import Relation.Binary.PropositionalEquality using (_≡_)
+open import Data.Empty using (⊥)
+open import Data.Nat using (ℕ)
 
 
+-- Local Imports
 open import Data-Interface using (Data-Implementation)
 
+
+-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module State-Interface ( 𝔡 : Data-Implementation ) where
 
+  -- Local Dependent Imports
   open Data-Implementation 𝔡
 
-  open import Data.Maybe using (Maybe ; just ; nothing)
-  open import Relation.Nullary using ( ¬_ )
-  open import Relation.Binary.PropositionalEquality using (_≡_)
-  open import Data.Empty using (⊥)
-  open import Data.Nat using (ℕ)
-                         
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- State-Interface:
+  --
+  -- Abstract out the representation of the state space as while reasoning
+  -- within the Hoare-Logic calculus, it is undesirable to have knowledge or use
+  -- of the fact that the state space is represented as say, a list of pairs,
+  -- as the exact representation shouldn't be relevant.
+
+  -- This interface makes clear just what logical rules a Hoare-Logic calculus
+  -- requires a particular state space to satisfy. Instantiation of the interface
+  -- is not necessary to allow us to reason about programs and provided we have
+  -- confidence in all lemmas given here then we will have confidence in any
+  -- proofs of program correctness constructed from this library. If, however,
+  -- the formalisation is to be complete, and the proofs to have full
+  -- computational meaning, it will need to be instantiated and as so it is
+  -- implemented within  𝑆𝑡𝑎𝑡𝑒-𝐴𝑠-𝐿𝑖𝑠𝑡.𝑎𝑔𝑑𝑎 in ./src/Representations/.
+
+
+  -- ════════════════════════════════════════════════════════════════════════════
   record State-Implementation  : Set₁ where
-    field
+
+    ---------------------------------------------------------------------------
+    field -- Definitions/Declarations
+
+      -- The set of all States (the State Space)
       S              : Set
-      ●              : S  -- Initial/Empty State
-      
+
+      -- Initial/Empty State
+      ●              : S
+
+
+    ---------------------------------------------------------------------------
+    field -- Operations upon the state space
+
       updateState    : Id → Val → S → S
+      
       getVarVal      : Id → S → Maybe Val
-      dropValue      : S → Id → S
-      hasVarVal      : Id → Val → S → Set
+      
+      dropValue      : Id → S → S
+
+
+    ---------------------------------------------------------------------------
+    field -- Predicates/Lemmas upon the state space
+
       updateGet      : ∀ i v s  → getVarVal i (updateState i v s) ≡ just v
-      ignoreTop      : ∀ i x v  → ¬ i ≡ x → (s : S) →
+      
+      ignoreTop      : ∀ i v x → ¬ i ≡ x → (s : S) →
                        getVarVal x (updateState i v s) ≡ getVarVal x s
+                       
       irrelUpdate    : ∀ i x v y → ¬ i ≡ x → (s : S) →
                        getVarVal x (updateState i v s) ≡ y → getVarVal x s ≡ y
-      nothingRec     : ∀ x i v s → getVarVal x (updateState i v s) ≡ nothing
-                       → getVarVal x s ≡ nothing
-      hasValueSame   : (x : Id) → (v v' : Val) → (s : S)
-                       → (hasVarVal x v (updateState x v' s)) → v ≡ v'
-      hasValueDiff   : (x y : Id) → (xval yval : Val)
-                       → (s : S) → ¬ (x ≡ y)
-                       → (hasVarVal x xval (updateState y yval s))
-                       → (hasVarVal x xval s)
+
       updateState¬●  : (i : Id) → (f : Val) → (s : S )
                        → ( updateState i f s ≡ ● ) → ⊥
 
-{-      
-      newArray       : Id → ℕ → S → S
-      getArrVal      : Id → ℕ → S → Maybe Val
-      updateArr      : Id → ℕ → Val → S → Maybe S
--}
 
-    
-    getVarValM : Id → Maybe S → Maybe Val
-    getVarValM i nothing = nothing
-    getVarValM i (just s) = getVarVal i s
-
-
-  import Representations.State-List-Rep 𝔡 as List-Rep
-  -- S = List localVar
-  ListRep : State-Implementation
-  ListRep = record { List-Rep }
-
-
+-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
