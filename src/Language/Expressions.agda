@@ -21,10 +21,10 @@ module Language.Expressions ( 𝔡 : Data-Implementation )
 
   -- ════════════════════════════════════════════════════════════════════════════
   -- Language.Expressions:
-
+  --
   -- Definition of the Expression Language used in both the Mini-Imp programming
   -- language and the assertions manipulated within the Hoare-Logic calculus.
-
+  --
   -- Implicit casting of ℤ ⇄ 𝔹 is assumed of the underlying representation.
 
 

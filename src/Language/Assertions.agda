@@ -1,31 +1,33 @@
 
--- Lib imports
+-- Lib Imports
 import Relation.Binary.PropositionalEquality as Eq
-open Eq using ( _≡_  ; _≢_ ; inspect ; Reveal_·_is_ ; refl ; subst ; sym )
 open import Data.Maybe using ( Maybe ; just ; nothing ; Is-just )
 open import Relation.Nullary using ( yes ;  no )
-open import Data.Sum
+--open import Data.Sum
 open import Data.Unit using ( ⊤ ; tt )
-open import Data.Empty using ( ⊥ ; ⊥-elim )
+--open import Data.Empty using ( ⊥ ; ⊥-elim )
 open import Data.Bool hiding ( _∧_ )
-open import Data.Product using (Σ ; Σ-syntax ; _×_  ; _,_  ; proj₁ ; proj₂ )
-open import Function using ( _∋_ ; _∘_ ; _$_ )
+open import Data.Product using (Σ  )
+open import Function using ( _∘_ )
 
--- Local imports
+-- Local Imports
 open import Data-Interface using (Data-Implementation)
 open import State-Interface using (State-Implementation)
 open import Misc
 
+  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module Language.Assertions
   ( 𝔡 : Data-Implementation )
   ( 𝔖 : State-Implementation 𝔡 ) where
 
+  -- Local Dependent Imports
   open Data-Implementation 𝔡
   open State-Implementation 𝔖
-  
   open import Language.Expressions 𝔡 𝔖
   
-  -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- Language.Assertions:
+  --
   -- Assertions(𝐴)/Conditions are just expressions from our Mini-Imp language.
   
   Assertion = Exp
@@ -148,7 +150,7 @@ module Language.Assertions
 
   -- So we want a system that looks something like the following:
 
-  -- insert picture of:
+  -- picture of:
 
   --                        (𝑥 == (𝑦 / 0)) = 𝐹 = ∅ = 0
   --                  ↓                                              ↑
@@ -221,9 +223,9 @@ module Language.Assertions
                              ConjunctionElim₁ x y ⊨x&y
 
 
- -- Refs
-    -- [1] - E. W. Dijkstra, A Discipline of Programming, 1976
-    -- [2] - D. Gries, The Science of Programming, 1981
+  -- Refs
+     -- [1] - E. W. Dijkstra, A Discipline of Programming, 1976
+     -- [2] - D. Gries, The Science of Programming, 1981
   -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
