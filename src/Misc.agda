@@ -15,23 +15,6 @@ open import Level using (Level )
 
 module Misc where
 
-  -- WFF = Is-just
-  
-  record New² {A : Set} (𝒙 𝒚 : A) : Set where
-      field
-        ᵍᵉᵗ  : A
-        ≠₂  : ᵍᵉᵗ ≡ 𝒙 → ⊥
-        ≠₃  : ᵍᵉᵗ ≡ 𝒚 → ⊥
-  open New² public
-
-  record New³ {A : Set} (𝒘 𝒙 𝒚 : A) : Set where
-      field
-        ᵍᵉᵗ  : A
-        ≠₁  : ᵍᵉᵗ ≡ 𝒘 → ⊥
-        ≠₂  : ᵍᵉᵗ ≡ 𝒙 → ⊥
-        ≠₃  : ᵍᵉᵗ ≡ 𝒚 → ⊥
-  open New³ public
-
   pattern any tt = Any.just tt
 
   Is-just-just : {l : Level} {A : Set l} {a : A} (p : Is-just (just a)) → to-witness p ≡ a
@@ -52,7 +35,7 @@ module Misc where
     in let ψ = cong suc γ
     --        γ :  ((k lt) + x) ≡ y
     --  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ≡-congruence
-    --   ψ : suc ((k lt) + x )  ≡ suc y 
+    --    ψ : suc ((k lt) + x )  ≡ suc y 
     in let χ = subst (_≡ suc y) (+-comm (suc (k lt)) x) ψ
     --    ψ : suc ((k lt) + x )  ≡ suc y
     --  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ● (+-commutativity)
@@ -74,23 +57,12 @@ module Misc where
   _<*>_ : {A B : Set} → Maybe (A → B) → Maybe A → Maybe B
   f <*> m = ap f m
 
-  {-
-  counterExample : ∀ {ℓ} {A B : Set ℓ} {a b d : A} { f : A → A }
-                   → ( b ≡ d → ⊥ ) → ((a : A) → ( f a ≡ b )) → Σ A ((d ≡_) ∘ f) → ⊥
-  counterExample ¬eq ∀a (fst , snd) rewrite snd = ⊥-elim (¬eq (sym (∀a fst)))
-
-
-  counter' : ∀ {ℓ} {A : Set ℓ} {P : A → Set} → ((a : A) → P a) → Σ A (λ a → (P a → ⊥)) → ⊥
-  counter' {_} {A} {P} p (fst , snd) = ⊥-elim (snd (p fst))
-  -}
-
+ 
   -- Isomorphism
   infix 0 _≃_
   record _≃_ (A B : Set) : Set where
     field
       to   : A → B
       from : B → A
-      from∘to : ∀ (x : A) → from (to x) ≡ x
-      to∘from : ∀ (y : B) → to (from y) ≡ y
-
+      
   open _≃_ public
