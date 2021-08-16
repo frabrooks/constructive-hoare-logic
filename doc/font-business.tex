@@ -1,0 +1,162 @@
+
+
+% Use T1 font encoding (for output)
+\usepackage[T1]{fontenc}
+
+% Enable utf-8 input encoding (n.b. this doesn't mean TeX will know how to print it)
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+
+
+% For smaller `⊨' than \models gives
+\usepackage{amssymb}
+
+% Use: \mathpzc{abc...z} for lowercase mathscript
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+
+%\usepackage{ucs}
+
+%\usepackage[greek,english]{babel}
+%\usepackage{eufrak}
+
+
+%\DeclareUnicodeCharacter{1D4B9}{\ensuremath\mathfrak{d}}
+
+
+\usepackage{newunicodechar}
+
+\newunicodechar{≡}{\ensuremath{\mathnormal\equiv}}
+\newunicodechar{≠}{\ensuremath{\mathnormal\neq}}
+% Line drawing
+\newunicodechar{═}{\ensuremath{\mathnormal\blacksquare}}
+\newunicodechar{━}{\ensuremath{\mathnormal - -}}
+\newunicodechar{Σ}{\ensuremath{\mathnormal\Sigma}}
+%\newunicodechar{∈}{\ensuremath{\mathnormal\in}}
+\newunicodechar{∀}{\ensuremath{\mathnormal\forall}}
+%\newunicodechar{∈}{\ensuremath{\mathnormal\upepsilon}}
+\newunicodechar{∃}{\ensuremath{\mathnormal\exists}}
+\newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
+\newunicodechar{≥}{\ensuremath{\mathnormal\geq}}
+\newunicodechar{≤}{\ensuremath{\mathnormal\leq}}
+\newunicodechar{₀}{\ensuremath{\mathnormal{_0}}}
+\newunicodechar{₁}{\ensuremath{\mathnormal{_1}}}
+\newunicodechar{₂}{\ensuremath{\mathnormal{_2}}}
+\newunicodechar{₃}{\ensuremath{\mathnormal{_3}}}
+\newunicodechar{₄}{\ensuremath{\mathnormal{_4}}}
+\newunicodechar{₅}{\ensuremath{\mathnormal{_5}}}
+\newunicodechar{₆}{\ensuremath{\mathnormal{_6}}}
+\newunicodechar{λ}{\ensuremath{\mathnormal\lambda}}
+\newunicodechar{∘}{\ensuremath{\mathnormal\circ}}
+\newunicodechar{⊨}{\ensuremath{\mathnormal\vDash}}
+\newunicodechar{⊭}{\ensuremath{\mathnormal\not\vDash}}
+\newunicodechar{⊬}{\ensuremath{\mathnormal\not\vdash}}
+%\newunicodechar{⊬}{\ensuremath{\mathnormal\vdash}}
+\newunicodechar{⇒}{\ensuremath{\mathnormal\Rightarrow}}
+\newunicodechar{⇧}{\ensuremath{\mathnormal\Uparrow}}
+\newunicodechar{∧}{\ensuremath{\mathnormal\wedge}}
+\newunicodechar{∨}{\ensuremath{\mathnormal\lor}}
+\newunicodechar{;}{\text{\bf{;}}}
+\newunicodechar{↪}{\ensuremath{\mathnormal\Delta}}
+\newunicodechar{𝑿}{\ensuremath{\mathnormal\mathcal{X}}}
+\newunicodechar{𝒀}{\ensuremath{\mathnormal\mathcal{Y}}}
+\newunicodechar{𝒙}{\ensuremath{\mathnormal\mathcal{X}}}
+\newunicodechar{𝒙}{\codevar{x}}
+\newunicodechar{𝒚}{\codevar{y}}
+\newunicodechar{𝒛}{\codevar{z}}
+\newunicodechar{⓪}{\constv{0}}
+\newunicodechar{①}{\constv{1}}
+\newunicodechar{②}{\constv{2}}
+\newunicodechar{ℱ}{\ensuremath{\mathnormal\mathpzc{f}}}
+\newunicodechar{⌊}{\ensuremath{\mathnormal\lfloor}}
+\newunicodechar{⌋}{\ensuremath{\mathnormal\rfloor}}
+\newunicodechar{ᵗ}{\ensuremath{^{t}}}
+\newunicodechar{⸴}{\raisebox{-2pt}{,}}
+\newunicodechar{″}{\ensuremath{\mathnormal\dagger}}
+\newunicodechar{‵}{\ensuremath{\mathnormal\dagger}}
+\newunicodechar{ϕ}{\ensuremath{\mathnormal\Phi}}
+\newunicodechar{Δ}{\ensuremath{\mathnormal\Delta}}
+\newunicodechar{⟪}{\large{\guillemotleft}}
+\newunicodechar{⟫}{\large{\guillemotright}}
+\newunicodechar{⟦}{\ensuremath{\mathnormal\llbracket}}
+\newunicodechar{⟧}{\ensuremath{\mathnormal\rrbracket}}
+\newunicodechar{∎}{\ensuremath{\mathnormal\blacksquare}}
+\newunicodechar{Ψ}{\ensuremath{\mathnormal\Psi}}
+\newunicodechar{Λ}{\ensuremath{\mathnormal\Lambda}}
+\newunicodechar{⊥}{\ensuremath{\mathnormal\bot}}
+\newunicodechar{≢}{\ensuremath{\mathnormal\not\equiv}}
+\newunicodechar{ₒ}{\ensuremath{\mathnormal{_o}}}
+\newunicodechar{𝐶}{\ensuremath{\mathnormal\mathbf{C_1}}}
+
+\newunicodechar{𝔴}{\impcode{w}}
+\newunicodechar{𝔥}{\impcode{h}}
+\newunicodechar{𝔦}{\impcode{i}}
+\newunicodechar{𝔩}{\impcode{l}}
+\newunicodechar{𝔢}{\impcode{e}}
+
+%s
+\newunicodechar{𝑘}{\agdamath{k}}
+\newunicodechar{𝑖}{\agdamath{i}}
+\newunicodechar{𝑝}{\agdamath{p}}
+
+% e
+% l
+\newunicodechar{𝔰}{\impcode{s}}
+% e
+
+
+\newunicodechar{𝒹}{\impcode{d}}
+\newunicodechar{ℴ}{\impcode{o}}
+
+\newunicodechar{𝔦}{\impcode{i}}
+\newunicodechar{𝔣}{\impcode{f}}
+
+\newunicodechar{𝔱}{\impcode{t}}
+\newunicodechar{𝔥}{\impcode{h}}
+\newunicodechar{𝔢}{\impcode{e}}
+\newunicodechar{𝔫}{\impcode{n}}
+
+\newunicodechar{𝑐}{\agdamath{c}}
+\newunicodechar{𝑜}{\agdamath{o}}
+\newunicodechar{𝑛}{\agdamath{n}}
+\newunicodechar{𝑠}{\agdamath{s}}
+\newunicodechar{𝑡}{\agdamath{t}}
+
+
+\newunicodechar{𝑣}{\agdamath{v}}
+\newunicodechar{𝑎}{\agdamath{a}}
+\newunicodechar{𝑙}{\agdamath{l}}
+
+
+\newunicodechar{𝑒}{\agdamath{e}}
+\newunicodechar{𝑣}{\agdamath{v}}
+% e
+\newunicodechar{𝑛}{\agdamath{n}}
+
+% o
+\newunicodechar{𝑑}{\agdamath{d}}
+% d
+
+
+
+%\newunicodechar{⟨}{\ensuremath{\mathnormal\langle}}
+%\newunicodechar{⟩}{\ensuremath{\mathnormal\rangle}}
+%
+%\newunicodechar{π}{\ensuremath{\mathnormal\uppi}}
+%\newunicodechar{𝔡}{\ensuremath{\mathfrak{d}}}
+%\newunicodechar{𝔖}{\ensuremath{\mathfrak{s}}}
+%
+%
+%% Language Constructs:
+%% 𝒹
+%\newunicodechar{𝒹}{\ensuremath{\mathfrak{d}}}
+%% ℴ
+%\newunicodechar{ℴ}{\ensuremath{\mathfrak{o}}}
+%
+%
+
+
+
+
+%\DeclareUnicodeCharacter{"1D4B9}{\alpha}
