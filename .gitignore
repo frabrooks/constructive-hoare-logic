@@ -1,6 +1,7 @@
 *.agdai
 .#*.*
 
+/lagda-src
 
 *.vtc
 *.ptb
