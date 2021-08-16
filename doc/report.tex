@@ -6,31 +6,78 @@
 
 \usepackage{agda}
 
+\input{font-business}
+
+% Caption options
+\usepackage[font=footnotesize,labelfont=bf]{caption}
+
+\usepackage{lipsum}
+
+% Bold face small caps
+% \usepackage{bold-extra}
+
 %\input{unicode}
 %\usepackage{eufrak}
 %\usepackage{mathabx}
 % Use Chancery Font
-\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
-% Use: \mathpzc{abc...z} for lowercase mathscript
+
 
 %Includes "References" in the table of contents
 \usepackage[nottoc]{tocbibind}
 
-% For \begin{lstlisting} which = verbatim
-% environment with escapable math
-%\usepackage{listings}% http://ctan.org/pkg/listings
-%\lstset{
-%  mathescape
-%}
+
+\usepackage{ stmaryrd }% For \llbracket \rrbracket
+% Used in \tctrip def
+
+% Style for Agda snippet math script replacement
+% (emphasised agda definitions)
+\newcommand{\agdamath}[1]{\emph{\texttt{\!#1}}}
+
+% style for Mini-Imp construct/mechanism
+\newcommand{\impcode}[1]{\textsc{\texttt{#1}}}
+
+\newcommand{\codevar}[1]{#1}
+
+
+% For constants in agda-snippets
+% Place input in circle (arg should be one numeral 1-9)
+\newcommand{\constv}[1]{\raisebox{.5pt}{\textcircled{\raisebox{-.9pt} {#1}}}}
+
+% Hoare's original notation for partial correctness
+\newcommand{\hpc}[3]{$#1\{\!\!\{#2\}\!\!\}#3$}
+
+% Gries then uses this for total correctness, but confusingly in many
+% expositions these days it is used to denote partial correctness!
+\newcommand{\gtc}[3]{\{\!\!\{#1\}\!\!\}\,#2\,\{\!\!\{#3\}\!\!\}}
+
+% This reports/project's notation
+% Partial Correctness Hoare-Triple
+\newcommand{\pctrip}[3]{\large{\guillemotleft}\normalsize{$#1$}\large{\guillemotright}%
+  \normalsize{$#2$}\large{\guillemotleft}\normalsize{$#3$}\large{\guillemotright}\normalsize}
+
+% Total Correctness Hoare-Triple
+\newcommand{\tctrip}[3]{$\large{\llbracket}\normalsize{#1}\large{\rrbracket}\,%
+  \normalsize{#2}\,\large{\llbracket}\normalsize{#3}\large{\rrbracket}\normalsize$}
+
+
+\newcommand{\wpre}[2]{$\textit{wp}(#1,#2)$}
+
+\newcommand{\wlpre}[2]{$\textit{wlp}(#1,#2)$}
+
+% Agda code state transformer symbol
+\newcommand{\stateT}{\ensuremath{S\Delta}}
+
+
+% def above equal sign
+\newcommand{\eqdef}{$\stackrel{\text{\tiny def}}{=}$}
 
 \begin{document}
-
 
 \begin{titlepage}
   \begin{center}
     \large
 
-    \textbf{\Large A Constructive Formalisation of Hoare Logic using the Interactive Theorem Prover Agda}
+    \textbf{\Large A Constructive Formalisation of Hoare Logic within the Interactive Theorem Prover Agda}
 
     
     \vfill
@@ -65,7 +112,7 @@
 
 \begin{abstract}
 
-Problem, Approach, What you Produced, Evaluation, What it all means. Nullam enim nisi, elementum eu pellentesque nec, facilisis id tellus. Sed erat sem, maximus vel fermentum et, fringilla quis est. Aliquam tempus nunc ac velit sollicitudin condimentum. Duis sed rutrum tellus. Curabitur rutrum finibus justo ut malesuada. Nullam tincidunt scelerisque iaculis. Quisque tempor massa id urna elementum, sit amet condimentum tellus euismod. Integer est eros, posuere et lacus finibus, pretium aliquam libero.
+Problem, Approach, What you Produced, Evaluation, What it all means. Nullam enim nisi, elementum eu pellentesque nec, facilisis id tellus. Sed erat sem, maximus  vel \gtc{P}{\impcode{while T do skip}}{Q}  fermentum et, fringilla quis est. Aliquam tempus nunc ac velit sollicitudin condimentum. Duis sed rutrum tellus. Curabitur rutrum finibus justo ut malesuada. Nullam tincidunt scelerisque iaculis. Quisque tempor massa id urna elementum, \hpc{P}{S}{Q} sit amet condimentum \gtc{P}{S}{Q} tellus euismod. Integer est eros, posuere et lacus finibus, pretium aliquam libero.
 
 Mauris scelerisque aliquam vehicula. Fusce id sodales lacus, vitae eleifend ex. Nulla facilisi. Maecenas placerat sem imperdiet ex pellentesque, in ultricies odio vulputate. Nulla facilisi. Donec eget suscipit sapien. Aenean ipsum neque, cursus quis magna nec, porttitor viverra enim. Nulla tellus augue, convallis at mattis eget, pellentesque et odio. Etiam suscipit, libero nec pretium posuere, leo erat posuere enim, non accumsan nisi mi ac libero. Morbi tortor diam, venenatis vitae nisi non, vulputate hendrerit diam. Nam eget nulla turpis.
 
@@ -84,6 +131,7 @@ Praesent consequat ut mi vel ullamcorper. Nullam a nisi bibendum, ultrices risus
 \raggedbottom
 
 \section{Introduction}
+
 
 This is some text. That will not be in my report. Lorem  ipsum  dolor  sit  amet,  consectetuer  adipiscing  
 elit.   Etiam  lobortisfacilisis sem.  Nullam nec mi et 
@@ -118,10 +166,10 @@ Strongest postcondition?
 
 
 
-Note that in the text [dijkstra], $wp(S,R)$, is used interchangeably as a predicate and as the state space that said predicate captures. With our constructive formalisation however, this lack of precision is not possible nor desired, so we end up with the, perhaps superfluous, distinction between predicates and the state space that they describe. Meaning that under our formalisation, $wp(S,F)$ is empty when considered as a state space, but inhabited when considered as a predicate (inhabited uniquely by $F$ itself). This exposition also explains why $<<F>> S <<Q>>$ is an inhabited type, as $F$ \emph{is} a valid precondition of any computation for any postcondition (think absurd function, or bluff function). $<<$ Actually explained by the fact that what we have formalised is the weakest \emph{liberal} precodnition!
+Note that in the text [dijkstra], $wp(S,R)$, is used interchangeably as a predicate and as the state space that said predicate captures. With our constructive formalisation however, this lack of precision is not possible nor desired, so we end up with the, perhaps superfluous, distinction between predicates and the state space that they describe. Meaning that under our formalisation, $wp(S,F)$ is empty when considered as a state space, but inhabited when considered as a predicate (inhabited uniquely by $F$ itself). This exposition also explains why \pctrip{F}{S}{Q} is an inhabited type, as $F$ \emph{is} a valid precondition of any computation for any postcondition (think absurd function, or bluff function). $<<$ Actually explained by the fact that what we have formalised is the weakest \emph{liberal} precodnition!
 
 
-Weakest Liberal Precondition is what has actually been formalised! (Need to work out the translation)
+Weakest Liberal Precondition is what has actually been formalised! Total correctness is denoted by \tctrip{P}{S}{Q}
 
 
 7 regions of the statesapce. As such, we can --- if we wish --- give a semantics to the notion of a derterministic mechanism as one in which the last four regions of the state space are empty.
@@ -137,12 +185,13 @@ Weakest Liberal Precondition is what has actually been formalised! (Need to work
 programming language for manipulating mathematical objects.' - MHE
 
 
-
 \subsection{Formal Proof}
 
 \subsection{Applications}
 
 \section{Specification}
+
+
 
 \subsection{Obfuscating Interfaces}
 
@@ -165,34 +214,351 @@ T/F, x == 2
 Relationship between logical operators and set theoretic operators
 i.e. $\wedge \Leftrightarrow \cap$
 
+{\advance\leftskip\mathindent
+
+\input{agda-snippets/expressions-even}
+
+}
 
 Ought to have differentiated between non stuck-ness and termination. I.e. D(E) as domain of expression E, to eliminate divide by zero and non-defined variables in an expression, as that is a problem that can be handled distinctly from termination
 (i.e. (I think anway) that given a state S, and an expression E, one can deterministically/decidably determine whether or not it is a WFF).
+
+Donec ullamcorper, felis non sodales.. Lorem  ipsum  dolor  sit  amet,  consectetuer  adipiscing  
+elit.
+
+{\advance\leftskip\mathindent
+  \advance\leftskip\mathindent
+  
+\input{agda-snippets/assertions-wff-def}
+
+}
+
+Donec ullamcorper, felis non sodales.. Lorem  ipsum  dolor  sit  amet,  consectetuer  adipiscing  
+elit.
+
+{\advance\leftskip\mathindent
+  \advance\leftskip\mathindent
+
+\input{agda-snippets/assertions-assert-def-2}
+
+}
+
+Donec ullamcorper, felis non sodales.. Lorem  ipsum  dolor  sit  amet,  consectetuer  adipiscing  
+elit. 
+Donec ullamcorper, felis non sodales.. Lorem  ipsum  dolor  sit  amet,  consectetuer  adipiscing  
+elit.
+
+{\centering \input{agda-snippets/assertions-implication}}
+
+
+Donec ullamcorper, felis non sodales.. Lorem  ipsum  dolor  sit  amet,  consectetuer  adipiscing  
+elit. 
+Donec ullamcorper, felis non sodales.. Lorem ipsum  dolor  sit  amet,  consectetuer  adipiscing  
+elit.
+
+
+\begin{figure}
+  \caption{Example of reasoning with the deep embedding of propositional logic}
+  \centering
+  
+  \begin{tabular}{cc}
+    \centering
+    \begin{minipage}[t]{0.45\textwidth}
+      \centering
+      \input{agda-snippets/assertions-a1-def}
+    \end{minipage}
+
+    &
+   
+      \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \input{agda-snippets/assertions-a2-def}
+      \end{minipage}
+      
+    \\
+    
+    \multicolumn{2}{c}{
+    \begin{minipage}{0.9\textwidth}
+      \centering
+      \vspace{-0.5cm}
+      \input{agda-snippets/assertions-inference-proof}
+    \end{minipage}}
+ 
+  \end{tabular}
+
+\end{figure}
+
+\lipsum[66]
+
+{\centering \input{agda-snippets/example-progs-swap}}
+
+\lipsum[75]
+
+
+\begin{figure}
+ \caption{Some simple programs defined with Mini-Imp; ripe for reasoning!}
+
+\begin{tabular}{r|l}
+  \centering
+  \footnotesize
+\begin{minipage}[t]{0.4\textwidth}
+  \centering
+  \input{agda-snippets/example-progs-gcd}
+\end{minipage}
+
+& 
+   
+\begin{minipage}[t]{0.5\textwidth}
+  \centering
+  \footnotesize
+  \advance\leftskip0.2cm
+  \input{agda-snippets/example-progs-mul-add}
+\end{minipage}
+
+\end{tabular}
+
+\end{figure}
+
+\begin{figure}
+  \caption{The deep embedding in Agda of our `Mini-Imp' imperative language.}
+  \advance\leftskip2\mathindent
+  \input{agda-snippets/mini-imp-definition}
+
+\end{figure}
+
+\lipsum[63]
+
+\lipsum[66]
+
+{\advance\leftskip2\mathindent
+  \input{agda-snippets/mini-imp-then-def}
+  \input{agda-snippets/mini-imp-then-comm}
+}
+
+\lipsum[75]
+
+\lipsum[63]
+
+\input{agda-snippets/evaluation-eval-foo-type}
+
+\lipsum[66]
+
+{\centering
+\input{agda-snippets/evaluation-eval-while-case}
+
+\vspace{-1cm}
+
+\input{agda-snippets/evaluation-eval-while-c2-case}
+}
+
+\lipsum[75]
+
+\lipsum[63]
+
+
+
+\lipsum[66]
+
+{\advance\leftskip1.5\mathindent
+
+\input{agda-snippets/termination-termination-def}
+
+\vspace{-0.8cm}
+
+\input{agda-snippets/termination-termination-cond-def}
+
+\vspace{-0.8cm}
+
+\input{agda-snippets/termination-indexed}
+
+\vspace{-0.8cm}
+
+\input{agda-snippets/termination-indexed-cond}
+
+}
+
+\lipsum[75]
+
+{\small \input{agda-snippets/termination-eval-det-signature}}
+
+
+\lipsum[34]
+
+{\centering \input{agda-snippets/termination-tsplit-record}}
+
+\lipsum[67]
+
+{\centering \input{agda-snippets/semantics-pc-trip}}
+
+\lipsum[66]
+
+{\centering \input{agda-snippets/semantics-tc-trip}}
+
+\lipsum[66]
+
+{\centering \input{agda-snippets/semantics-lem}}
+
+\lipsum[66]
 
 
 
 \subsection{Language}
 
-A S$\Delta$ is one of the following:
-
-\input{agda/Language/LangCon}
 
 \subsection{Axioms \& Rules}
+
+
+\lipsum[75]
+
+\lipsum[66]
+
+\lipsum[66]
+
+
+\vbox{\centering
+  \input{agda-snippets/rules-axiom-of-assi}
+}
+
+\lipsum[66]
+
+\vbox{\centering
+  \input{agda-snippets/rules-cons-post}
+}
+
+\vbox{\centering
+  \input{agda-snippets/rules-cons-pre}
+}
+
+\lipsum[66]
+
+\vbox{\centering
+  \input{agda-snippets/rules-comp}
+}
+
+\lipsum[66]
+
+\vbox{\centering
+  \input{agda-snippets/rules-while}
+}
+
+\lipsum[66]
+
+\vbox{\centering
+  \input{agda-snippets/rules-conditional}
+}
+
+
+
+\begin{figure}
+  \caption{D3-While: Full proof of the while rule; the crucial rule for reasoning with Hoare Logic:}
+  \centering
+  \small
+  \input{agda-snippets/rules-while-proof-p1}
+  {\centering \hfill \Huge{\vdots} \hfill }
+\end{figure}
+
+\begin{figure}\ContinuedFloat
+  \caption{D3-While: Full proof of the while rule; the crucial rule for reasoning with Hoare Logic:}
+  \vspace{-0.8cm}
+  \begin{center}\!\!\!\small{cont.}\end{center}
+  {\centering \hfill \Huge{\vdots} \hfill }
+   \centering
+   \small
+   \input{agda-snippets/rules-while-proof-p2}
+\end{figure}
+
 
 \section{Implementation}
 
 \subsection{Constructive Termination}
 
+
+\lipsum[66-69]
+
+
 \subsection{Small Step Evaluation with Fuel}
+
+
+\lipsum[66-69]
+
 
 \subsection{Termination Splitting}
 
+
+\lipsum[66-75]
+
+
 \subsection{Axiom \& Rules in Agda}
+
+
+\begin{figure}
+  \caption{ssEvalwithFuel: The small-step evaluation function}
+  \centering
+  \input{agda-snippets/evaluation-eval-full-p1}
+  {\centering \hfill \Huge{\vdots} \hfill }
+\end{figure}
+
+\begin{figure}\ContinuedFloat
+  \caption{ssEvalwithFuel cont.}
+  \centering
+  { \hfill \Huge{\vdots} \hfill }
+  \input{agda-snippets/evaluation-eval-full-p2}
+\end{figure}
+
+\begin{figure}
+  \caption{The full proof that evaluation is deterministic via proof that for any two proofs of termination, the resultant states serving as evidence for each of those proofs - in accordance with them being \emph{constructive} proofs - will be identical.  \\ n.b. that the $\dagger$ function is the function that extracts the witness from the proof of termination - i.e. the resultant state after the computation has terminated successfully.}
+  \centering
+  \scriptsize
+  \input{agda-snippets/termination-eval-det-full}
+\end{figure}
+
+\begin{figure}
+  \caption{[t]-split: The function for splitting two proofs of termination. }
+  \footnotesize
+  {\centering \input{agda-snippets/termination-tsplit-full-p1}}
+  {\centering \hfill \Huge{\vdots} \hfill }
+\end{figure}
+
+\begin{figure}\ContinuedFloat
+  \caption{[t]-split cont. \\
+   n.b. some cases have been omitted but none that vary from the general pattern here. }
+  \footnotesize
+  {\centering \hfill \Huge{\vdots} \hfill }
+  {\centering \input{agda-snippets/termination-tsplit-full-p3}}
+\end{figure}
+
+
 
 \subsection{Using the System to Reason about Programs}
 
-
 Reasoning about swap was done for constants but a similar proof could be implemented with any expression as long as the variables to be swapped were also swapped across the whole expression. For example:
+
+
+\begin{figure}
+  \caption{SWAP: Using the library to formalise the correctness of the SWAP program:}
+  \small
+  {\centering \input{agda-snippets/swap-example-p1}}
+  {\centering \hfill \Huge{\vdots} \hfill }
+\end{figure}
+
+\begin{figure}\ContinuedFloat
+  \caption{SWAP: Using the library to formalise the correctness of the SWAP program:}
+  \small
+  \vspace{-0.5cm}
+  \begin{center}\!\!\!\small{cont.}\end{center}
+  {\centering \hfill \Huge{\vdots} \hfill }
+  {\centering \input{agda-snippets/swap-example-p2}}
+  {\centering \hfill \Huge{\vdots} \hfill }
+\end{figure}
+
+\begin{figure}\ContinuedFloat
+  \caption{SWAP: Using the library to formalise the correctness of the SWAP program:}
+  \small
+  \vspace{-0.5cm}
+  \begin{center}\!\!\!\small{cont.}\end{center}
+  {\centering \hfill \Huge{\vdots} \hfill }
+  {\centering \input{agda-snippets/swap-example-p3}}
+\end{figure}
 
 
 \begin{verbatim}
@@ -236,6 +602,8 @@ parse a C program and create formal proof in background. Complain if fail
 If the Agda code is to work as a library, there had ought to be some functionality for allowing potential users to add to Data-Implementation.agda, to define their own logical rules.
 
 
+Ref paper: tactics for separation logic and how some reworking of data-interface could allow full use of HOL in Agda when manipulating assertions.
+
 
 \subsection{Conclusion}
 
@@ -256,7 +624,6 @@ Never been so intimately aquainted with the three lines of code comprising the s
 \bibliographystyle{plain}
 
 \bibliography{report}
-
-
-  
+ 
 \end{document}
+
