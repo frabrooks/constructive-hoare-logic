@@ -37,13 +37,12 @@ module Evaluation.Evaluation (𝔡 : Data-Implementation )
   -----------------------------------------------------------------
   ssEvalwithFuel :  ℕ → C → S → Maybe S
   -----------------------------------------------------------------  
-  -- Skip ⇒ eval finished successfully
-  -- Computation Successful 
+  -- Skip always terminates successfully even with zero fuel
   ssEvalwithFuel zero (𝑠𝑘𝑖𝑝 ;) s = just s
   ssEvalwithFuel (suc n) ( 𝑠𝑘𝑖𝑝 ;) s = just s
   -----------------------------------------------------------------
   -- Out of fuel
-  -- Need to explicitly give all four cases here so Agda can see
+  -- Need to explicitly give all cases here so Agda can see
   -- `eval zero C = nothing` is definitionally true when C≠skip
   ssEvalwithFuel zero ( 𝔴𝔥𝔦𝔩𝔢 _ 𝒹ℴ _ ;) _ = nothing
   ssEvalwithFuel zero ( 𝔦𝔣 _ 𝔱𝔥𝔢𝔫 _ 𝔢𝔩𝔰𝔢 _ ;) _ = nothing
@@ -72,7 +71,7 @@ module Evaluation.Evaluation (𝔡 : Data-Implementation )
   ssEvalwithFuel (suc n) ( id := exp ;) s = 
     map (λ v → updateState id v s) (evalExp exp s)
   -----------------------------------------------------------------
-  -- SINGLE SKIP
+  -- SKIP ; THEN C
   ssEvalwithFuel (suc n) (𝑠𝑘𝑖𝑝 ; c) s = ssEvalwithFuel (suc n) c s
   -----------------------------------------------------------------
   -- WHILE ; THEN C₂
