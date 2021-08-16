@@ -3,9 +3,7 @@
 import Relation.Binary.PropositionalEquality as Eq
 open import Data.Maybe using ( Maybe ; just ; nothing ; Is-just )
 open import Relation.Nullary using ( yes ;  no )
---open import Data.Sum
 open import Data.Unit using ( ⊤ ; tt )
---open import Data.Empty using ( ⊥ ; ⊥-elim )
 open import Data.Bool hiding ( _∧_ )
 open import Data.Product using (Σ  )
 open import Function using ( _∘_ )
@@ -209,9 +207,7 @@ module Language.Assertions
 
   -- 𝑥 == 2 ∧ 𝑦 == 1
   private a₁ : Assertion
-  a₁ = ((𝑣𝑎𝑙 𝒙) == (𝑐𝑜𝑛𝑠𝑡 ②))
-       ∧
-       ((𝑣𝑎𝑙 𝒚) == (𝑐𝑜𝑛𝑠𝑡 ①))
+  a₁ = ((𝑣𝑎𝑙 𝒙) == (𝑐𝑜𝑛𝑠𝑡 ②)) ∧ ((𝑣𝑎𝑙 𝒚) == (𝑐𝑜𝑛𝑠𝑡 ①))
 
   -- x == 2
   private a₂ : Assertion

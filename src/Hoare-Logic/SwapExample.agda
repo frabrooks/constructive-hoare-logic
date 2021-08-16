@@ -77,8 +77,6 @@ module Hoare-Logic.SwapExample ( 𝔡 : Data-Implementation )
           go t | yes p = ⊥-elim (𝒙≢𝒛 p)
           go t | no  _ = t
 
-     --
-
      A₃ : Assertion
      A₃ =   ((sub (𝑣𝑎𝑙 𝒙) 𝒛 (sub (𝑣𝑎𝑙 𝒚) 𝒙 (sub (𝑣𝑎𝑙 𝒛) 𝒚 (𝑣𝑎𝑙 𝒙)))) == (𝑐𝑜𝑛𝑠𝑡 𝒀))
           ∧ ( 𝒙 =̌= (𝑐𝑜𝑛𝑠𝑡 𝑿) )
@@ -114,6 +112,7 @@ module Hoare-Logic.SwapExample ( 𝔡 : Data-Implementation )
 
      s₆ : ⟪ A₃ ⟫ 𝒛 := 𝑣𝑎𝑙 𝒙 ;  𝒙 := 𝑣𝑎𝑙 𝒚 ;  𝒚 := 𝑣𝑎𝑙 𝒛 ; ⟪ POST ⟫
      s₆ = D2-Rule-of-Composition {A₃} {A₂} {POST} s₃ s₅
+
 
      ∎ : ⟪ PRE ⟫ 𝒛 := 𝑣𝑎𝑙 𝒙 ;  𝒙 := 𝑣𝑎𝑙 𝒚 ;  𝒚 := 𝑣𝑎𝑙 𝒛 ; ⟪ POST ⟫
      ∎ = D1-Rule-of-Consequence-pre {A₃} {swap} {POST} {PRE}  s₆ go

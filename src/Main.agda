@@ -14,7 +14,7 @@ module Main where
 
 
   -- ════════════════════════════════════════════════════════════════════════════  
-  -- Import Everything to check it all compiles:
+  -- Import everything to check it all compiles:
 
 
 
