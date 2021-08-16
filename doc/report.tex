@@ -112,13 +112,15 @@
 
 \begin{abstract}
 
-Problem, Approach, What you Produced, Evaluation, What it all means. Nullam enim nisi, elementum eu pellentesque nec, facilisis id tellus. Sed erat sem, maximus  vel \gtc{P}{\impcode{while T do skip}}{Q}  fermentum et, fringilla quis est. Aliquam tempus nunc ac velit sollicitudin condimentum. Duis sed rutrum tellus. Curabitur rutrum finibus justo ut malesuada. Nullam tincidunt scelerisque iaculis. Quisque tempor massa id urna elementum, \hpc{P}{S}{Q} sit amet condimentum \gtc{P}{S}{Q} tellus euismod. Integer est eros, posuere et lacus finibus, pretium aliquam libero.
 
-Mauris scelerisque aliquam vehicula. Fusce id sodales lacus, vitae eleifend ex. Nulla facilisi. Maecenas placerat sem imperdiet ex pellentesque, in ultricies odio vulputate. Nulla facilisi. Donec eget suscipit sapien. Aenean ipsum neque, cursus quis magna nec, porttitor viverra enim. Nulla tellus augue, convallis at mattis eget, pellentesque et odio. Etiam suscipit, libero nec pretium posuere, leo erat posuere enim, non accumsan nisi mi ac libero. Morbi tortor diam, venenatis vitae nisi non, vulputate hendrerit diam. Nam eget nulla turpis.
+  Program correctness is a perennial problem for software engineers and computer scientists alike. Many methods exist for establishing the correctness of a program and broadly speaking these methods fall into one of two paradigms; a program can be tested or the correctness can be `proved' outright. Due to the sheer complexity of software engineering, testing has reigned supreme in industry as formal techniques for proving correctness, while numerous, have lagged behind practice.
+  However, with the advent of higher-order-logic theorem provers and dependently typed programming languages, both operating under the scope of the Curry-Howard correspondence, the gap between practice and theory is shrinking.
 
-Donec posuere mi id pellentesque volutpat. Proin ultricies diam ut velit ultricies congue. Duis molestie aliquet lectus a sodales. Integer mollis sed leo in commodo. Suspendisse potenti. Etiam nec libero quis sapien porttitor vehicula. Proin eleifend dolor egestas, dapibus leo at, pulvinar velit. Proin id erat a turpis accumsan iaculis non sit amet purus. Integer porta, eros non elementum bibendum, libero eros elementum turpis, at fringilla sem sapien hendrerit mi.
+  Hoare logic is a formal system in which one can reason rigorously about --- and \emph{prove} --- the correctness of programs while Agda is both a dependently typed programming language \emph{and} an interactive theorem prover in accordance with the Curry-Howard correspondence. Combining the two, this work sets out to formalise the salient rules from Hoare logic within Agda and in doing so, provide a novel library with which a user could reason and prove correct simple imperative-style programs.
 
-Praesent consequat ut mi vel ullamcorper. Nullam a nisi bibendum, ultrices risus at, volutpat neque. Quisque tincidunt ac elit sed pellentesque. Integer sed tristique lectus. Pellentesque lacinia pellentesque magna in viverra. Aenean pharetra sit amet quam non molestie. Nam dictum quam sit amet eros sodales interdum. Morbi porttitor lectus lorem. Sed sagittis ante est, at tempor mauris dictum a. Suspendisse nec est vitae augue porta posuere quis eu velit. Nullam euismod nunc ut eleifend congue. Aliquam fermentum, lectus vel mollis tempor.
+  This formalisation was achieved via a deep embedding of both a simple imperative language, dubbed \emph{`Mini-Imp,'} and of the propositional calculus used in the reasoning about programs in the guise of Mini-Imp's expression language. Interfaces were also used to seperate out the concerns of proving program correctness and proving trivial results within the expression language such as conjunction elimination or the distributivity of multiplication over addition.
+
+  The final result is an Agda library that is fit for the purpose of reasoning about and proving correct simple imperative-style programs using the implemented Hoare logic rules. A limitation of the work is the simplicity of the Mini-Imp language and corresponding lack of more sophisticated logical rules meaning there is no facility for reasoning about more complex language constructs like procedures, arrays or pointers. However, more powerful logics such as `separation logic' --- an extension of Hoare logic --- could bridge this gap and owing to the expressive power of HOL, with time, there is no reason why the current library couldn't be expanded to encompass separation logic too.
 
   \end{abstract}
 
@@ -328,14 +330,12 @@ elit.
 
 \lipsum[63]
 
-\lipsum[66]
 
 {\advance\leftskip2\mathindent
   \input{agda-snippets/mini-imp-then-def}
   \input{agda-snippets/mini-imp-then-comm}
 }
 
-\lipsum[75]
 
 \lipsum[63]
 
@@ -352,8 +352,6 @@ elit.
 }
 
 \lipsum[75]
-
-\lipsum[63]
 
 
 
@@ -573,12 +571,12 @@ y := z <y == x + 1 >
 \end{verbatim}
 
 
-Hello, some maths: \texttt{$\ll$\!\,\,P\,\,\!$\gg$\!\,\,C\,\,\!$\ll$\!\,\,Q\,\,\!$\gg$} test test hello hello
+Some maths: \texttt{$\ll$\!\,\,P\,\,\!$\gg$\!\,\,C\,\,\!$\ll$\!\,\,Q\,\,\!$\gg$} test test hello hello
  
 \section{Evaluation}
 
 
-\subsection{Agda \& Beautiful Verbosity}
+\subsection{Using Agda}
 
 Getting better at working with Agda --- thanks to unicode suport, psychological bias of aesthetic but incorrect signature.
 
@@ -595,7 +593,6 @@ Actually, if I was doing it again, it would have been very sensible to not bothe
 Gries page 164 'a fine balance between the two' 
 \ldots but! automation, Infer,
 
-\ldots BUT WHAT ABOUT FUN??
 
 parse a C program and create formal proof in background. Complain if fail
 
