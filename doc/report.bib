@@ -11,6 +11,36 @@
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
+
+@article{Dijkstra75,
+author={Dijkstra, Edsger W.},
+title={Guarded Commands, Nondeterminacy and Formal Derivation of Programs},
+year={1975},
+issue_date={Aug. 1975},
+publisher={ACM New York, NY, USA},
+address={New York, NY, USA},
+volume={18},
+number={8},
+abstract={So-called “guarded commands” are introduced as a building block for alternative and repetitive constructs that allow nondeterministic program components for which at least the activity evoked, but possibly even the final state, is not necessarily uniquely determined by the initial state. For the formal derivation of programs expressed in terms of these constructs, a calculus will be be shown.},
+journal={Communications of the ACM},
+month=aug,
+pages={453–457},
+numpages={5}
+}
+
+@inproceedings{Dijkstra62,
+  author    = {Edsger W. Dijkstra},
+  title     = {Some Meditations on Advanced Programming},
+  booktitle = {Information Processing, Proceedings of the 2nd {IFIP} Congress 1962,
+               Munich, Germany, August 27 - September 1, 1962},
+  pages     = {535--538},
+  publisher = {North-Holland},
+  year      = {1962},
+  timestamp = {Fri, 26 Jul 2019 12:25:11 +0200},
+  biburl    = {https://dblp.org/rec/conf/ifip/Dijkstra62.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
 @book{Gries81,
   author    = {David Gries},
   title     = {The Science of Programming},
@@ -40,6 +70,29 @@ abstract = {Summary
 An algorithm is described which is capable of solving certain word problems: i.e. of deciding whether or not two words composed of variables and operators can be proved equal as a consequence of a given set of identities satisfied by the operators. Although the general word problem is well known to be unsolvable, this algorithm provides results in many interesting cases. For example in elementary group theory if we are given the binary operator ·, the unary operator −, and the nullary operator e, the algorithm is capable of deducing from the three identities a · (b · c) = (a · b) · c, a · a− = e, a · e = a, the laws a− · a = e, e · a = a, a– = a, etc.; and furthermore it can show that a · b = b · a− is not a consequence of the given axioms. The method is based on a well-ordering of the set of all words, such that each identity can be construed as a “reduction”, in the sense that the right-hand side of the identity represents a word smaller in the ordering than the left-hand side. A set of reduction identities is said to be “complete” when two words are equal as a consequence of the identities if and only if they reduce to the same word by a series of reductions. The method used in this algorithm is essentially to test whether a given set of identities is complete; if it is not complete the algorithm in many cases finds a new consequence of the identities which can be added to the list. The process is repeated until either a complete set is achieved or until an anomalous situation occurs which cannot at present be handled. Results of several computational experiments using the algorithm are given.}
 }
 
+@book{norell2007towards,
+  title={Towards a practical programming language based on dependent type theory},
+  author={Norell, Ulf},
+  volume={32},
+  year={2007},
+  publisher={Citeseer}
+}
+
+@InProceedings{vst,
+author="Appel, Andrew W.",
+editor="Barthe, Gilles",
+title="Verified Software Toolchain",
+booktitle="Programming Languages and Systems",
+year="2011",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="1--17",
+abstract="The software toolchain includes static analyzers to check assertions about programs; optimizing compilers to translate programs to machine language; operating systems and libraries to supply context for programs. Our Verified Software Toolchain verifies with machine-checked proofs that the assertions claimed at the top of the toolchain really hold in the machine-language program, running in the operating-system context, on a weakly-consistent-shared-memory machine.",
+isbn="978-3-642-19718-5"
+}
+
+
+
 @article{hoare1969axiomatic,
   title={An axiomatic basis for computer programming},
   author={Hoare, Charles Antony Richard},
@@ -49,6 +102,23 @@ An algorithm is described which is capable of solving certain word problems: i.e
   pages={576--580},
   year={1969},
   publisher={ACM New York, NY, USA}
+}
+
+@article{Floyd1967Flowcharts,
+  added-at = {2009-01-27T21:07:57.000+0100},
+  author = {Floyd, Robert W.},
+  biburl = {https://www.bibsonomy.org/bibtex/22fa3c50b3386ec2f640eb8bfaedaa7db/tmcphillips},
+  description = {A formal grammar for flowcharts.},
+  interhash = {bd9dee412b9a403b9fa1f1b2f0032f36},
+  intrahash = {2fa3c50b3386ec2f640eb8bfaedaa7db},
+  journal = {Proceedings of Symposium on Applied Mathematics},
+  keywords = {FormalLanguages},
+  pages = {19-32},
+  timestamp = {2009-01-27T22:39:35.000+0100},
+  title = {Assigning Meanings to Programs},
+  url = {http://laser.cs.umass.edu/courses/cs521-621.Spr06/papers/Floyd.pdf},
+  volume = 19,
+  year = 1967
 }
 
 @article{hoare2009viewpoint,
