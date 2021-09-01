@@ -54,7 +54,7 @@ module State-Interface ( 𝔡 : Data-Implementation ) where
 
       updateState    : Id → Val → S → S
       
-      getVarVal      : Id → S → Maybe Val
+      getIdVal      : Id → S → Maybe Val
       
       dropValue      : Id → S → S
 
@@ -62,13 +62,13 @@ module State-Interface ( 𝔡 : Data-Implementation ) where
     ---------------------------------------------------------------------------
     field -- Predicates/Lemmas upon the state space
 
-      updateGet      : ∀ i v s  → getVarVal i (updateState i v s) ≡ just v
+      updateGet      : ∀ i v s  → getIdVal i (updateState i v s) ≡ just v
       
       ignoreTop      : ∀ i v x → ¬ i ≡ x → (s : S) →
-                       getVarVal x (updateState i v s) ≡ getVarVal x s
+                       getIdVal x (updateState i v s) ≡ getIdVal x s
                        
       irrelUpdate    : ∀ i x v y → ¬ i ≡ x → (s : S) →
-                       getVarVal x (updateState i v s) ≡ y → getVarVal x s ≡ y
+                       getIdVal x (updateState i v s) ≡ y → getIdVal x s ≡ y
 
       updateState¬●  : (i : Id) → (f : Val) → (s : S )
                        → ( updateState i f s ≡ ● ) → ⊥

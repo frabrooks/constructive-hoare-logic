@@ -108,31 +108,10 @@ module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
   --
   -- These properties are proved classically in [1] but given the scope of this
   -- project, it seemed natural to consider including these properties in the
-  -- formalisation as well. Attempting to do so however was met with a number
-  -- of challenges.
+  -- formalisation as well as a means of sanity checking the formalisations
+  -- of the Mini-Imp mechanisms that have been defined.
   --
-  -- First of all, a subtlety that I did not fully appreciate at first, these
-  -- properties pertain to the 𝑛𝑜𝑡𝑖𝑜𝑛 of using 𝑤𝑝 or 𝑤𝑙𝑝 to 𝑑𝑒𝑓𝑖𝑛𝑒 mechanisms,
-  -- not any particular mechanism that ℎ𝑎𝑠 been defined. Remembering that
-  -- one of the central tenets of constructive mathematics is to constrain our
-  -- thinking to objects that ℎ𝑎𝑣𝑒 been defined, and indeed the proofs in [1]
-  -- make use of classical not constructive reasoning, this leaves two options
-  -- if these properties are to be formalised in this project:
-  --
-  --     - Abandon constructive reasoning and formalise these properties in a
-  --     classical sense, either by making use of postulates in Agda or by
-  --     switching to an alternative proof assistant, such as 𝐼𝑠𝑎𝑏𝑒𝑙𝑙𝑒, with
-  --     built in support for classical reasoning principles such as the Law of
-  --     the Excluded Middle and the Axiom of Choice.
-  --
-  --     - Or, as that first approach would be a substantial deviation from the
-  --     current project's scope, merely formalise that each of the mechanisms
-  --     that ℎ𝑎𝑣𝑒 been defined do indeed satisfy each one of these properties;
-  --     both for completeness sake and as a means of sanity checking the
-  --     formalisations of the mechanisms that have been formalised.
-  --
-  -- That second option, however, leads to further complications. Firstly, the
-  -- constructs/mechanisms that have been formalised in this work (:=,
+  -- However, the constructs/mechanisms that have been formalised (:=,
   -- 𝔦𝔣_𝔱𝔥𝔢𝔫_𝔢𝔩𝔰𝔢_, 𝔴𝔥𝔦𝔩𝔢_𝔡𝔬 ⋯) have been formalised in terms of how they are to
   -- be executed, which is precisely the approach to defining programming
   -- constructs that the notion of 𝑤𝑝  and 𝑤𝑙𝑝 were trying to avoid by instead
@@ -151,7 +130,7 @@ module Hoare-Logic.Semantics ( 𝔡 : Data-Implementation )
   -- of D0 where it is clear that the definition depends on nothing other than
   -- the mechanism itself (𝑒, 𝑖), and the postcondition (𝑅):
   --
-  --         D0-Axiom-of-assignment : ∀ 𝑖 𝑒 𝑅 → ⟪ 𝑠𝑢𝑏 𝑒 𝑖 𝑅 ⟫ 𝑖 := 𝑒 ⟪ 𝑅 ⟫
+  --   D0-Axiom-of-assignment : ∀ 𝑖 𝑒 𝑅 → ⟪ 𝑠𝑢𝑏 𝑒 𝑖 𝑅 ⟫ 𝑖 := 𝑒 ⟪ 𝑅 ⟫
   --
   -- For the rest of the mechanisms, however, no attempt has been made to
   -- formalise their corresponding 𝑤𝑝/𝑤𝑙𝑝 as defined in [1]. The reason

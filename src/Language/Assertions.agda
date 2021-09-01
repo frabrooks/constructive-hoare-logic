@@ -214,8 +214,8 @@ module Language.Assertions
   a₂ = (𝑣𝑎𝑙 𝒙) == (𝑐𝑜𝑛𝑠𝑡 ②)
 
   inferenceExample : a₁ ⇒ a₂
-  inferenceExample  s ⊨x&y = let x = getVarVal 𝒙 s ==ᵥ (just ②) in
-                             let y = getVarVal 𝒚 s ==ᵥ (just ①)  in
+  inferenceExample  s ⊨x&y = let x = getIdVal 𝒙 s ==ᵥ (just ②) in
+                             let y = getIdVal 𝒚 s ==ᵥ (just ①)  in
                              ConjunctionElim₁ x y ⊨x&y
 
 

@@ -121,16 +121,22 @@ isbn="978-3-642-19718-5"
   year = 1967
 }
 
-@article{hoare2009viewpoint,
-  title={Viewpoint retrospective: An axiomatic basis for computer programming},
-  author={Hoare, Charles Antony Richard},
-  journal={Communications of the ACM},
-  volume={52},
-  number={10},
-  pages={30--32},
-  year={2009},
-  publisher={ACM New York, NY, USA}
+
+@InProceedings{sep2001,
+author="O'Hearn, Peter
+and Reynolds, John
+and Yang, Hongseok",
+editor="Fribourg, Laurent",
+title="Local Reasoning about Programs that Alter Data Structures",
+booktitle="Computer Science Logic",
+year="2001",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="1--19",
+abstract="We describe an extension of Hoare's logic for reasoning about programs that alter data structures. We consider a low-level storage model based on a heap with associated lookup, update, allocation and deallocation operations, and unrestricted address arithmetic. The assertion language is based on a possible worlds model of the logic of bunched implications, and includes spatial conjunction and implication connectives alongside those of classical logic. Heap operations are axiomatized using what we call the ``small axioms'', each of which mentions only those cells accessed by a particular command. Through these and a number of examples we show that the formalism supports local reasoning: A specification and proof can concentrate on only those cells in memory that a program accesses.",
+isbn="978-3-540-44802-0"
 }
+
 
 % Original Separation Logic Publication
 @inproceedings{reynolds2002separation,
@@ -141,55 +147,6 @@ isbn="978-3-642-19718-5"
   year={2002},
   organization={IEEE}
 }
-
-
-@inproceedings{10.1145/800191.805513,
-author = {Ligler, George T.},
-title = {The Assignment Axiom and Programming Language Design},
-year = {1976},
-isbn = {9781450374897},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-url = {https://doi.org/10.1145/800191.805513},
-doi = {10.1145/800191.805513},
-abstract = {One way to approach software reliability is to design programming languages that satisfy
-criteria which ensure that undesirable semantic effects cannot occur. The effect of
-using the assignment rule of Hoare as such a criterion on the design of procedure-oriented,
-block-structured programming languages is investigated; after details of the Hoare
-formalism are discussed, language design guidelines derived from formal studies are
-informally presented and justified.},
-booktitle = {Proceedings of the 1976 Annual Conference},
-pages = {2–6},
-numpages = {5},
-location = {Houston, Texas, USA},
-series = {ACM '76}
-}
-
-
-@inproceedings{10.1145/512976.512982,
-author = {Ligler, George T.},
-title = {A Mathematical Approach to Language Design},
-year = {1975},
-isbn = {9781450373517},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-url = {https://doi.org/10.1145/512976.512982},
-doi = {10.1145/512976.512982},
-abstract = {A framework for validating surface properties of programming language constructs,
-composed of proof rules (akin to those of Hoare) and supporting hypotheses, is constructed
-using the mathematical semantics of Scott and Strachey. The following approach to
-language design is then considered: the constructs of a language should have surface
-properties which 1) need few hypotheses other than assumed surface properties; and
-2) have proofs consisting, as far as possible, of trivial fixpoint and structural
-inductions.},
-booktitle = {Proceedings of the 2nd ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages},
-pages = {41–53},
-numpages = {13},
-location = {Palo Alto, California},
-series = {POPL '75}
-}
-
-
 
 
 

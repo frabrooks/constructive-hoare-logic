@@ -79,7 +79,7 @@
 \>[9]\AgdaFunction{Λ}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaFunction{″}\AgdaSpace{}%
-\AgdaBound{⌊ᵗCᵗ⌋}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaBound{⌊ᵗC\,ᵗ⌋}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaOperator{\AgdaFunction{⊨}}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaInductiveConstructor{op₂}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaInductiveConstructor{op₁}\AgdaSpace{}%
@@ -105,6 +105,8 @@
 \AgdaBound{P}\AgdaSymbol{))}\AgdaSpace{}%
 \AgdaFunction{Δ'}\AgdaSpace{}%
 \AgdaFunction{GO}\<%
+\\
+\>[6]\AgdaComment{---------------------------------------------------------------------------------------------------------------------------}\<%
 \\
 \>[6]\AgdaComment{-- case where B is false}\<%
 \\
@@ -207,7 +209,7 @@
 \AgdaSymbol{(}\AgdaFunction{⊭B}\AgdaSymbol{))}\<%
 \\
 %
-\>[6]\AgdaComment{---------------------------------------------------------------}\<%
+\>[6]\AgdaComment{---------------------------------------------------------------------------------------------------------------------------}\<%
 \\
 %
 \>[6]\AgdaFunction{go}%
@@ -215,7 +217,7 @@
 \AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
 \AgdaBound{ℱ}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaBound{⊨P}\AgdaSpace{}%
-\AgdaBound{⌊ᵗCᵗ⌋}\AgdaSpace{}%
+\AgdaBound{⌊ᵗC\,ᵗ⌋}\AgdaSpace{}%
 \AgdaKeyword{with}\<%
 \\
 \>[995I][@{}l@{\AgdaIndent{0}}]%
@@ -266,7 +268,7 @@
 \AgdaBound{⊨P}\AgdaSpace{}%
 \AgdaBound{p₁}\AgdaSpace{}%
 \AgdaBound{p₂}\AgdaSpace{}%
-\AgdaBound{⌊ᵗCᵗ⌋}\<%
+\AgdaBound{⌊ᵗC\,ᵗ⌋}\<%
 \\
 %
 \>[6]\AgdaSymbol{...}\AgdaSpace{}%
@@ -277,8 +279,8 @@
 \AgdaBound{p₂}\AgdaSpace{}%
 \AgdaOperator{\AgdaInductiveConstructor{]}}\AgdaSpace{}%
 \AgdaKeyword{rewrite}\AgdaSpace{}%
-\AgdaFunction{Is-just-just}\AgdaSpace{}%
-\AgdaBound{⌊ᵗCᵗ⌋}\AgdaSpace{}%
+\AgdaFunction{Is-just-witness-rewrite}\AgdaSpace{}%
+\AgdaBound{⌊ᵗC\,ᵗ⌋}\AgdaSpace{}%
 \AgdaSymbol{=}\AgdaSpace{}%
 \AgdaFunction{go-false}\AgdaSpace{}%
 \AgdaBound{⊨P}\AgdaSpace{}%
@@ -286,5 +288,5 @@
 \AgdaBound{p₂}\<%
 \\
 %
-\>[6]\AgdaComment{---------------------------------------------------------------}\<%
+\>[6]\AgdaComment{---------------------------------------------------------------------------------------------------------------------------}\<%
 \end{code}

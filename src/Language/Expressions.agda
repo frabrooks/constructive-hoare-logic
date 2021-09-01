@@ -177,7 +177,7 @@ module Language.Expressions ( 𝔡 : Data-Implementation )
                    (evalExp l s) ∙ (evalExp r s)
                             
   evalTerm (Const x) _ = just x
-  evalTerm (Var x) s = getVarVal x s
+  evalTerm (Var x) s = getIdVal x s
   evalTerm  𝒕 _ = just 𝑻
   evalTerm  𝒇 _ = just 𝑭
 

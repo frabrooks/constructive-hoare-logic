@@ -7,6 +7,7 @@
 \usepackage{graphicx}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{tikz}
+\usepackage{verbatim}
 
 \usepackage{amsmath}
 \usepackage{mathtools}
@@ -28,7 +29,8 @@
 %\usepackage{mathabx}
 % Use Chancery Font
 
-%Includes "References" in the table of contents
+
+% Includes "References" in the table of contents
 \usepackage[nottoc]{tocbibind}
 
 
@@ -37,6 +39,9 @@
 
 \usepackage{ stmaryrd }% For \llbracket \rrbracket
 % Used in \tctrip def
+
+
+
 
 % For NB ligature
 \newcommand\NB[1][0.1]{N\kern-#1emB \,} % default kern amount: -0.3em
@@ -104,7 +109,7 @@
     \vfill
 
     Project Report \\
-    Word Count XXXX   \\
+    Word Count: 10,000  \\
     Fraser L. Brooks 1680975 \\
     Supervisor: Vincent Rahli
     
@@ -131,17 +136,17 @@
 
 \flushbottom
 
+\renewcommand{\abstractname}{Introduction}
 \begin{abstract}
 
-
-  Program correctness is a perennial problem for software engineers and computer scientists alike. Many methods exist for establishing the correctness of a program and broadly speaking these methods fall into one of two paradigms; a program can be tested for correctness or the correctness can be `proved' outright. Due to the sheer complexity of software engineering, testing has reigned supreme in industry as formal techniques for proving correctness, while numerous, have lagged behind practice.
+  Program correctness is a perennial problem for software engineers and computer scientists alike. Many methods exist for establishing the correctness of a program, and broadly speaking these methods fall into one of two paradigms; a program can be tested for correctness or the correctness can be `proved' outright. Due to the sheer complexity of software engineering, testing has reigned supreme in industry as formal techniques for proving correctness, while numerous, have lagged behind practice.
   However, with the advent of higher-order-logic theorem provers and dependently typed programming languages, both operating under the scope of the Curry-Howard correspondence, the gap between practice and theory is shrinking.
 
-  Hoare logic is a formal system in which one can reason rigorously about --- and \emph{prove} --- the correctness of programs while Agda is both a dependently typed programming language \emph{and} an interactive theorem prover in accordance with the Curry-Howard correspondence. Combining the two, this work sets out to formalise the salient rules from Hoare logic within Agda and in doing so, provide a novel library with which a user could reason and prove correct simple imperative-style programs.
+  Hoare logic is a formal system in which one can reason rigorously about --- and \emph{prove} --- the correctness of programs while Agda is both a dependently typed programming language \emph{and} an interactive theorem prover in accordance with the Curry-Howard correspondence. Combining the two, this work sets out to formalise the salient rules from Hoare logic within Agda and, in doing so, provide a novel library with which a user could reason and prove correct simple imperative-style programs.
 
-  This formalisation was achieved via a deep embedding of both a simple imperative language, dubbed \emph{`Mini-Imp,'} and of a propositional calculus used in the reasoning about programs in the guise of Mini-Imp's expression language. Agda record interfaces were also used to seperate out the concerns of proving program correctness and proving trivial results within the expression language --- such as conjunction elimination or the distributivity of multiplication over addition.
+  This formalisation was achieved via a deep embedding of both a simple imperative language, dubbed \emph{`Mini-Imp,'} and of a propositional calculus used in the reasoning about programs in the guise of Mini-Imp's expression language. Agda record interfaces were also used to separate out the concerns of proving program correctness and proving trivial results within the expression language --- such as conjunction elimination or the distributivity of multiplication over addition.
 
-  The final result is an Agda library that is fit for the purpose of reasoning about and proving correct simple imperative-style programs using the implemented Hoare logic rules. A limitation of the work is the simplicity of the Mini-Imp language and corresponding lack of more sophisticated logical rules meaning there is no facility for reasoning about more complex language constructs like procedures, arrays or pointers. However, more powerful logics such as `separation logic' could bridge this gap and owing to the expressive power of HOL, with time, there is no reason why the current library couldn't be expanded to encompass separation logic too.
+  The final result is a constructive formalisation of Hoare logic and an Agda library that is fit for the purpose of proving correct simple imperative-style programs using the implemented Hoare logic rules. A limitation of the work is the simplicity of the Mini-Imp language and corresponding lack of more sophisticated logical rules, meaning there is no facility for reasoning about more complex language constructs like procedures, arrays or pointers. However, more powerful logics such as `separation logic' could bridge this gap and owing to the expressive power of HOL, with time, there is no reason why the current library couldn't be expanded to encompass separation logic too.
 
   \end{abstract}
 
@@ -166,20 +171,20 @@
 \epigraph{``Programming began as an art''}{ \tiny - David Gries, \emph{The Science of Programming}}
 
 
-Around the late 60's -- early 70's, in response to the verbose and inelegant languages of the time --- some of which, sadly, are still in use today --- computer scientists were experimenting with different ways of giving semantics to programming languages. The desire being partly to assist in the development of more elegent laguages but also partly to get a better mathematical grip on the process of computer programming and, in doing so, make a science out of the art.
+Around the late 60s -- early 70s, in response to the verbose and inelegant languages of the time --- some of which, sadly, are still in use today --- computer scientists were experimenting with different ways of giving semantics to programming languages. The desire being partly to assist in the development of more elegant languages but also partly to get a better mathematical grip on the process of computer programming and, in doing so, make a science out of the art.
 
 
-Early approaches to language specification and semantics fell into what would become the category of \emph{operational} semantics\footnote{In 1968 an operational semantics was given for Algol 68. Even earlier, in 1960, the lambda calculus --- the semantics of which is commonly understood as operational --- was evoked in giving semantics to the Lisp programming language.}  that describe a language in terms of how it is to be executed. Thus demonstrating that the most salient interpretation of a program at the time was as a set of instructions destined for execution by a machine\footnote{And this meant the \emph{specific} and often competing machines of the time.} rather than as a syntactic representation of the mathematical \mbox{object} known as an \emph{algorithm}. This lead to languages being designed with the machines that would run them, and the programmers that would use them, in mind. This led to a state of affairs wherein reasoning about the correctness of programms was much harder than it needed to be and was seen as not worth the effort.
+Early approaches to language specification and semantics fell into what would become the category of \emph{operational} semantics\footnote{In 1968 an operational semantics was given for Algol 68. Even earlier, in 1960, the lambda calculus --- the semantics of which is commonly understood as operational --- was evoked in giving semantics to the Lisp programming language.}  that describe a language in terms of how it is to be executed. Thus demonstrating that the most salient interpretation of a program at the time was as a set of instructions destined for execution by a machine\footnote{And this meant the \emph{specific} and often competing machines of the time.} rather than as a syntactic representation of the mathematical \mbox{object} known as an \emph{algorithm}. This lead to languages being designed with the machines that would run them, and the programmers that would use them, in mind. This led to a state of affairs wherein reasoning about the correctness of programs was much harder than it needed to be and was seen as not worth the effort.
 
 
-As Dijkstra remarked at the time, the balance needed `redressing' thus leading to a couple of seminal papers, first by Hoare\cite{hoare1969axiomatic} and then himself\cite{Dijkstra75}--- the latter, in part, inspired by the former. Hoare introduced \emph{axiomatic} semantics as a means to understanding computer programs via the assertions that can be said to be true before and after execution\footnote{Regardless of how that execution is performed!}. Then Dijkstra introduced a \emph{predicate transformer} semantics identifying language constructs with functions between preconditions and postconditions --- and thus, the balance between practical power and mathematical elegence and rigour began to find more equitable ground.
+As Dijkstra remarked at the time, the balance needed `redressing' thus leading to a couple of seminal papers, first by Hoare\cite{hoare1969axiomatic} and then himself\cite{Dijkstra75}--- the latter, in part, inspired by the former. Hoare introduced \emph{axiomatic} semantics as a means to understanding computer programs via the assertions that can be said to be true before and after execution.\footnote{Regardless of how that execution is performed!} Then Dijkstra introduced a \emph{predicate transformer} semantics identifying language constructs with functions between preconditions and postconditions --- and thus, the balance between practical power and mathematical elegance and rigour began to find more equitable ground.
 
 
 
 \subsubsection{Axiomatic Semantics via Hoare Logic}
 
 
-In 1967, as an alternative to operational semantics, Floyd\cite{Floyd1967Flowcharts} produced his seminal paper `Assigning Meanings to Programs' in which a program is given semantics via attatchment of propositions to the connections in a flow chart with nodes as commands. In Floyd's deductive system, whenever a command (a node) is reached via a connection whose associated proposition is true, then, if execution of the program leaves that node, it will leave through a connection whose associated proposition is also true.
+In 1967, as an alternative to operational semantics, Floyd\cite{Floyd1967Flowcharts} produced his seminal paper `Assigning Meanings to Programs' in which a program is given semantics via attachment of propositions to the connections in a flow chart with nodes as commands. In Floyd's deductive system, whenever a command (a node) is reached via a connection whose associated proposition is true, then, if execution of the program leaves that node, it will leave through a connection whose associated proposition is also true.
 
 \begin{quote}
 
@@ -205,7 +210,7 @@ A Hoare triple is of the form `\gtcil{P}{Q}{R}' which can be read as \ldots
   \end{itemize}
 \item If the notation is to denote \emph{total correctness}:
   \begin{itemize}
-  \item As above but termination of \textM{Q} is also guaranteed.
+  \item As above, but termination of \textM{Q} is also guaranteed.
   \end{itemize}
 \end{itemize}
 
@@ -258,7 +263,7 @@ Note that in general \gtcil{P}{Q}{R} is a predicate within the predicate calculu
 
 
 
-This first example not only demonstrates the utility and elegence of the Hoare triple but also shines a light on two of the stumbling blocks of Hoare logic. The first of these is the substitution of the programming language expression \textM{f} into the predicate \textM{P} thus indicating an interplay between the expression language and the assertion language --- the assertion language, being, the language from which preconditions and postconditions are to be formed. In theory, and in practice, this interplay isn't a problem so long as the assertion language is more expressive than the program's expression language. So long as this condition is met there will always be \emph{some} sensible, well-defined way of substituting an expression into an assertion and because there is never a need to substitute in the opposite direction, no further \mbox{complications} arise.\footnote{Within this formalisation however, this stumbling block does present a challenge as it forces upon us a number of considerations. See \autoref{sec:spec:expression-assertion-lang} }
+This first example not only demonstrates the utility and elegance of the Hoare triple but also shines a light on two of the stumbling blocks of Hoare logic. The first of these is the substitution of the programming language expression \textM{f} into the predicate \textM{P} thus indicating an interplay between the expression language and the assertion language --- the assertion language, being, the language from which preconditions and postconditions are to be formed. In theory, and in practice, this interplay isn't a problem so long as the assertion language is more expressive than the program's expression language. So long as this condition is met there will always be \emph{some} sensible, well-defined way of substituting an expression into an assertion and because there is never a need to substitute in the opposite direction, no further \mbox{complications} arise.\footnote{Within this formalisation however, this stumbling block does present a challenge as it forces upon us a number of considerations. See \autoref{sec:spec:expression-assertion-lang} }
 
 \label{page:expassertionprob}
 
@@ -274,11 +279,11 @@ The second stumbling block is that at first, to many, the reasoning appears to b
 \ldots but both of these are erroneous. The first gives the false consequent $\vdash \gtc{\codevar{x} = 1}{\codevar{x} \, \impcode{:=} \, \codevar{0}}{\codevar{x} = 1}$ as a direct consequence of the fact that $(\textM{\codevar{x}=1})[0/\codevar(x)]\, = \, (\textM{\codevar{x}=1})$; as $0$ doesn't occur in `$\textM{\codevar{x}=1}$'. The second gives the false consequent of $\vdash \gtc{\codevar{x} = \codevar{y}}{\codevar{x} \, \impcode{:=} \, \codevar{z}}{\codevar{z} = \codevar{y}}$ via substituting \codevar{x} for \codevar{z}.
 
 
-So in fact, the reasoning is in the right direction, that is, \emph{backwards}. This is in line with the radical reformulation of programming that was being proposed at the time by Hoare, and later Dijkstra, and then most lucidly expatiated upon in Gries' monograph\cite{Gries81}, `The Science of Programming.' This reformulation was to frame programming as a \emph{goal-oriented} activity and to construct programs alongside a proof of correctness, starting with the desired postcondition --- the desired output --- and working backwards towards the necessary precondtion/input.\footnote{As a result, proofs of correctness constructed using the Agda library produced by this project are also constructed backwards. See XXXXXXX}
+So in fact, the reasoning is in the right direction, that is, \emph{backwards}. This is in line with the radical reformulation of programming that was being proposed at the time by Hoare, and later Dijkstra, and then most lucidly expatiated upon in Gries' monograph\cite{Gries81}, `The Science of Programming.' This reformulation was to frame programming as a \emph{goal-oriented} activity and to construct programs alongside a proof of correctness, starting with the desired postcondition --- the desired output --- and working backwards towards the necessary precondition/input.\footnote{As a result, proofs of correctness constructed using the Agda library produced by this project are also constructed backwards. See figure \ref{fig:swap-proof}}
 
 
 
-So we've seen the characterisation of the assignment command as an axiom. In Hoare's original paper, the following inference rules were aslo given, from which proofs of correctness could be developed, starting with the fairly intuitive rules of consequence:
+So we've seen the characterisation of the assignment command as an axiom. In Hoare's original paper, the following inference rules were also given, from which proofs of correctness could be developed, starting with the fairly intuitive rules of consequence:
 
   
 \begin{equation}
@@ -329,7 +334,7 @@ Finally the most interesting rule, the rule of iteration:
 \vspace{2em}
 
 
-The insights on display here are that \emph{if} a loop terminates, then we can be sure that the condition \textM{B} of the loop is now false, and that if we have a condition \textM{P} that we know isn't changed by the running of the body of the loop so long as it is ran when the loop condition \textM{B} is also true ($\vdash \gtc{\textM{P} \wedge \textM{B}}{S}{P}$), then we can also be sure that \textM{P} is true \emph{after} the loop terminates. And thus the, now well known, notion of a a loop \emph{invariant} has been introduced.
+The insights on display here are that \emph{if} a loop terminates, then we can be sure that the condition \textM{B} of the loop is now false, and that if we have a condition \textM{P} that we know isn't changed by the running of the body of the loop so long as it is ran when the loop condition \textM{B} is also true ($\vdash \gtc{\textM{P} \wedge \textM{B}}{S}{P}$), then we can also be sure that \textM{P} is true \emph{after} the loop terminates. And thus the, now well known, notion of a loop \emph{invariant} has been introduced.
 
 This was one of the first contributions of the \emph{theory} of programming to the practice, viz, that when designing a loop, we should start with the desired postcondition \textM{R} and search for a \textM{P} and \textM{B} fitting the schema above --- i.e. A \textM{P} and \textM{B} such that $\textM{P} \wedge \neg \textM{B} \Rightarrow \textM{R}$ --- at which point we'll have the condition of the loop \emph{and} its precondition and all that shall be left to do is fill in the body of the loop; which we'll be able to do safely by making sure that \textM{P} is left invariant, and execution moves towards the falsity of \textM{B}.
 
@@ -342,7 +347,7 @@ This was one of the first contributions of the \emph{theory} of programming to t
 
 Very early on in the field of computing science, Dijkstra, among others, was also interested in putting programming on surer mathematical footing; moving away from the notion of programming as a `chaotic contribution' of `thousands of ingenious tricks' as it was put in his talk `Some meditations on Advanced Programming'\cite{Dijkstra62}, at the 1962 IFIP conference.
 
-Despite some disagreements between industy and academics --- or rather, the theoretically inclined academics --- as the 60's progressed and the programs being developed grew in scope, it became apparent that Dijkstra and similar detractors of the status quo were right and that there were serious problems with programming. Hoare's paper had spawned a field of research on axiomatic definitions of programming languages, and many papers were born from this, but the utility of the approach was still subject to doubt. Axiomatic definitions provided a way to reason about programs but didn't so much present a way to \emph{develop} them.
+Despite some disagreements between industry and academics --- or rather, the theoretically inclined academics --- as the 60s progressed and the programs being developed grew in scope, it became apparent that Dijkstra and similar detractors of the status quo were right and that there were serious problems with programming. Hoare's paper had spawned a field of research on axiomatic definitions of programming languages, and many papers were born from this, but the utility of the approach was still subject to doubt. Axiomatic definitions provided a way to reason about programs, but didn't so much present a way to \emph{develop} them.
 
 Then, in 1975, building upon Hoare's paper, Dijkstra carried the notion of an axiomatic semantics further in his very influential paper `Guarded Commands and Non-Determinism'\cite{Dijkstra75} --- followed up by the monograph `A Discipline of Programming'\cite{Dijkstra76} --- in which he introduced the notion of a \emph{predicate transformer semantics}.\footnote{As well as introducing the notion of guarded commands still very much present in languages today}
 
@@ -397,9 +402,9 @@ The relation to Hoare logic should now be clear and indeed, \textM{wp(S,R)} can 
 
 This shows, as remarked previously, that a Hoare triple is just a statement within the underlying predicate calculus and proving a Hoare triple --- i.e. a \emph{program} --- correct, is reduced to the task of proving a \emph{first-order formula}! 
 
-The contribution of predicate transformer semantics, as a reformulation of Hoare logic, is that it lay the ground work for a new (at the time) paradigm of programming, a \emph{science of programming}\cite{Gries81}, such that for the first time, programmers could use theory to develop programs \emph{alongside} a proof of correctness, rather than resorting to `ingenious' but `chaotic' tricks.
+The contribution of predicate transformer semantics, as a reformulation of Hoare logic, is that it lay the groundwork for a new (at the time) paradigm of programming, a \emph{science of programming}\cite{Gries81}, such that for the first time, programmers could use theory to develop programs \emph{alongside} a proof of correctness, rather than resorting to `ingenious' but `chaotic' tricks.
 
-As a slight diversion then, what does defining a language in terms of \textM{wp} look like? The simplest commands that can be characterised by their weakest preconditions are the \agdamath{skip} command, that does nothing, characterised by `$\textM{wp}( \agdamath{skip}  ,\textM{R}) = \textM{R}$', and the \agdamath{abort} command --- that aborts computation and signifies failure, characterised by `$\textM{wp}( \agdamath{abort}  ,\textM{R})  = \agdamath{False}$.'
+As a slight diversion, then, what does defining a language in terms of \textM{wp} look like? The simplest commands that can be characterised by their weakest preconditions are the \agdamath{skip} command, that does nothing, characterised by `$\textM{wp}( \agdamath{skip}  ,\textM{R}) = \textM{R}$', and the \agdamath{abort} command --- that aborts computation and signifies failure, characterised by `$\textM{wp}( \agdamath{abort}  ,\textM{R})  = \agdamath{False}$.'
 
 A more interesting example that should be familiar is the assignment command as a reformulation of the axiom of assignment from Hoare logic:
 
@@ -427,7 +432,7 @@ A, more interesting still, example would be a characterisation of a simple `\imp
 \end{centering} 
 
 
-A weakest precondition for a \impcode{while}/iteration command becomes a little more involved as it has to be defined inductively, similar to the above definition, only in a way that guarantees progress torwards termination. As such, it is not repeated here; the definitions above have been given only for pedagogical reasons to situate the Hoare logic calculus and the rules formalised in this work fully within their understood context.\footnote{\NB That the definitions given here differ significantly from those in \cite{Dijkstra75}/\cite{Dijkstra76} wherein the language that is defined is non-deterministic, a fact that to many a programmer might sound alarming but in actuality makes for a much `cleaner' language.}
+A weakest precondition for a \impcode{while}/iteration command becomes a little more involved as it has to be defined inductively, similar to the above definition, only in a way that guarantees progress towards termination. As such, it is not repeated here; the definitions above have been given only for pedagogical reasons to situate the Hoare logic calculus and the rules formalised in this work fully within their understood context.\footnote{\NB That the definitions given here differ significantly from those in \cite{Dijkstra75}/\cite{Dijkstra76} wherein the language that is defined is non-deterministic, a fact that to many a programmer might sound alarming but in actuality makes for a much `cleaner' language.}
 
 Thankfully for Hoare logic and this formalisation, it is rarely necessary to formulate/compute the weakest precondition itself. In so far as our concerns are to prove the correctness of programs, it is enough to show that for a given precondition \textM{P}: $\textM{P} \Rightarrow \textM{wp(S,R)}$. Indeed, for the Hoare logic inference rules \ref{eq:D1},\ref{eq:D2}, and \ref{eq:D3},  given in the previous section, proofs that they do actually imply what they claim are given in \cite{Dijkstra76}/\cite{Gries81}. For instance, see theorem (11.6) in \cite{Gries81}, or the proof of the `Fundamental Invariance Theorem' in \cite{Dijkstra76} for a proof that any \textM{P} that satisfies a more general, non-deterministic, version of the Rule of Iteration from the previous section, does in fact imply the weakest precondition of the \impcode{while}/iterative command as given in those same works.
 
@@ -449,13 +454,13 @@ First up, the word `formalisation', as in, a \emph{formal} proof. What is a form
 \end{quote}
 
 
-What exactly this `evidence' should be is left unspecified. In a \emph{formal} proof, this evidence is situated within some logical system. It is a string of symbols or sentences that form a \emph{well-formed formula} within a formally defined language --- read, a language that has been described by precise and unabmiguous rules --- each of which has a precise and unambiguous meaning and is either an \emph{axiom} within the logical system, an \emph{assumption}, or follows from one of the logical system's inference rules. Put very simply then, a formal proof is just a very assiduous, unambiguous, sometimes tedious, proof. 
+What exactly this `evidence' should be is left unspecified. In a \emph{formal} proof, this evidence is situated within some logical system. It is a string of symbols or sentences that form a \emph{well-formed formula} within a formally defined language --- read, a language that has been described by precise and unambiguous rules --- each of which has a precise and unambiguous meaning and is either an \emph{axiom} within the logical system, an \emph{assumption}, or follows from one of the logical system's inference rules. Put very simply then, a formal proof is just a very assiduous, unambiguous, sometimes tedious, proof. 
 
 
 \subsubsection{Constructive Mathematics}
 
 
-Constructive mathematics, or constructive logic, refers to mathematical or logical reasoning within the \emph{constructivism} philosophy of mathematics. It is often characterised as classical mathematics or logic, only without the \emph{Law of Excluded Middle} and the \emph{Axiom of Choice.}\footnote{Necessarily without the Axiom of Choice as the Axiom of Choice implies the Law of Excluded Middle within a constructive setting.} The law of the excluded middle, sometimes called the \emph{principle} or \emph{aiom} of the excluded middle by constructivists to emphasise the optionality, is the axiom stating that every proposition is either true or false; that is, $\forall \textM{P} . \textM{P} \vee \neg \textM{P}$. At first glance it seems an obvious, even banal, tool to allow oneself; indeed it is a very useful principle in logic upon which many famous proofs rely. So why reject it?
+Constructive mathematics, or constructive logic, refers to mathematical or logical reasoning within the \emph{constructivism} philosophy of mathematics. It is often characterised as classical mathematics or logic, only without the \emph{Law of Excluded Middle} and the \emph{Axiom of Choice.}\footnote{Necessarily without the Axiom of Choice as the Axiom of Choice implies the Law of Excluded Middle within a constructive setting.} The law of the excluded middle, sometimes called the \emph{principle} or \emph{axiom} of the excluded middle by constructivists to emphasise the optionality, is the axiom stating that every proposition is either true or false; that is, $\forall \textM{P} . \textM{P} \vee \neg \textM{P}$. At first glance it seems an obvious, even banal, tool to allow oneself; indeed it is a very useful principle in logic upon which many famous proofs rely. So why reject it?
 
 The beginnings of the constructivist philosophy can be traced back to early 20th century thought led by Brouwer. The main concern of constructivism is in how one asserts that a mathematical object does or does not exist. The problem with LEM is that it allows one to assert the existence of mathematical objects without actually specifying \emph{what} they are, that is, without \emph{constructing} them. Consider the following classical proof:
 
@@ -520,15 +525,17 @@ So, rather than characterise constructive mathematics as classical mathematics w
 With all that said, it is not necessary to get caught up in the philosophical arguments or the nuances of constructivism for this present work. The primary motivation here is that often constructive treatments of classical results can often prove stronger and more illuminating.
 
 
-Also of our concern, is that with the rise of the computer, constructive mathematics has come into its own. A constructive proof can be read as an \emph{algorithmic} proof --- read, checkable or usable by a computer. As an example, consider the proof given just now, if we wished to do something algoritmically with the $a^b$-object that was proved to exist, the proof given there wouldn't be much use to the machine or the programmer; a computer cannot procede in two minds at once! Thus the utility of constructive mathematics has never been clearer and this leads to a contribution that computer scientists have given the world of mathematics; the subject of the next section.
+Also of our concern, is that with the rise of the computer, constructive mathematics has come into its own. A constructive proof can be read as an \emph{algorithmic} proof --- read, checkable or usable by a computer. As an example, consider the proof given just now, if we wished to do something algorithmically with the $a^b$-object that was proved to exist, the proof given there wouldn't be much use to the machine or the programmer; a computer cannot proceed in two minds at once! Thus, the utility of constructive mathematics has never been clearer, and this leads to a contribution that computer scientists have given the world of mathematics; the subject of the next section.
 
 
 \subsubsection{Interactive Theorem Provers}
 
-Interactive Theorem Provers, or proof assistants, are broadly characterised as software systems used as an aid in the development of proofs. They can all perhaps trace their origins to a paper by Knuth and Bendix\cite{KNUTH1970263} from 1970 in which an algorithm was devised which was capable of deducing new laws or theorems from some given ones; some laws of elementary group theory serving as an exmple within the paper. The formal development of this algorithm in the authors words was `primarily a precise statement of what hundreds of mathematicians have been doing for many decades.'
+Interactive Theorem Provers, or proof assistants, are broadly characterised as software systems used as an aid in the development of proofs. An early demonstration of the use of a computer to aid mathematical endeavour is given by Knuth and Bendix in 1970\cite{KNUTH1970263} in which an algorithm was devised which was capable of deducing new laws or theorems from some given ones; some laws of elementary group theory serving as an exmple within the paper. The formal development of this algorithm, in the authors words was `primarily a precise statement of what hundreds of mathematicians have been doing for many decades.'
 
 
-Of course, the space of interactive theorem provers has come a long way since then and there are now a plethora of such software systems to choose from. The principle idea behind all of them is that mathematical objects can be represented as \emph{data}, sometimes, also referred to as a \emph{word}, inside a machine -- imagine a `String' in your favourite programming language --- and mathematical operations or laws can be implemented as operations upon that data/word. These operations might be referred to as \emph{reductions}. For example, we can encode in data, or as \emph{words}, the natural numbers \`{a} la Peano as follows:
+Of course, the development of mathematics with computational aid has come a long way since then and there are now a plethora of so called `Interactive Theorem Provers' to choose from. The principle idea behind all of them is that mathematical objects can be represented as \emph{data}, sometimes, also referred to as a \emph{word}, inside a machine and mathematical operations or laws can be implemented as operations upon that data/word. These operations might be referred to as \emph{reductions}. For example, we can encode in data, or as \emph{words}, the natural numbers \`{a} la Peano as follows:
+
+\vspace{0.3em}
 
 \texttt{A natural number is inductively defined as either:}
 
@@ -536,6 +543,7 @@ Of course, the space of interactive theorem provers has come a long way since th
 \item  The word/data: \AgdaInductiveConstructor{``zero''}
 \item  Or the word/data: \AgdaInductiveConstructor{``suc $\mathpzc{x}$''} where \AgdaInductiveConstructor{$\mathpzc{x}$} is some other natural number.
 \end{enumerate}
+
 
 
 Addition over natural numbers can then be quite simply defined on a case by case basis of the inputs:
@@ -553,30 +561,25 @@ Addition over natural numbers can then be quite simply defined on a case by case
   \end{minipage}
 \end{center}
 
-So we might say that the \emph{word} \AgdaInductiveConstructor{``suc $\mathpzc{x}$ + \texttt{y}''} \emph{reduces} to the \emph{word}  \mbox{\AgdaInductiveConstructor{``suc ($\mathpzc{x}$ + \texttt{y})''}}. With such a definition, it can be \emph{algorithmically} verified that $ 1  +  1 \; \equiv \; 2$, with $\equiv$ serving as \emph{definitional} equality, as once both terms on either side of the operator are maximally reduced, they \emph{are} the same. The two constructions above could be built upon further, for instance, the commutativity of addition could be proved, multiplication could be defined in terms of the definition of addition etc. In fact, there are projects operating today aiming to formalise large quantities of mathematics in this manner within particular interactive theorem provers. For instance, the UniMath project is a huge library of mathematics formalised within the Coq interactive theorem prover.
+With such a definition, it can be \emph{algorithmically} verified that $ 1  +  1 \; \equiv \; 2$, with $\equiv$ serving as \emph{definitional} equality, as once both terms on either side of the operator are maximally reduced, they \emph{are} the same. In addition to the above, the commutativity of addition could be proved, multiplication could be defined in terms of the definition of addition etc. In fact, there are projects operating today aiming to formalise large quantities of mathematics in this manner within particular interactive theorem provers. For instance, the UniMath project is a huge library of mathematics formalised within the Coq interactive theorem prover.
 
 
 
 Within these theorem provers then, proving that $\textM{P} \Rightarrow \textM{Q}$, amounts to a search for a sequence of reductions/rules that transform the data encoding \textM{P}, into some data encoding \textM{Q}. This search is done through some degree of cooperation between the user and the machine, in some cases happening automatically, and in others requiring human intervention and ingenuity. The algorithmic nature of theorem provers following this pattern is what gives this realm of mathematics a great synergy with constructive mathematics, although it should be noted that not all interactive theorem provers have to operate under the scope of constructive mathematics.
 
 
-With that said, Agda\cite{norell2007towards} is the interactive theorem prover used within this formalisation, chosen as it happens to be a constructive system by default which means that the principle of the excluded middle, if desired, would need to be \emph{postulated} as an axiom.\footnote{A temptation that has been resisted in this formalisation.} This amounts to inserting it as a rule by which we can reduce words but at the cost of our proof having a computational meaning, because, as was mentioned in the previous section, PEM has no compuational meaning. So this restriction is what allows Aga to also claim itself a \emph{programming language} and operate under the Curry-Howard correspondence, also referred to as the \emph{propositions as types} paradigm in which the type signature of a program becomes a proposition and an implementation of that program becomes a proof of that proposition.
+With that said, Agda\cite{norell2007towards} is the interactive theorem prover used within this formalisation, chosen as it is a constructive system by default which means that the principle of the excluded middle, if desired, would need to be \emph{postulated} as an axiom.\footnote{A temptation that has been resisted in this formalisation.} This amounts to inserting it as a reduction rule but at the cost of our proof having algorithmic meaning, because, as was mentioned in the previous section, PEM has no computational meaning. So this restriction is what allows Agda to also claim itself a \emph{programming language} and operate under the \emph{propositions as types} paradigm, also known as the Curry-Howard correspondence, in which the type of a program as described by its signature becomes a proposition and an implementation of that program becomes a proof of that proposition. Disciplined use of Agda in this way showcases the fact that the formalisation is possible without LEM/PEM, an unsurprising, but nice to verify, fact.
 
 
 \subsection{Modern Literature Review}
 
-With most of the preliminaries out of the way, and most of them being historic, it is worth examining the picture of program correctness as it appears today. The field has come a long way and despite the methodolgy of program development proposed by Hoare, Dijkstra, and Gries, wherein a program is developed alongside its proof of correctness, struggling to catch on in the mainstream as programs of the time continued to swell in complexity, Hoare logic has been expanded upon giving rise most notably to \emph{Separation Logic} which has become another success story of the theoretical making its way into industry in the form of the \emph{Infer} tool which is now in use in a plethora of tech companies.
+With most of the preliminaries out of the way, and most of them being historic, it is worth examining the picture of program correctness as it appears today. The field has come a long way despite the methodology of program development proposed by Hoare, Dijkstra, and Gries, wherein a program is developed alongside its proof of correctness, struggling to catch on in the mainstream --- likely as a result of programs continuing to swell in complexity. Hoare logic has been expanded upon, giving rise most notably to \emph{Separation Logic} which has become a success story of the theoretical world after making its way into industry in the form of the \emph{Infer} tool which is now in use in a plethora of tech companies. The Infer tool is a static analyser for Java, C, C++, and other languages, capable of catching a plethora of bugs including null pointer errors and memory leaks before they make their way into production.
 
-Separation logic originated from some papers [XX][XX] that extended Hoare logic to also facilitate reasoning about memory and pointers thus alllowing one to prove correct much more complicated and sophisticated programs rather than being limited to local variables as you are in Hoare logic. Indeed, the original aims of this work were to formalise not only Hoare logic but separation logic as well but this proved too much work for the time allotted.
+Separation logic originated from a couple of papers (\cite{sep2001}/\cite{reynolds2002separation}) in which Hoare logic was extended to also facilitate reasoning about memory and pointers, thus allowing one to prove correct much more complicated and sophisticated programs rather than being limited to local variables and reasoning as you are in Hoare logic. Indeed, the original aims of this work were to formalise not only Hoare logic but separation logic as well, but this proved too much work for the time allotted.
 
+Also of note on the modern scene is the work from a group of researchers towards a \emph{Verified Software Toolchain}\cite{vst} aiming to have a modular tool or toolchain that can statically analyse and make observations about a source-language and produce \emph{machine-checked} proofs that guarantee the complete correctness not only of the source-language but also of the compiled program operating within a particular operating system.
 
-Also of note is the work from a group of researchers towards a \emph{Verified Software Toolchain}\cite{vst} aiming to have a modular tool or toolchain that can statically analyse and make observations about a source-language and produce \emph{machine-checked} proofs that guarantee the complete correctness not only of the source-language but also of the compiled program operating within a particular operating system.
-
-Of note is that the two systems above, Infer and VST, work via two possible relaxations of the foundational Halting Problem which of course implies that we can never expect to have a program that for \emph{all possible} programs catches \emph{all possible} bugs. The obvious workaround to this constraint is to relax one of those two constraints, with Infer opting to allow some false negatives --- and not catch all bugs --- while VST diminshes the first constraint by constraining the programmer from constructing all possible programs.
-
-\,
-
-TODO: THIS PAGE NEEDS MORE WORK
+An interesting thing to note is that the two systems above, Infer and VST, work via the two possible relaxations of the foundational Halting Problem which of course implies that we can never expect to have a program that for \emph{all possible} programs catches \emph{all possible} bugs. The obvious workaround to this constraint is to relax one of those two constraints, with Infer opting to allow some false negatives --- and not catch all bugs --- while VST diminishes the first constraint by constraining the programmer from constructing all possible programs.
 
 
 \pagebreak
@@ -585,7 +588,7 @@ TODO: THIS PAGE NEEDS MORE WORK
 \section{Specification of the Formalisation}
 
 
-When formalising within a symbolic system, a lot of details that are normally swept under the rug in typical expositions need to be considered. With the preliminaries out the way then, this section details the design decisions that were made with regards to these unavoidable details, the justifications for those decisions, and finally the scope of, and overarching plan for, the formalisation at hand.
+When formalising within a symbolic system, a lot of details that are normally swept under the rug in typical expositions need to be considered. With the preliminaries out the way then, this section details the design decisions that were made with regard to these unavoidable details, the justifications for those decisions, and finally the scope of, and overarching plan for, the formalisation at hand.
 
 These decisions include: the choice between a deep or shallow embedding of the expression language and the programming language, the choice of programming language to model and the encoding of that language as embedded within Agda, and finally the choice of inference rules to be formalised for use within proofs of program correctness.
 
@@ -594,15 +597,15 @@ These decisions include: the choice between a deep or shallow embedding of the e
 \label{sec:shallowdeep}
 
 
-For Hoare logic to be formalised within Agda, a simple imperative language for the Hoare logic assertions to apply to needs to be constructed and formalised first. This language itself, will actually comprise of \emph{two} languages, the language defining the commands of the language (\impcode{WHILE\_DO\_} etc\ldots) and the expression/assertion language defining both the expressions that appear \emph{within} those commands and the propositional assertions for reasoning.
+For Hoare logic to be formalised within Agda, a simple imperative language for the Hoare logic to apply to needs to be constructed and formalised first. This language itself, will actually comprise \emph{two} languages, the language defining the commands of the language (\impcode{IF\_ELSE\_} etc\ldots) and the expression and or assertion language defining both the expressions that appear \emph{within} those commands and the assertions for the logical calculus.
 
 
-Given that Agda is a programming language then, the task is to embed one language within another; a task that is actually rather common. So called \emph{Domain Specific Languages}, as opposed to \emph{General Purpose Languages}, are programming languages designed with a specific use case in mind. DSLs can be implimented via standalone syntax and semantics with their own compilation techniques but often they are instead \emph{embedded} within a host language making use of that language's syntax, semantics, and compilation techniques and thus saving a lot of work for the implementer.
+Given that Agda is a programming language, then, the task is to embed one language within another; a task that is actually rather common. So-called \emph{Domain Specific Languages}, as opposed to \emph{General Purpose Languages}, are programming languages designed with a specific use case in mind. DSLs can be implemented via standalone syntax and semantics with their own compilation techniques, but often they are instead \emph{embedded} within a host language making use of that language's syntax, semantics, and compilation techniques and thus saving a lot of work for the implementer.
 
-The choice one has to make when embedding a language within another is between a \emph{shallow embedding} or a \emph{deep embedding}. The two approaches are closely related with the principal difference being that in a shallow embedding, only the semantics are captured, whereas in a deep embedding the syntax itself is embedded along with some evaluation function, sometimes called an \emph{observation function}; This function then essentially gives an operational semantics to the syntax of the embedded language, while in a shallow embedding the semantics is in terms of the host language's semantics.
+The choice one has to make when embedding a language within another is between a \emph{shallow embedding} or a \emph{deep embedding}. The two approaches are closely related with the principal difference being that in a shallow \mbox{embedding}, only the semantics are captured, whereas in a deep embedding the syntax itself is embedded along with some evaluation function, sometimes called an \emph{observation function}. This function then essentially provides an operational semantics to the syntax of the embedded language, while in a shallow embedding the semantics is in terms of the host language's semantics.
 
 
-As an illustrative example consider a simple expression language of arithmetic expressions with integer constants and addition. A deep embedding might have the form:
+As an illustrative example, consider a simple expression language of \mbox{arithmetic} expressions with integer constants and addition. A deep embedding might have the form:
 
 
 \begin{centering}
@@ -703,35 +706,35 @@ With observation function \texttt{\emph{eval}}. Meanwhile, a shallow embedding o
 
 
 
-Both approaches have their advantages. A deep embedding allows for the easy modification of evaluation functions without having to change the language itself. In fact, with a deep embedding, multiple evaluation functions can be given which amounts to being able to give multiple \emph{non-compositional} (operational) semantics for the language; whether or not that counts as an advantage or disadvantage will depend on the context.
+Both approaches have their advantages. A deep embedding allows for the easy modification of evaluation functions without having to change the language itself. In fact, with a deep embedding, multiple evaluation functions can be given, which amounts to being able to give multiple \emph{non-compositional} (operational) semantics for the language; whether that counts as an advantage or disadvantage will depend on the context.
 
 
-Meanwhile, a shallowly embedded language can only be given semantics compositionally through the host language but the pay-off for this is that it makes it much easier to change the embedded language as a small change will not necessitate a change in the evaluation function and all its dependents.
+Meanwhile, a shallowly embedded language can only be given semantics compositionally through the host language, but the pay-off for this is that it makes it much easier to change the embedded language as a small change will not necessitate a change in the evaluation function and all its dependents.
 
 
 
-In this work then, a choice of embedding strategy needed to be made for the two languages, viz, the imperative language to be reasoned about and the expression language within that language. Ultimately the choice was made in favour of a \emph{deep embedding} for \emph{both}.
+This project, then, demands a choice of embedding strategy to be made for the two languages, viz, the imperative language to be reasoned about and the expression language within that language. Ultimately, the choice was made in favour of a \emph{deep embedding} for \emph{both}.
 
-The primary justification for the imperative language to be a deep embedding is that it was decided that one of the primary intentions of this work, beyond formalising Hoare logic in Agda, would be to have a system wherein a small snippet of, say, a C program, could easily be translated into Agda, perhaps even automatically. Then a proof of its correctness could be constructed giving great confidence in the correctness of this snippet within its original program. This made it desirable that the embedded imperative language closely mirror a simple \emph{real-world} language lest the user lose confidence that the program proved correct in Agda correctly captures the one they started with.
+The justification for the imperative language to be a deep \mbox{embedding} comes from the recognition that rather than just formalising Hoare logic in Agda, this project could also have practical utility in forming a system wherein a small snippet of, say, a C program, could easily be translated into Agda, perhaps even automatically. Then a proof of its correctness could be constructed, giving great confidence in the correctness of this snippet within its original program. This made it desirable that the embedded imperative language closely mirror a simple \emph{real-world} language, lest the user of the system lose confidence that the program proved correct in Agda accurately captures the one they started with.
 
-The other consideration is that a deep embedding of the imperative language allows for the giving of an operational semantics for that language in the form of its evaluation function. In that sense it could be said that the present work, beyond just formalising some Hoare logic, is giving both an axiomatic semantics \emph{and} an operational semantics to a simple imperative language and showing that both are consistent with one another; thus expanding the scope of the formalisation.
+Another consideration is that a deep embedding of the imperative language allows for the giving of an operational semantics for that language in the form of its evaluation function. In that sense it could be said that the present work, beyond just formalising some Hoare logic, is giving both an axiomatic semantics \emph{and} an operational semantics to a simple imperative language and showing that both are consistent with one another; thus expanding the scope of the formalisation.
 
 
-The decision to have the assertion language deeply embedded, however, is a little harder to justify. As this is the language that will also form the logical assertions of the predicate calculus underlying the Hoare logic, it may seem wasteful to re-encode this first-order logic within the higher order logic underpinning Agda.
+The decision to have the assertion language deeply embedded, however, is a little harder to justify. As this is the language that will also form the logical assertions of the predicate calculus underlying the Hoare logic, it may seem wasteful to embed this first order logic within the higher order logic underpinning Agda.
 
-Agda already has an extensive standard library covering many of the definitions and theorems that may be needed while reasoning within the Hoare logic calculus. For instance, in Hoare logic, it is often necessary to prove $\textM{P} \Rightarrow \textM{Q}$ for some \textM{P} and \textM{Q} --- e.g.\! when the user has \mbox{\gtcil{A}{S_1}{P}} and \mbox{\gtcil{Q}{S_2}{B}} and wants to derive \mbox{\gtcil{A}{S_1 \; ; S_2}{B}} --- and if, say, this \textM{P} is some conjunction involving \textM{Q}, then what is required is a mechanism/proof corresponding to \emph{conjunction elimination}. A deep embedding prevents a user from simply using the Agda standard library equivalent of conjunction elimination --- the projections out of the product/sigma type --- and instead necessitates re-proving this fact for the semantics of the embedded language itself.
+Agda already has an extensive standard library covering many of the definitions and theorems that may be needed within the Hoare logic calculus. For instance, in Hoare logic, it is often necessary to prove $\textM{P} \Rightarrow \textM{Q}$ for some \textM{P} and \textM{Q} --- e.g.\! when the user has \mbox{\gtcil{A}{S_1}{P}} and \mbox{\gtcil{Q}{S_2}{B}} and wants to derive \mbox{\gtcil{A}{S_1 \; ; S_2}{B}} --- and if, say, this \textM{P} is some conjunction involving \textM{Q}, then what is required is a mechanism/proof corresponding to \emph{conjunction elimination}. A deep embedding prevents a user from simply using the Agda standard library equivalent of conjunction elimination --- the projections out of the product/sigma type --- and instead necessitates re-proving this fact for the embedded language itself.
 
 
 
 \pagebreak
 
-Despite this drawback, the desire for this work to not only be a theoretical achievement but also to have potential practical use in future as a means of checking the correctness of \emph{real} programs influenced the decision in favour of a deep embedding. This is in keeping with the spirit of Hoare's original paper in which the theory was being developed with a purpose in mind. The problem with relying on Agda's standard library is that the treatments therein don't necessarily capture real programming --- most notably in the case of integers where the standard library definition obviously corresponds to the mathematical, \emph{`true'}-integer that is unbounded in both directions, whereas in most programming languages, certainly the ones this work is aiming to reason about, an integer is bounded by dint of it being implemented by the compiler as, usually, either a 32 or 16-bit word.
+Despite this drawback, once again the desire for this project to not only be a theoretical achievement but also to have potential practical use as a means of checking the correctness of \emph{real} programs influenced the decision in favour of a deep embedding. This is in keeping with the spirit of Hoare's original paper, in which the theory was being developed with a purpose in mind. The problem with relying on Agda's standard library is that the treatments therein don't necessarily capture real programming --- most notably in the case of integers where the standard library definition obviously corresponds to the mathematical, \emph{`true'}-integer that is unbounded in both directions, whereas in most programming languages, certainly the ones this work is aiming to reason about, an integer is bounded by dint of it being implemented by the compiler as, usually, either a 32 or 16-bit word.
 
-Hoare was very particular in his original paper to only introduce arithmetic axioms that are true regardless of whether or not one was reasoning with the traditional infinite set of integers or within the programmer's finite sets of `integers' and regardless of the choice of overflow strategy. AKDNGDNGLDSKNGLAK apdgmPASDMG  APODGMPD DAPOGMDG PADGOKKPO AGDKG. AOAFKJ ASIFJL ASLIFJ LASFJ LASFJ LKJLAFK ALSKF ALSKF FSA.
+Hoare was very particular in his original paper to only introduce \mbox{arithmetic} axioms that are true regardless of whether one was reasoning with the traditional infinite set of integers or within the programmer's finite sets of `integers' and regardless of the choice of overflow strategy. He also pointed to the fact that the actual arithmetic or overflow strategy could be identified via a set of mutually exclusive axioms --- a fact made use of in the \emph{proof obligation interfaces} described in the next section.
 
-In keeping with this spirit, a deep embedding, it was reasoned, would force the user of this library to think consciously about the inferences that are being used and whether or not they really hold within the `real' world. The intention being that if a proof of correctness depended, say, on a particular overflow strategy, this fact would be rendered explicit on the way to constructing that proof.
+In keeping with this spirit, a deep embedding, it was reasoned, would force the user of this library to think consciously about the inferences that are being used and whether they really hold within the `real' world. The intention being that if a proof of correctness depended, say, on a particular overflow strategy, this fact would be rendered explicit on the way to constructing that proof.
 
-The end result of these twin choices of embedding strategy is that only the Hoare logic caluculus itself takes place within Agda's higher order logic with the rest of the formalisation busying itself \emph{within} the deep embedding of one of the two languages. Despite this, there will be very little, if any, reason to use Agda's standard library and higher expressive power within the process of proving correct a simple program within this library as the rules provided should be sufficient for programs within the scope of the library's capabilities.
+The end result of these twin choices of embedding strategy is that only the Hoare logic calculus itself takes place within Agda's higher order logic, with the rest of the formalisation busying itself \emph{within} the deep embedding of one of the two languages. Despite this, there will be very little, if any, reason to use Agda's standard library and higher expressive power within the process of proving correct a simple program within this library as the rules provided should be sufficient for programs within the scope of the library's capabilities.
 
 
 \pagebreak
@@ -740,20 +743,20 @@ The end result of these twin choices of embedding strategy is that only the Hoar
 \subsection{Proof Obligation Interfaces}
 
 
-As was mentioned in the previous section, the decision to go with a deep embedding for the expression/assertion language brings with it a major drawback. While some users may wish to rigorously prove all aspects of a program correct, ideally, the user shouldn't be \emph{forced} to re-prove simple, obvious, and banal lemmas when proving a program correct in the library.
+As was mentioned in the previous section, the decision to go with a deep embedding for the expression and or assertion language brings with it a major drawback. While some users may wish to rigorously prove all aspects of a program correct, ideally, the user shouldn't be \emph{forced} to re-prove simple, obvious, and banal lemmas when proving a program correct in the library.
 
 This led to the decision to build into the formalisation/library a pair of interfaces using Agda's record types --- a generalisation of the dependent product type. These two interfaces being:
 
 
 \begin{itemize}
-\item \textbf{Data-Interface}: abstract out the reperesentation of the identifiers, values, and operations thereupon.
-\item \textbf{State-Interface}: abstract out the representation of the state space.
+\item \textbf{Data-Interface}: to abstract out the representation of the identifiers, values, and operations and lemmas thereupon.
+\item \textbf{State-Interface}: to abstract out the representation of the state space and lemmas thereupon.
 \end{itemize}
 
 
-The intention of these interfaces would be twofold. First, to allow the user to forestall --- perhaps indefinitely --- the obligaton of proving simple or obvious lemmas when proving a program correct within the library. And secondly, to separate out the concerns and hide implementation details that are adjunct to Hoare logic but not the main concern in any proof of correctness constructed therein. For example, while reasoning within the Hoare-logic calculus it is undesirable to have knowledge or use of the fact that the state space is represented within the formalisation in a particular way, say, as a list of pairs of identifiers and variables, as no proof should depend on the exact choice of representation.
+The intention of these interfaces would be twofold. First, to allow the user to forestall, perhaps indefinitely, the obligation of proving simple or obvious lemmas when proving a program correct within the library. Secondly, to separate out the concerns and hide implementation details that are adjunct to Hoare logic but not the main concern in any proof of correctness constructed therein. For example, while reasoning within the Hoare logic calculus it is undesirable to have knowledge or use of the fact that the state space is represented within the formalisation in a particular way, say, as a list of pairs of identifiers and variables, as no proof should depend on the exact choice of representation.
 
-A sketch of the interfaces as currently defined in the library are given in figure \ref{agda:interfaces}. A user of this library would be able to add any needed lemmas to these interfaces as required for any proof of correctness being worked upon. The user that is after a total formalisation then, can go on to prove correct the added inference rules or axioms, within a given instantiation of the interface. Such an instantiation is bound by the definition of the interface to properly identify its arithmetic and overflow strategy thus forcing the explicit consideration on the part of the user of such matters. Alternatively, the user interested only in the mechanics of the Hoare logic calculus can forgo instantiating the interface indefinitely and still construct a proof of correctness.
+A sketch of the interfaces as currently defined in the library are given in figure \ref{agda:interfaces}. A user of this library would be able to add any needed lemmas to these interfaces as required for any proof of correctness being worked upon. The user that is after a total formalisation then, can go on to prove correct the added inference rules or axioms, within a given instantiation of the interface. Such an instantiation is bound by the definition of the interface to properly identify its arithmetic and overflow strategy, thus forcing the explicit consideration on the part of the user of such matters. Alternatively, the user interested only in the mechanics of the Hoare logic calculus can forgo instantiating the interface indefinitely and still prove programs correct.
 
 
 
@@ -807,15 +810,15 @@ A sketch of the interfaces as currently defined in the library are given in figu
     \end{centering}  
   }
   
-  {\footnotesize \NB that the interfaces have been instantiated in full as part of this work with \impcode{Id} \eqdef \, $\mathbb{N}$ and \impcode{Val} \eqdef \, ($\mathbb{Z}$ \impcode{x Bool}) --- where $\mathbb{N}$, $\mathbb{Z}$, and \impcode{Bool} are the Agda standard library versions. Implicit casting is then assumed between Ints and Bools within the Val type and the state space is the type of Lists of pairs of \impcode{Id}'s and \impcode{Val}'s --- i.e. \textM{S} \eqdef \, ( \impcode{List} (\impcode{Id x Val})). }
+  {\footnotesize \NB that the interfaces have been instantiated in full as part of this project with \impcode{Id} \eqdef \, $\mathbb{N}$ and \impcode{Val} \eqdef \, ($\mathbb{Z}$ \impcode{x Bool}) --- where $\mathbb{N}$, $\mathbb{Z}$, and \impcode{Bool} are the Agda standard library versions. Implicit casting is then assumed between Ints and Bools within the Val type and the state space is defined as lists of pairs of \impcode{Id}'s and \impcode{Val}'s --- i.e. \textM{S} \eqdef \, ( \impcode{List} (\impcode{Id x Val})). }
 \end{figure}
 
 
  
-\subsection{The Exppresion and/or Assertion Language}
+\subsection{The Expression and/or Assertion Language}
 \label{sec:spec:expression-assertion-lang}
 
-The specification of the expression language is straightforward with the intent being that it closely mirror the array of operands available in most imperative languages. It is described, as it appears in the formalisation, via the following context-free grammar given in Backus-Naur form:
+The specification of the expression language is straightforward, with the intent being that it closely mirror the array of operands available in most imperative languages. It is described, as it appears in the formalisation, via the following context-free grammar given in Backus-Naur form:
 
 
 \begin{centering}
@@ -835,17 +838,16 @@ Evaluation of these expressions is defined with respect to the operator instanti
 
 An incredibly baroque solution to this problem would be enforcing a type system that distinguishes between Boolean variables and Integer variables within the deep embedding. The alternative, much simpler, solution that has been opted for here is to assume implicit casting between Ints and Bools within both the expressions and the assertions, drastically simplifying both.
 
-Following C, C++, and most other languages with implicit casting, any non-zero integer is taken to have truth-value \textM{true}, and zero, a truth-value of \textM{false}. Thus the expressions \texttt{(2 + 4)} and \texttt{(4 * 0)} are valid assertions having constant values \textM{true} and \textM{false} respectively.
+Following C, C++, and most other languages with implicit casting, any non-zero integer is taken to have truth-value \textM{true}, and zero, a truth-value of \textM{false}. Thus, the expressions \texttt{(2 + 4)} and \texttt{(4 * 0)} are valid assertions having constant values \textM{true} and \textM{false} respectively.
 
 
 The next complication involves the handling of stuck expressions. Is the assertion (\texttt{x} == (\texttt{y} / 0)) to be read as \textM{false}? Is it even an Assertion? The assertions in Hoare Logic (or assertions in general) are understood to be boolean-valued functions over the state space, but with the present treatment some assertions are only partial functions of the state space as the truth value of any assertion with a variable is undefined in all states in which that variable is not defined; as is any assertion that contains a division by zero error.
 
 
-This is a problem often brushed aside casually - if mentioned at all - in typical expositions of the subject and it is easy to see why --- any sensible programmer will avoid writing code where the non-zero-ness of a divisor is not obvious and a variable that is undefined will immidiately make itself apparent. Unfortunately, in a constructive formalisation such as this one, sweaping things under the table is not an option nor desirable so the complication must be addressed.
+This is a problem often brushed aside casually - if mentioned at all - in typical expositions of the subject and it is easy to see why --- any sensible programmer will avoid writing code where the non-zero-ness of a divisor is not obvious and a variable that is undefined will immediately make itself apparent. Unfortunately, in a constructive formalisation such as this one, sweeping things under the table is not an option nor desirable so the complication must be addressed.
 
 
 Semantically, this problem is resolved by Dijkstra in \cite{Dijkstra76} by introducing a predicate into the expression/assertion language of the form $\textM{D(E)}$ which returns true when the given state lies within the domain of the expression \textM{E}. The weakest precondition of the assignment mechanism is then rewritten as:
-
 
 
 \begin{center}
@@ -853,15 +855,15 @@ Semantically, this problem is resolved by Dijkstra in \cite{Dijkstra76} by intro
 \end{center}
 
 
-\ldots with \texttt{cand} being the conditional boolean \impcode{\&\&} that only evaluates the second argument if necessary. In essence, the semantics are changed so that any stuck assertion will be rendered as \textM{false}. From the perspective of Hoare logic --- from outside the deep embedding --- this solution seems reasonable as with Hoare logic being a \emph{deductive system}, it is only whether or not assertions are true that is of concern, not the conditions under which they fail to be so.
+\ldots with \texttt{cand} being the conditional boolean \impcode{\&\&} that only evaluates the second argument if necessary. In essence, the semantics are changed so that any stuck assertion will be rendered as \textM{false}. From the perspective of Hoare logic --- from outside the deep embedding --- this solution seems reasonable as with Hoare logic being a \emph{deductive system}, it is only whether assertions are true that is of concern, not the conditions under which they fail to be so.
 
-With that said, this only answers the question of how stuck expressions are to be treated \emph{semantically}, not how to handle the issue \emph{syntactically} within this formalisation. Perhaps \textM{D(E)} could be added to the expression language as the \emph{well-formed-ness} of an expression in a given state can be defined inductively and checked mechanically. However, making this change would also change the semantics of the imperative language that is also to be embedded.
-
-
-It is obviously undesirable to have `(\texttt{x} == (\texttt{y} / 0)) \eqdef \; \textM{false}' within the semantics of the \emph{programming} language that users of this library are to form the programs they want to prove correct as no sensible language should allow \mbox{`\impcode{if ( ¬ (\texttt{x} == (\texttt{y} / 0))) \ldots}'} to evaluate\footnote{What on earth would it even evaluate to?}  - not to mention the fact that this would be a deviation from the intention outlined previously for the formalised imperative language to mirror real world languages.
+With that said, this only answers the question of how stuck expressions are to be treated \emph{semantically}, not how to handle the issue \emph{syntactically} within this formalisation. Perhaps \textM{D(E)} could be added to the expression language, as the \emph{well-formed-ness} of an expression in a given state can be defined inductively and checked mechanically. However, making this change would also change the semantics of the imperative language that is also to be embedded.
 
 
-So the desired state of affairs is to have stuck expressions be undefined within the programming language but equate them to false without.  The solution used to achieve this was to modify the data interface so that all operations --- and by extension the expression \texttt{eval} function --- had the option of failing via wrapping the output of each in the \impcode{Maybe} type. 
+It is obviously undesirable to have `(\texttt{x} == (\texttt{y} / 0)) \eqdef \; \textM{false}' within the semantics of the \emph{programming} language that users of this library are to form the programs they want to prove correct, as no sensible language should allow \mbox{`\impcode{if ( ¬ (\texttt{x} == (\texttt{y} / 0))) \ldots}'} to evaluate\footnote{What on earth would it even evaluate to?}  - not to mention the fact that this would be a deviation from the intention outlined previously for the formalised imperative language to mirror real world languages.
+
+
+So the desired state of affairs is to have stuck expressions be undefined within the programming language, but equate them to false without.  The solution used to achieve this was to modify the data interface so that all operations --- and by extension the expression \texttt{eval} function --- had the option of failing via wrapping the output of each in the \impcode{Maybe} type. 
 
 
 With this decision made, the definition of a \emph{well-formed-formula} could be given simply in terms of evaluation. i.e.\!\! an expression/assertion is a well-formed formula if and only if it can be evaluated successfully:
@@ -980,7 +982,7 @@ The end result of these two deep embeddings then, is that programs can be encode
 
 \subsection{The Rules to be Implemented}
 
-With the Mini-Imp langauage specified a rough sketch of the rules to be formalised can be given with the apparatus supporting these Agda definitions to be expounded upon in the next section. First the axiom of assignment:
+With the Mini-Imp language specified a rough sketch of the rules to be formalised can be given with the apparatus supporting these Agda definitions to be expounded upon in the next section. First, the axiom of assignment:
 
 \vbox{\centering
   \input{agda-snippets/rules-axiom-of-assi}
@@ -1017,24 +1019,27 @@ And with that, the Hoare logic inference rules that are to be formalised within 
 
 
 
-\section{Implementation Details and Challenges}
+\section{Implementation Details}
 
 With the syntactic aspects out the way, this section covers the semantics of those syntactic aspects as well as some of the more nuanced or tricky aspects of the formalisation.
 
 
-\subsection{Evaluation of Programs \& Termination}
+\subsection{Small-step Evaluation \& Termination}
 
-As mentioned in section \ref{sec:shallowdeep}, the deep embedding of the Mini-Imp language needs some form of observation or evaluation function to give it semantics. This presented a challenge as Agda demands that all functions be total and features a rather strict termination checker that will only accept functions that it can mechanically prove terminating. This termination checker only checks for \emph{structural recursion} and so some argument of the evaluation function must get structurally smaller on each call. This left the only feasible way forward being to give the Mini-Imp language semantics via a \mbox{small-step} \mbox{(operational)} semantics which then allowed for the evaluation function to take a `fuel' argument ($\in \mathbb{N}$) that could be decremented with each call, \mbox{giving} the form: \AgdaFunction{ssEvalwithFuel}\AgdaSpace{}\AgdaSymbol{:}\AgdaDatatype{ℕ}\AgdaSpace{}\AgdaSymbol{→}\AgdaSpace{}\AgdaFunction{Program}\AgdaSpace{}\AgdaSymbol{→}\AgdaSpace{}\AgdaField{S}\AgdaSpace{}\AgdaSymbol{→}\AgdaSpace{}\AgdaDatatype{Maybe}\AgdaSpace{}\AgdaField{S}. The implementation of this function is relatively straightforward, if a little verbose, and the two most interesting cases are reproduced here:
+As mentioned in section \ref{sec:shallowdeep}, the deep embedding of the Mini-Imp language needs some form of observation or evaluation function to give it semantics. This presented a challenge as Agda demands that all functions be total and features a rather strict termination checker that will only accept functions that it can mechanically prove terminating. Said termination checker only checks for \emph{structural recursion}, and so some argument of the evaluation function must get structurally smaller on each call. This left the only feasible way forward being to give the Mini-Imp language semantics via a \mbox{small-step} \mbox{(operational)} semantics which then allowed for the evaluation function to take a `fuel' argument ($\in \mathbb{N}$) that could be decremented with each call, \mbox{giving} the form: \AgdaFunction{ssEvalwithFuel}\AgdaSpace{}\AgdaSymbol{:}\AgdaSpace{}\AgdaDatatype{ℕ}\AgdaSpace{}\AgdaSymbol{→}\AgdaSpace{}\AgdaFunction{Program}\AgdaSpace{}\AgdaSymbol{→}\AgdaSpace{}\AgdaField{S}\AgdaSpace{}\AgdaSymbol{→}\AgdaSpace{}\AgdaDatatype{Maybe}\AgdaSpace{}\AgdaField{S}. The implementation of this function is straightforward, if a little verbose, with the two most interesting cases reproduced below and the full implementation given in figure \ref{fig:eval-full} in the appendix.
+
+\vspace{-1em}
 
 {\centering
 \input{agda-snippets/evaluation-eval-while-case}
 
-\vspace{-4em}
+\vspace{-3.2em}
 
 \input{agda-snippets/evaluation-eval-while-c2-case}
 }
 
-With evaluation defined, termination of a program can now be formalised like so:
+
+With a small-step evaluation function defined, what it means for a program to terminate can now be formalised like so:\footnote{\NB That \AgdaFunction{C} is introduced here as a type synonym for \AgdaFunction{Program}.}
 
 
 {\advance\leftskip1.5\mathindent
@@ -1055,281 +1060,299 @@ With evaluation defined, termination of a program can now be formalised like so:
 
 }
 
-\lipsum[75]
+
+
+The different notations above are just different ways of saying the same thing, viz, that a program terminates if there exists some $n \in \mathbb{N}$ such that the evaluation of the program succeeds with fuel $= n$. With this constructive definition of termination, some useful lemmas for later use in formalising the Hoare logic rules were proved:
+
+\hspace{1em}
 
 {\small \input{agda-snippets/termination-eval-det-signature}}
 
+The above function relates any two proofs of termination of the same program from the same initial state via identifying the resultant states. This can be taken as a proof that evaluation is deterministic --- which it obviously is --- hence the name \AgdaFunction{EvalDet}.\footnote{The implementation/proof of this function is given in figure \ref{fig:evaldetfull} in the Appendix.} Closely related is the \AgdaFunction{addFuel} function below that takes any proof of termination and generates a new proof of termination with a given extra amount of fuel. The implementation of both of these lemmas is fairly straightforward albeit tedious, with the central mechanism being induction on the structure of \AgdaFunction{C}. Both lemmas are used in the constructive proof of the \AgdaFunction{D3-While-Rule} (see figure \ref{fig:while-rule-proof}).
 
-\lipsum[34]
+{\,
+\begin{minipage}{0.9\textwidth}
+{\input{agda-snippets/termination-add-fuel.tex}}
+\end{minipage}
+}
+
+
+
+
+
+
+\subsection{Termination Proof Splitting}
+
+
+On the topic of termination, a key lemma that is utilised within the proof of both the \AgdaFunction{D3-While-Rule} and the \AgdaFunction{D2-Rule-of-Composition} is the mechanism \mbox{\AgdaFunction{⌊ᵗ⌋-split}}\footnote{The implementation/proof of this function is given in figure \ref{fig:tsplitfull} in the Appendix.} that takes a proof of termination of some program of the form `$Q_1 \; \AgdaFunction{\impcode{THEN}} \; Q_2$' and outputs the following \mbox{\AgdaFunction{Split-⌊ᵗ⌋}} record:
+
 
 {\centering \input{agda-snippets/termination-tsplit-record}}
 
-\lipsum[67]
+\vspace{-1em}
+
+That is, it `splits' a proof of termination into two proofs of termination of the two constituent parts. It is only the $\Delta$ component that is necessary within the rule of composition as a means of identifying the resultant state of \pctrip{R_1}{Q_2}{R} with the resultant state of \pctrip{P}{\,Q_1 \;\impcode{THEN}\; Q_2\,}{R}. On the other hand, for the while rule, the full record is needed.
+
+
+
+\subsection{Hoare Triples in Agda}
+
+With termination covered, it is now possible to give the definition Hoare triples within the Agda library. The choice of notation is a result of the curly braces being reserved for Agda's syntax and so \pctrip{P}{Q}{R} and \tctrip{P}{Q}{R} are used for partial and total correctness respectively.
 
 {\centering \input{agda-snippets/semantics-pc-trip}}
 
-\lipsum[66]
+\vspace{-2em}
 
 {\centering \input{agda-snippets/semantics-tc-trip}}
 
-\lipsum[66]
+
+\subsection{Axiom of Assignment}
+
+Rather than go into detail of the proofs of each and every rule, only the proofs of \AgdaFunction{D0-Axiom-of-Assignment} and \AgdaFunction{D3-While-Rule} are detailed in this report, as these are the most salient rules.
+
+
+The formulation of the axiom of assignment first requires the construction of a function that substitutes an expression into an assertion but given that assertions are synonymous with expressions here, this function has signature: \mbox{\AgdaFunction{sub : Exp $\rightarrow$ Id $\rightarrow$ Exp $\rightarrow$ Exp}.} The proof of \AgdaFunction{D0-Axiom-of-Assignment}, then, isn't too complicated, with the key mechanisms within the proof being two lemmas that were added to the state interface:
+
+\begin{itemize}
+  \small
+\item \AgdaField{updateGet}\AgdaSpace{}\AgdaSymbol{:}\vspace{0.5\baselineskip}\\
+  \hspace*{6em}\AgdaSymbol{∀}\AgdaSpace{}\AgdaBound{i}\AgdaSpace{}\AgdaBound{v}\AgdaSpace{}\AgdaBound{s}\AgdaSymbol{→}\AgdaSpace{}\AgdaField{getIdVal}\AgdaSpace{}\AgdaBound{i}\AgdaSpace{}\AgdaSymbol{(}\AgdaField{updateState}\AgdaSpace{}\AgdaBound{i}\AgdaSpace{}\AgdaBound{v}\AgdaSpace{}\AgdaBound{s}\AgdaSymbol{)}\AgdaSpace{}\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}\AgdaInductiveConstructor{just}\AgdaSpace{}\AgdaBound{v}
+\item \AgdaField{ignoreTop}\AgdaSpace{}\AgdaSymbol{:}\AgdaSpace{}\vspace{0.5\baselineskip}\\
+  \hspace*{0.1em}\AgdaSymbol{∀}\AgdaSpace{}\AgdaBound{i}\AgdaSpace{}\AgdaBound{v}\AgdaSpace{}\AgdaBound{x}\AgdaSpace{}\AgdaSymbol{→}\AgdaSpace{}\AgdaOperator{\AgdaFunction{¬}}\AgdaSpace{}\AgdaBound{i}\AgdaSpace{}\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}\AgdaBound{x}\AgdaSpace{}\AgdaSymbol{→}\AgdaSpace{}\AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}\AgdaSymbol{:}\AgdaSpace{}\AgdaField{S}\AgdaSymbol{)}\AgdaSpace{}\AgdaSymbol{→}\AgdaField{getIdVal}\AgdaSpace{}\AgdaBound{x}\AgdaSpace{}\AgdaSymbol{(}\AgdaField{updateState}\AgdaSpace{}\AgdaBound{i}\AgdaSpace{}\AgdaBound{v}\AgdaSpace{}\AgdaBound{s}\AgdaSymbol{)}\AgdaSpace{}\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}\AgdaField{getVarVal}\AgdaSpace{}\AgdaBound{x}\AgdaSpace{}\AgdaBound{s}
+\end{itemize}
+
+That is, any state space implementation must satisfy the above, fairly intuitive, lemmas for the axiom of assignment to hold. Both have been implemented within the `state as list' representation as part of this \mbox{formalisation.}
+
+
+\subsection{The Rule of Iteration / While Rule}
+
+The proof/implementation of \AgdaFunction{D3-While-Rule} is a little more involved, but the basic mechanism is similar to that of the proofs relating to termination/evaluation of programs, with induction being performed on the structure of a \AgdaFunction{Program}. The most salient mechanism as mentioned in the previous section is the use of the \mbox{\AgdaFunction{⌊ᵗ⌋-split}} function. This function is needed for the case where the condition $B$ of the while loop is true and therefore the body of the loop is evaluated. Under this case, the (assumed) proof of termination reduces to: \mbox{\AgdaOperator{\AgdaFunction{⌊ᵗ}}\AgdaSpace{}\AgdaBound{ℱ}\AgdaSpace{}\AgdaOperator{\AgdaFunction{⸴}}\AgdaSpace{}\AgdaSymbol{(}\AgdaBound{C}\AgdaSpace{}\AgdaOperator{\AgdaFunction{𝔱𝔥𝔢𝔫}}\AgdaSpace{}\AgdaOperator{\AgdaInductiveConstructor{𝔴𝔥𝔦𝔩𝔢}}\AgdaSpace{}\AgdaBound{B}\AgdaSpace{}\AgdaOperator{\AgdaInductiveConstructor{𝒹ℴ}}\AgdaSpace{}\AgdaBound{C}\AgdaSpace{}\AgdaOperator{\AgdaInductiveConstructor{;}}\AgdaSymbol{)}\AgdaSpace{}\AgdaOperator{\AgdaFunction{⸴}}\AgdaSpace{}\AgdaBound{s}\AgdaSpace{}\AgdaOperator{\AgdaFunction{ᵗ⌋}}} but for the recursive call a proof of termination of the form: \mbox{\AgdaOperator{\AgdaFunction{⌊ᵗ}}\AgdaSpace{}\AgdaBound{ℱ}\AgdaSpace{}\AgdaOperator{\AgdaFunction{⸴}}\AgdaSpace{}\AgdaSymbol{(}\AgdaOperator{\AgdaInductiveConstructor{𝔴𝔥𝔦𝔩𝔢}}\AgdaSpace{}\AgdaBound{B}\AgdaSpace{}\AgdaOperator{\AgdaInductiveConstructor{𝒹ℴ}}\AgdaSpace{}\AgdaBound{C}\AgdaSpace{}\AgdaOperator{\AgdaInductiveConstructor{;}}\AgdaSymbol{)}\AgdaSpace{}\AgdaOperator{\AgdaFunction{⸴}}\AgdaSpace{}\AgdaBound{s}\AgdaSpace{}\AgdaOperator{\AgdaFunction{ᵗ⌋}}} is needed. Obviously it is the case that if the former terminates with $f$ fuel then so will the latter and so the \mbox{\AgdaFunction{⌊ᵗ⌋-split}} function, along with \mbox{\AgdaFunction{addFuel}}, and \mbox{\AgdaFunction{EvalDet}}, is used to transform the proof of the former into a proof of the latter.\footnote{ \NB That the full implementations/proofs of the axiom of assignment and the While Rule are reproduced in the appendix in figures \ref{fig:axiom-of-assi-proof}, and \ref{fig:while-rule-proof} respectively.}
+
+
+
+
+\subsection{Relation to Predicate Transformer Semantics}
+
+In \cite{Dijkstra76} Dijkstra outlines some properties that the notion of \textM{wp} and \textM{wlp} must satisfy to make sense as a means of giving semantics to a mechanism and or programming construct. Failure to satisfy these properties would mean we were no longer manipulating pre/post-conditions but instead just 'massaging predicates.'
+
+These properties are proved classically in that exposition but given the scope of this project, it seemed natural to consider including these properties in the formalisation as a means of sanity checking the formalisations of the Mini-Imp mechanisms that have been defined.
+
+However, the constructs/mechanisms that have been formalised here ( $\coloneqq$ ,  \impcode{if\_then\_else\_, while\_do\_} \ldots ) have been formalised in terms of how they are to be executed, which is precisely the approach to defining programming constructs that the notions of \textM{wp}  and \textM{wlp} were trying to avoid. So there is an incongruency there.
+
+  The only mechanism for which \textM{wp}/\textM{wlp} have come close to being formalised is the assignment ($\coloneqq$) mechanism via the \AgdaFunction{sub} function. This is because the \AgdaFunction{sub} function actually \emph{is} the weakest precondition.
+
+\begin{center}
+  
+  i.e.\!\! \mbox{\textM{wp}($ i \coloneqq e$ , \textM{R} ) = \AgdaFunction{sub} $e$ $i$ \textM{R}}
+
+\end{center}
+
+
+With that said, while the \AgdaFunction{sub} function has been formalised, the fact that it \emph{is} the weakest precondition hasn't been. What has been formalised is the fact that \mbox{\AgdaFunction{sub} $e$ $i$ \textM{R} $\Rightarrow$ \textM{wp}( $ i \coloneqq e$ , \textM{R} )}, via the proof of the axiom of assignment.
+
+For the rest of the mechanisms, however, no attempt has been made to formalise their corresponding \textM{wp}/\textM{wlp}. Nonetheless, it may be within reach to confirm the \textM{wp}-properties for just the \textM{wp} that has been defined, viz the \AgdaFunction{sub} function. This proves to be trivial for property 1, the so called `Law of the Excluded Miracle' (\textM{wp(S, \agdamath{F}) = \agdamath{F}} )  \ldots
 
 {\centering \input{agda-snippets/semantics-lem}}
 
-\lipsum[66]
-
-
-
-\lipsum[75]
-
-\lipsum[66]
-
-\lipsum[66]
-
-
-
-\lipsum[66]
-
+\ldots and trivial for the second property of monotonicity, with the proof not reproduced here. In fact, after this second property was confirmed it became clear that this was a detour from the project scope that was adding little value to the formalisation so the exploration of the formalisation's relationship to predicate transformer semantics stopped there.
 
 
 \begin{figure}
-  \caption{D3-While: Full proof of the while rule; the crucial rule for reasoning with Hoare Logic:}
-  \centering
-  \small
-  \input{agda-snippets/rules-while-proof-p1}
-  {\centering \hfill \Huge{\vdots} \hfill }
+  \caption{Using the library to formalise the correctness of the \impcode{SWAP} program: \;\; \impcode{[1/3]}}
+  \label{fig:swap-proof}
+  \hrulefill 
+  {\centering \input{agda-snippets/swap-example-p1}}
 \end{figure}
 
 \begin{figure}\ContinuedFloat
-  \caption{D3-While: Full proof of the while rule; the crucial rule for reasoning with Hoare Logic:}
-  \vspace{-0.8cm}
-  \begin{center}\!\!\!\small{cont.}\end{center}
-  {\centering \hfill \Huge{\vdots} \hfill }
-   \centering
-   \small
-   \input{agda-snippets/rules-while-proof-p2}
+  \caption{\mbox{Using the library to formalise the correctness of \impcode{SWAP} program cont. \;\; \impcode{[2/3]}} }
+  \hrulefill\\
+  \vspace{1em}\\
+  \hspace*{\fill} {\Huge\vdots} \hspace*{\fill}
+  {\centering \input{agda-snippets/swap-example-p2}}
+  \hspace*{\fill} {\Huge\vdots} \hspace*{\fill}
+\end{figure}
+
+\begin{figure}\ContinuedFloat
+  \caption{\mbox{Using the library to formalise the correctness of \impcode{SWAP} program cont. \;\; \impcode{[3/3]}} }  
+  \hrulefill \\
+  \vspace{2.5em}\\
+  \hspace*{\fill} {\Huge\vdots} \hspace*{\fill}
+  {\centering \input{agda-snippets/swap-example-p3}}
 \end{figure}
 
 
-\lipsum[66-69]
+
+\section{Project Evaluation}
+
+\subsection{Using the System to Reason about Programs}
+
+With the Hoare logic rules implemented, proofs of program correctness can now be constructed using the Agda library that has been developed.
+
+Only a simple example has been constructed, a proof of correctness of the \impcode{SWAP} program, of the form shown below. See figure \ref{fig:swap-proof} for the actual proof.
 
 
-\subsection{Small Step Evaluation with Fuel}
+{\centering \small \input{agda-snippets/example-prog-pre}}
+
+\vspace{-2em}
+
+{\hspace*{10em} \begin{minipage}{0.8\textwidth} \small \input{agda-snippets/example-prog-mid} \end{minipage}}
+
+\vspace{-2em}
+
+{\centering \small \input{agda-snippets/example-prog-post}}
+
+While this is a very simple and meagre example that doesn't even utilise the While Rule, it is sufficient for evaluating the use of the Agda library that has been produced for the task of formalising proofs of correctness of simple programs. The process, ultimately, even for incredibly simple programs, is rather tedious as it forces the user to think very carefully and belabour with great assiduity. In the end, more time is spent manipulating syntax than convincing oneself of correctness, but perhaps that is to be expected when one considers that the task in a formalisation such as this one is ultimately to convince the \emph{machine} of the correctness, not the user.
 
 
-\lipsum[66-69]
+\subsection{Deliverables}
+\label{sec:deliv}
+
+The most salient achievement of this project, then, is a novel and constructive formalisation of a selection of Hoare logic inference rules in Agda. This has been achieved with a deep embedding of a simple \emph{while} language `Mini-Imp.' This language was given an operational semantics via a small-step evaluation function \emph{and} an axiomatic semantics via the Hoare logic rules thus demonstrating, nay, \emph{formalising} the interplay and or consistency between the two approaches to programming language semantics. In terms of practical utility the Agda library as a system for reasoning about programs leaves a lot to be desired, but perhaps with much more work it could prove a useful building block for a much more useful tool.
 
 
-\subsection{Termination Splitting}
+
+\subsection{Reflection on the use of Agda}
+
+Reflecting on the usage of Agda for this project, there are some clear positives and negatives. One positive is Agda's support for unicode in source code that allows for some beautiful proofs. With great power, however, comes great responsibility and one shouldn't use fancy unicode characters just because one \emph{can} --- a rule that was fallen afoul of more than a few times --- but rather, it was learned, only when they can provide greater clarity or terseness.
+
+On that note, an interesting observation is that frequently the aesthetic nature of a signature rendered in all its unicode splendour led to a reluctance to sanity check it semantically --- even after hours spent in vain trying to prove it. This psychological bias, once noticed, was overcome by paying closer attention to the semantic content of a signature rather than its syntactic form and also by spending more time considering the signatures themselves before charging in and attempting to prove something syntactically pretty but semantically absurd.
+
+Finally, an oft encountered negative of Agda was the verbose and unhelpful nature of its reporting of goal types. Perhaps this was just a problem particular to this project, but at times, upon asking for the type of a hole in a proof while constructing a proof interactively, a myriad of symbols was produced as a result of Agda fully unpacking all the declarations. See figure \ref{fig:verbosity} in the appendix for an example.
+
+\subsection{Missteps \& Drawbacks}
+
+Many wrong turns were taken on the way to completing this project. Of the most notable was an initial insistence on enforcing a type system within the assertion language without impacting the expression language. The desire was for \texttt{`x + 5'} and other integer valued expressions to \emph{not} be valid assertions but eventually it was realised that the formalisation became far simpler and terser once implicit casting between integers and booleans was assumed.
+
+A big drawback of the current system, somewhate mitigated by the proof obligation interfaces, is the need to formalise simple and obvious lemmas of the assertion language. The cumbersome necessity of formalising the obvious, however, is part and parcel of most formalisations so is not worth much commentary here.
+
+Another shortcoming is the inability to specify the free or non-free variables of an expression and or assertion. Such a facility would allow the proof of correctness of the \impcode{SWAP} program to be generalised over expressions. With the current formulation, \impcode{SWAP} cannot be said to swap the values of 𝒙 and 𝒚 if their initial values 𝑿 and 𝒀 are described by arbitrary expressions as, being arbitrary, they may contain 𝒙 or 𝒚. Relatedly, the only variables available for program specification currently are 𝒙, 𝒚, and \codevar{z} with extra variables needed to be added as required. This is clunky and ideally some facility or interface would exist that would allow a user the functionality described as `give me a fresh variable' or, `give me a fresh variable that is not used in this expression \textM{E}.' Such functionality, however, is left for possible future work.
 
 
-\lipsum[66-75]
+
+\subsection{Future Work}
+
+As mentioned in section \ref{sec:deliv}, the present work is not all that useful in practice. With considerably more work, this library could be a useful tool for proving correct \emph{very} simple programs, the issues addressed in the previous section would need to be addressed, however. Perhaps some semi-automated tool could be developed to at least ease the burden of having to transcribe program snippets into Agda or the pain of tedious syntax manipulation; the final output of the tool being a proof checkable by Agda.
+
+In terms of the formalisation, the next step beyond fixing the issues mentioned prior would be expanding the system with Separation Logic. This would allow for the manipulation of assertions containing pointers and claims upon the heap space, rather than just the values of local variables. In theory this is imminently achievable, but in practice may prove otherwise.
 
 
-\subsection{Axiom \& Rules in Agda}
+\subsection{Conclusion \& Personal Reflection}
+
+
+If the authors whose works made up much of the literature referenced in this report could comment on this work, a `we told you so' would be more than justified. Each one at some point in the papers or monographs read in preparation for this project mentioned the need for `a fine balance' between `formality and common sense' and it's fair to say that the scales have tipped away from common sense and towards formality in this project and as a result the most `practical' output of this work is a three-page proof of the correctness of the \impcode{SWAP} program.
+
+But as I now believe, the central purpose of a constructive formalisation isn't in practicality but in the education and entertainment of the person doing the constructing and in that sense, the project is a great success.
+
+
+\bibliographystyle{plain}
+
+\bibliography{report}
+
+\pagebreak
+
+
+\begin{centering}
+
+  \vspace*{\fill}
+  \textbf{\huge 5 \, Appendix}
+  \vspace*{\fill}
+  
+\end{centering}
+
+
+\pagebreak
 
 
 \begin{figure}
-  \caption{ssEvalwithFuel: The small-step evaluation function}
+  \caption{The full definition of the small-step evaluation function \;\; \impcode{[1/2]}}
+  \label{fig:eval-full}
   \centering
   \input{agda-snippets/evaluation-eval-full-p1}
   {\centering \hfill \Huge{\vdots} \hfill }
 \end{figure}
 
 \begin{figure}\ContinuedFloat
-  \caption{ssEvalwithFuel cont.}
+  \caption{The full definition of the small-step evaluation function cont. \;\; \impcode{[2/2]}}
   \centering
   { \hfill \Huge{\vdots} \hfill }
   \input{agda-snippets/evaluation-eval-full-p2}
 \end{figure}
 
+
 \begin{figure}
-  \caption{The full proof that evaluation is deterministic via proof that for any two proofs of termination, the resultant states serving as evidence for each of those proofs - in accordance with them being \emph{constructive} proofs - will be identical.  \\ n.b. that the $\dagger$ function is the function that extracts the witness from the proof of termination - i.e. the resultant state after the computation has terminated successfully.}
+  \caption{The full proof/implementation of the Axiom of Assignment.}
+  \label{fig:axiom-of-assi-proof}
+  {\centering \input{agda-snippets/rules-assi-proof}}
+\end{figure}
+
+
+
+\begin{figure}
+  \caption{The full proof of the `While Rule'/`Rule of Iteration' \;\; \impcode{[1/2]}}
+  \label{fig:while-rule-proof}
   \centering
-  \scriptsize
+  \input{agda-snippets/rules-while-proof-p1}
+  {\centering \hfill \Huge{\vdots} \hfill }
+\end{figure}
+
+\begin{figure}\ContinuedFloat
+  \caption{The full proof of the `While Rule'/`Rule of Iteration' \;\; \impcode{[2/2]}}
+  \vspace{-0.8cm}
+  \begin{center}\!\!\!\small{cont.}\end{center}
+  {\centering \hfill \Huge{\vdots} \hfill }
+   \centering
+   \input{agda-snippets/rules-while-proof-p2}
+\end{figure}
+
+\begin{figure}
+  \caption{The proof/implementation of \AgdaFunction{EvalDet}.
+    \\ \NB that the $\dagger$ function is the function that extracts the witness from the proof of termination - i.e. the resultant state after the computation has terminated successfully.}
+  \label{fig:evaldetfull}
+  \centering
+  \footnotesize
   \input{agda-snippets/termination-eval-det-full}
 \end{figure}
 
 \begin{figure}
-  \caption{[t]-split: The function for splitting two proofs of termination. }
+  \caption{The proof/implementation of \mbox{\AgdaFunction{⌊ᵗ⌋-split}} \;\; \impcode{[1/3]} \\
+    \NB some cases have been omitted but none that vary from the general pattern here.}
+  \label{fig:tsplitfull}
   \footnotesize
   {\centering \input{agda-snippets/termination-tsplit-full-p1}}
   {\centering \hfill \Huge{\vdots} \hfill }
 \end{figure}
 
+
 \begin{figure}\ContinuedFloat
-  \caption{[t]-split cont. \\
-   n.b. some cases have been omitted but none that vary from the general pattern here. }
+  \caption{The proof/implementation of \mbox{\AgdaFunction{⌊ᵗ⌋-split}} \;\; \impcode{[2/3]} \\
+   \NB some cases have been omitted but none that vary from the general pattern here. }
+  \footnotesize
+  {\centering \hfill \Huge{\vdots} \hfill }
+  {\centering \input{agda-snippets/termination-tsplit-full-p2}}
+  {\centering \hfill \Huge{\vdots} \hfill }
+\end{figure}
+
+\begin{figure}\ContinuedFloat
+  \caption{The proof/implementation of \mbox{\AgdaFunction{⌊ᵗ⌋-split}} \;\; \impcode{[3/3]} \\
+   \NB some cases have been omitted but none that vary from the general pattern here. }
   \footnotesize
   {\centering \hfill \Huge{\vdots} \hfill }
   {\centering \input{agda-snippets/termination-tsplit-full-p3}}
 \end{figure}
 
 
-\section{Evaluation}
-
-\subsection{Using the System to Reason about Programs}
-
-Reasoning about swap was done for constants but a similar proof could be implemented with any expression as long as the variables to be swapped were also swapped across the whole expression. For example:
-
-
-{\centering \footnotesize \input{agda-snippets/example-progs-swap}}
-
-
 \begin{figure}
-  \caption{SWAP: Using the library to formalise the correctness of the SWAP program:}
-  \small
-  {\centering \input{agda-snippets/swap-example-p1}}
-  {\centering \hfill \Huge{\vdots} \hfill }
-\end{figure}
-
-\begin{figure}\ContinuedFloat
-  \caption{SWAP: Using the library to formalise the correctness of the SWAP program:}
-  \small
-  \vspace{-0.5cm}
-  \begin{center}\!\!\!\small{cont.}\end{center}
-  {\centering \hfill \Huge{\vdots} \hfill }
-  {\centering \input{agda-snippets/swap-example-p2}}
-  {\centering \hfill \Huge{\vdots} \hfill }
-\end{figure}
-
-\begin{figure}\ContinuedFloat
-  \caption{SWAP: Using the library to formalise the correctness of the SWAP program:}
-  \small
-  \vspace{-0.5cm}
-  \begin{center}\!\!\!\small{cont.}\end{center}
-  {\centering \hfill \Huge{\vdots} \hfill }
-  {\centering \input{agda-snippets/swap-example-p3}}
-\end{figure}
-
-
-\begin{verbatim}
-< x == y + 1 > $\leftarrow$ sub x for z
+  \caption{An example of the verbosity that was sometimes encountered when Agda reported the type of a hole that was semantically simple, yet syntactically complex.}
+  \label{fig:verbosity}
+  \vspace*{\fill}
+  \begin{centering}
+    \includegraphics[scale=0.50]{./Figures/verbosity}
+  \end{centering}
+  \vspace*{\fill}
   
-z := x (z == y + 1) $\leftarrow$ sub y for x
+\end{figure}
 
-x := y (z == x + 1) $\leftarrow$ sub z for y
 
-y := z <y == x + 1 >
-
-\end{verbatim}
-
-
-Some maths: \texttt{$\ll$\!\,\,P\,\,\!$\gg$\!\,\,C\,\,\!$\ll$\!\,\,Q\,\,\!$\gg$} test test hello hello
- 
-
-
-\subsection{Using Agda}
-
-Getting better at working with Agda --- thanks to unicode suport, psychological bias of aesthetic but incorrect signature.
-
-`I believe the hard part of building software to be the specification, design, and testing of this conceptual construct, not the labor of representing it and testing the fidelity of the representation.' - Fred Brooks who evidently, never used Agda.
-
-
-\subsection{Missteps}
-
-
-Downsides: Having to define all logical manipulations in the interface. Some mechanism for making this less painful would be nice. Equally however, said logical manipulations are not really of the main concern. Just because nothing can be postulated for the proof to have a computational meaning, doesn't mean we need be bound by this restriction. Indeed, there is little reason for us to care about whether or not our proofs have this computational context so long as we trust the parts we omit, and as these ommisions are oft simple logical manipulations, leaving them only in the record but not actually proved would be perfectly sensible and allow more focus to be on the manipulation of Hoare triples to reason about programs.
-
-Actually, if I was doing it again, it would have been very sensible to not bother with implementing the interfaces at all. It was probably not a worthwhile use of my time to prove De Morgans law, or the commutativity of boolean and, in Agda when I could have instead focused on the more salient parts of the code base.
-
-
-With more time a more expansive interface would be given allowing for as many identifiers as were necessary to reason about the desired program along with a mechanism for obtaining free identifiers from an expression, with the identifiers being represented as natural numbers, a new \emph{free} identifier could always be generated by summing the numerical value of the identifiers present in the supplied expression, or in a given list.
-
-
-In hindsight, it would have been prudent to abstract away whole expression language, not just the data/values.
-(page 42 surface properties (Ligler))
-
-\subsection{Future Work}
-
-Gries page 164 'a fine balance between the two' 
-\ldots but! automation, Infer,
-
-
-parse a C program and create formal proof in background. Complain if fail
-
-If the Agda code is to work as a library, there had ought to be some functionality for allowing potential users to add to Data-Implementation.agda, to define their own logical rules.
-
-
-Ref paper: tactics for separation logic and how some reworking of data-interface could allow full use of HOL in Agda when manipulating assertions.
-
-
-\subsection{Conclusion}
-
-Hoare's surprise at test case success (see retrospective)
-
-Not all that useful in practice, other tools are far more sophisticated and far better suited to practical applications, whether that be the verified software toolchain for reasoning about embedded software that needs to be correct, or Infer for catching a litany of bugs before they make their way into production. There's not a lot of room to claim that this Agda library has any real practical purpose. But that doesn't mean no purpose.
-
-Constructive mathematics and interactive theorem provers are not front and center in mainstream mathematics, and perhaps never will be, but one oft talked about benefits of constructive mathematics is quite simply that it is fun to do [link MHE blog post] and it is on that note that one finds the most compelling use for this Agda library; it's actually a lot of fun --- if you're of a particular sort --- to reason about even the most simple of programs. I certainly found it enjoyable to reason about the swap program and have Agda check my workings for me.
-
-Never been so intimately aquainted with the three lines of code comprising the swap function.
-
-
-\section{Appendix}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Wrting scrap pile: (TO BE DELETED BEFORE SUBMISSION)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-The wording here can be a little confusing. In accordance with the literature, the term `weakest precondition' could reasonably be referring to one of three things:
-
-\begin{enumerate}
-\item The weakest precondition for an unspecified state \textM{S}, \emph{and} an unspecified postcondition \textM{R}. Denoted: \textM{wp(S,R)}.
-\item The \emph{function} of type \agdamath{Postcondition $\rightarrow$ Precondition} for a fixed command/mechanism \textM{S}, say the \agdamath{skip} command, that takes an unspecified postcondition \textM{R}. Denoted: \textM{wp}( \agdamath{skip}\,,\,\textM{R}).
-\item Or, the actual \emph{output} of the function, that is, the predicate itself, for a given command \textM{S} and a given postcondition \textM{R}. Also denoted: \textM{wp(S,R)}.
-\end{enumerate}
-
-
-
-Note that in the text [dijkstra], $wp(S,R)$, is used interchangeably as a predicate and as the state space that said predicate captures. With our constructive formalisation however, this lack of precision is not possible nor desired, so we end up with the, perhaps superfluous, distinction between predicates and the state space that they describe. Meaning that under our formalisation, $wp(S,F)$ is empty when considered as a state space, but inhabited when considered as a predicate (inhabited uniquely by $F$ itself). This exposition also explains why \pctrip{F}{S}{Q} is an inhabited type, as $F$ \emph{is} a valid precondition of any computation for any postcondition (think absurd function, or bluff function). $<<$ Actually explained by the fact that what we have formalised is the weakest \emph{liberal} precodnition!
-
-
-Weakest Liberal Precondition is what has actually been formalised! Total correctness is denoted by \tctrip{P}{S}{Q}
-
-
-7 regions of the statesapce. As such, we can --- if we wish --- give a semantics to the notion of a derterministic mechanism as one in which the last four regions of the state space are empty.
-
-
-
-
-
-
-As a \emph{deductive system} Hoare logic is only interested in the preservation of truth: treating not WFF as false.
-
-Carving up state space.
-Every predicate denotes a subset of the statespace
-(which in our case is infinite).
-
-(day = 23) Dijkstra's example
-
-T/F, x == 2
-
-Relationship between logical operators and set theoretic operators
-i.e. $\wedge \Leftrightarrow \cap$
-
-{\advance\leftskip\mathindent
-
-\input{agda-snippets/expressions-even}
-
-}
-
-Ought to have differentiated between non stuck-ness and termination. I.e. D(E) as domain of expression E, to eliminate divide by zero and non-defined variables in an expression, as that is a problem that can be handled distinctly from termination
-(i.e. (I think anway) that given a state S, and an expression E, one can deterministically/decidably determine whether or not it is a WFF).
-
-Donec ullamcorper, felis non sodales.. Lorem  ipsum  dolor  sit  amet,  consectetuer  adipiscing  
-elit.
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\nocite{*}
-
-\bibliographystyle{plain}
-
-\bibliography{report}
- 
 \end{document}
 

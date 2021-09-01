@@ -124,37 +124,41 @@ module Hoare-Logic.Rules
               
 
 
-
   -- ════════════════════════════════════════════════════════════════════════════
   -- Implementations / Proofs
 
-  D0-Axiom-of-Assignment i e P s (𝑤𝑓𝑓 , ⊢sub) (suc n , p)
+  D0-Axiom-of-Assignment i e P s (wff , ⊢sub) (suc n , p)
       with evalExp e s | inspect (evalExp e) s
-  ... | (just v) | [ eq ] rewrite Is-just-just p = go
+  ... | (just v) | [ eq ] = Ψ
       where
 
-      evalExp-Var : (v : Id) (s : S) → evalExp (term (Var v)) s ≡ getVarVal v s
-      evalExp-Var v s = refl
+      lem₁ : ∀ v s → evalExp (term (Var v)) s ≡ getIdVal v s
+      lem₁ v s = refl
 
-      evalExp-updState : (P e : Exp) (i : Id) (v : Val) (s : S)
-                         → evalExp e s ≡ just v
-                         → evalExp P (updateState i v s) ≡ evalExp (sub e i P) s
-      evalExp-updState (op₂ P x P₁) e i v s comp
-        rewrite evalExp-updState P e i v s comp
-              | evalExp-updState P₁ e i v s comp = refl
-      evalExp-updState (op₁ x P) e i v s comp
-        rewrite evalExp-updState P e i v s comp = refl
-      evalExp-updState (term (Const x)) e i v s comp = refl
-      evalExp-updState (term 𝒕) e i v s comp = refl
-      evalExp-updState (term 𝒇) e i v s comp = refl
-      evalExp-updState (term (Var x)) e i v s comp with i ?id= x
-      ... | yes q rewrite evalExp-Var x (updateState i v s)
+      -----------------------------------------------------------
+      updateState⇄sub : ∀ P e i v s → evalExp e s ≡ just v
+          → evalExp P (updateState i v s) ≡ evalExp (sub e i P) s
+      -----------------------------------------------------------          
+      updateState⇄sub (op₂ P x P₁) e i v s comp
+        rewrite updateState⇄sub P e i v s comp
+              | updateState⇄sub P₁ e i v s comp = refl
+      updateState⇄sub (op₁ x P) e i v s comp
+        rewrite updateState⇄sub P e i v s comp = refl
+      updateState⇄sub (term (Const x)) e i v s comp = refl
+      updateState⇄sub (term 𝒕) e i v s comp = refl
+      updateState⇄sub (term 𝒇) e i v s comp = refl
+      updateState⇄sub (term (Var x)) e i v s comp with i ?id= x
+      ... | yes q rewrite lem₁ x (updateState i v s)
                           | q | updateGet x v s = sym comp
-      ... | no  q rewrite evalExp-Var x (updateState i v s)
+      ... | no  q rewrite lem₁ x (updateState i v s)
                           | ignoreTop i v x q s = refl
 
-      go : (updateState i v s) ⊨ P
-      go rewrite evalExp-updState P e i v s eq = 𝑤𝑓𝑓 , ⊢sub
+      Λ : (updateState i v s) ⊨ P
+      Λ rewrite updateState⇄sub P e i v s eq = wff , ⊢sub
+
+      Ψ : (to-witness p) ⊨ P
+      Ψ rewrite Is-just-witness-rewrite p = Λ
+      -----------------------------------------------------------
 
 
   -- ════════════════════════════════════════════════════════════════════════════
@@ -238,7 +242,8 @@ module Hoare-Logic.Rules
       ... | f@(just v) | [ p₁ ] with
           toTruthValue {f} (any tt) | inspect (toTruthValue {f}) (any tt)
       ... | true  | [ p₂ ] = go-true {s} {ℱ} ⊨P p₁ p₂ ⌊ᵗCᵗ⌋
-      ... | false | [ p₂ ] rewrite Is-just-just ⌊ᵗCᵗ⌋ = go-false ⊨P p₁ p₂
+      ... | false | [ p₂ ]
+          rewrite Is-just-witness-rewrite ⌊ᵗCᵗ⌋ = go-false ⊨P p₁ p₂
       ---------------------------------------------------------------
       -- ════════════════════════════════════════════════════════════
 

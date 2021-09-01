@@ -17,12 +17,14 @@ module Misc where
 
   pattern any tt = Any.just tt
 
-  Is-just-just : {l : Level} {A : Set l} {a : A} (p : Is-just (just a)) → to-witness p ≡ a
-  Is-just-just (Any.just x) = refl
+  Is-just-witness-rewrite : ∀ {l} → {A : Set l} → {a : A}
+    → (p : Is-just (just a)) → to-witness p ≡ a
+  Is-just-witness-rewrite (Any.just x) = refl
 
   Is-just-nothing : {l : Level} {A : Set l} → Is-just {l} {A} nothing → ⊥
   Is-just-nothing ()
 
+  -------------------------------------------------------------------------------
   suc≤″ : ∀ {x} {y} → x ≤″ y → x ≤″ suc y
   suc≤″ {x} {y} lt =
   
@@ -41,6 +43,8 @@ module Misc where
     --  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ● (+-commutativity)
     --     χ : x + suc (k lt) ≡ suc y  
     in less-than-or-equal χ
+  -------------------------------------------------------------------------------
+
 
   sym¬ : ∀ {ℓ} {A : Set ℓ} {a : A} {b : A} → ¬ a ≡ b → ¬ b ≡ a
   sym¬ {A} {a} {b} p = λ x → ⊥-elim (p (sym x))
