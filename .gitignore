@@ -1,6 +1,11 @@
 *.agdai
 .#*.*
 
+project_proposal.*
+
+/report.pdf
+
+
 /lagda-src
 
 *.vtc
