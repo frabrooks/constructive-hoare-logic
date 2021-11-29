@@ -10,7 +10,7 @@ For an (admittedly underwhelming) example, this library allows for a
 constructive proof of the correctness of a 'swap' program via the
 following type/top-level definition:
 
-![Type of the Proof of correctness of SWAP program](/images/swap-example.jpg)
+![Type of the Proof of correctness of SWAP program](/imgs/swap-example.jpg)
 
 
 
