@@ -1,4 +1,4 @@
-# A Constructive Formalisation of Hoare Logic in Agda 
+# A constructive formalisation of Hoare logic in Agda 
 (My Master's project at the University of Birimingham)
 
 A constructive formalisation of Hoare logic and an Agda library 
